@@ -41,12 +41,12 @@ Tracks **season-based balances** across sessions, handles **treasurer approvals*
 
 ## Context map (read when needed)
 
-- project.md — product goals, roles, permissions, season/session model overview
-- datamodels.md — v1 data model (SQLite/Turso), all tables, fields, constraints, derived computations
-- season.md — season flow screen-by-screen: states, UI, validations, permissions, edge cases
-- session.md — session flow screen-by-screen: state machine, dealing, rebuys, closing, finalize
-- screens.md — v1 screen map (mobile-first), navigation, all screens by section
-- ledger.md — ledger screens: balances table, session history, finalized session detail, player detail
+- docs/project.md — product goals, roles, permissions, season/session model overview
+- docs/datamodels.md — v1 data model (SQLite/Turso), all tables, fields, constraints, derived computations
+- docs/season.md — season flow screen-by-screen: states, UI, validations, permissions, edge cases
+- docs/session.md — session flow screen-by-screen: state machine, dealing, rebuys, closing, finalize
+- docs/screens.md — v1 screen map (mobile-first), navigation, all screens by section
+- docs/ledger.md — ledger screens: balances table, session history, finalized session detail, player detail
 - docs/STYLES.md — UI/styling conventions + accessibility checklist (when created)
 - .claude/skills/problem-solver — orchestrates ambiguous / complex tasks with clarification + research
 
