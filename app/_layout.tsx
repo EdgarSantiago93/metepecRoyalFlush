@@ -34,10 +34,21 @@ function RootNavigation() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthGate>
-        <Stack>
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: '#fdfbf7' },
+            headerTintColor: '#c49a3c',
+            headerTitleStyle: { color: '#1a1714' },
+            headerShadowVisible: false,
+          }}
+        >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen name="deposit-upload" options={{ title: 'Upload Deposit' }} />
+          <Stack.Screen name="deposit-approvals" options={{ title: 'Deposit Approvals' }} />
+          <Stack.Screen name="host-order" options={{ title: 'Host Order' }} />
+          <Stack.Screen name="season-settings" options={{ title: 'Season Settings' }} />
         </Stack>
       </AuthGate>
       <StatusBar style="auto" />

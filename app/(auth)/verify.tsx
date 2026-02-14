@@ -16,7 +16,7 @@ export default function VerifyScreen() {
       setVerifying(true);
       try {
         await verifyMagicLink(email, 'mock-code');
-        router.replace('/index');
+        router.replace('/');
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Verification failed');
       } finally {

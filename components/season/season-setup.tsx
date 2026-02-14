@@ -126,14 +126,14 @@ export function SeasonSetup({ season, members, users }: Props) {
             <ActionButton
               testID="btn-upload-deposit"
               label="Upload Deposit Proof"
-              onPress={() => router.push('/(tabs)/index/deposit-upload')}
+              onPress={() => router.push('/deposit-upload')}
             />
           )}
           {isTreasurer && (
             <ActionButton
               testID="btn-review-deposits"
               label="Review Deposits"
-              onPress={() => router.push('/(tabs)/index/deposit-approvals')}
+              onPress={() => router.push('/deposit-approvals')}
               variant="gold"
             />
           )}
@@ -142,12 +142,12 @@ export function SeasonSetup({ season, members, users }: Props) {
               <ActionButton
                 testID="btn-edit-host-order"
                 label="Edit Host Order"
-                onPress={() => router.push('/(tabs)/index/host-order')}
+                onPress={() => router.push('/host-order')}
               />
               <ActionButton
                 testID="btn-season-settings"
                 label="Season Settings"
-                onPress={() => router.push('/(tabs)/index/season-settings')}
+                onPress={() => router.push('/season-settings')}
                 variant="outline"
               />
             </>
@@ -170,7 +170,7 @@ export function SeasonSetup({ season, members, users }: Props) {
                   right={<StatusBadge variant={member.approvalStatus} />}
                   onPress={
                     member.userId === currentUser?.id && needsDeposit
-                      ? () => router.push('/(tabs)/index/deposit-upload')
+                      ? () => router.push('/deposit-upload')
                       : undefined
                   }
                 />
@@ -184,7 +184,7 @@ export function SeasonSetup({ season, members, users }: Props) {
           <View className="mb-3 flex-row items-center justify-between">
             <Text className="text-lg font-bold text-sand-950 dark:text-sand-50">Host Order</Text>
             {isAdmin && (
-              <Pressable onPress={() => router.push('/(tabs)/index/host-order')}>
+              <Pressable onPress={() => router.push('/host-order')}>
                 <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
                   Edit
                 </Text>
