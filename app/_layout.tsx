@@ -9,6 +9,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/hooks/use-auth';
 import { AuthProvider } from '@/contexts/auth-context';
+import { AppStateProvider } from '@/contexts/app-state-context';
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
@@ -34,6 +35,7 @@ function RootNavigation() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthGate>
+        <AppStateProvider>
         <Stack
           screenOptions={{
             headerStyle: { backgroundColor: '#fdfbf7' },
@@ -50,6 +52,7 @@ function RootNavigation() {
           <Stack.Screen name="host-order" options={{ title: 'Host Order' }} />
           <Stack.Screen name="season-settings" options={{ title: 'Season Settings' }} />
         </Stack>
+        </AppStateProvider>
       </AuthGate>
       <StatusBar style="auto" />
     </ThemeProvider>

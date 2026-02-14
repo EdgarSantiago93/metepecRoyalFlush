@@ -1,12 +1,27 @@
 appId: host.exp.Exponent
 name: Login as Carlos (treasurer)
 ---
+# Launch app - clears state so we get a fresh login screen
+- launchApp:
+    appId: host.exp.Exponent
+    clearState: true
+
+# Open Poker Ledger via deep link
+- openLink: exp://127.0.0.1:8081
+
+# Wait for the login screen to appear
+- extendedWaitUntil:
+    visible: "Metepec Royal Flush"
+    timeout: 25000
+
 # Login flow for Carlos — treasurer role
 - tapOn:
     id: "login-email-input"
 - inputText: "carlos@poker.local"
 - tapOn:
     id: "login-send-button"
-# Wait for auto-verify + redirect
-- assertVisible: "Season"
-  timeout: 10000
+
+# Wait for auto-verify + redirect to main app
+- extendedWaitUntil:
+    visible: "Season"
+    timeout: 15000

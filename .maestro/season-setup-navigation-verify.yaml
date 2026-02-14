@@ -1,0 +1,73 @@
+appId: host.exp.Exponent
+name: Season Setup - Verify navigation fix
+---
+# Full self-contained test: restarts app, switches preset, navigates sub-screens.
+
+# Kill and relaunch Expo Go to start fresh
+- stopApp
+- launchApp:
+    appId: host.exp.Exponent
+- tapOn: "Poker Ledger"
+
+# Wait for our app to fully load (either default or preset state)
+- extendedWaitUntil:
+    visible: "Create Season"
+    timeout: 30000
+
+# Step 1: Go to Profile tab and switch to setup_mixed preset
+- tapOn:
+    point: "88%,93%"
+- extendedWaitUntil:
+    visible: "Sign out"
+    timeout: 5000
+- scrollUntilVisible:
+    element: "Setup (mixed)"
+    direction: DOWN
+- tapOn:
+    id: "dev-preset-season_setup_mixed"
+
+# Step 2: Go to Season tab — verify dashboard loaded
+- tapOn:
+    point: "12%,93%"
+- extendedWaitUntil:
+    visible: "Deposit Status"
+    timeout: 5000
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Upload Deposit Proof"
+- assertVisible: "Edit Host Order"
+- assertVisible: "Season Settings"
+- takeScreenshot: "season-setup-dashboard"
+
+# Step 3: Navigate to Host Order (was "unmatched route" before fix)
+- tapOn:
+    id: "btn-edit-host-order"
+- extendedWaitUntil:
+    visible: "Randomize"
+    timeout: 5000
+- assertVisible: "Save Order"
+- assertVisible: "Tap arrows to reorder hosts"
+- takeScreenshot: "host-order-screen"
+# Tap the back button in the header (left side)
+- tapOn:
+    point: "10%,6%"
+
+# Step 4: Navigate to Season Settings
+- extendedWaitUntil:
+    visible: "Season Feb 2026"
+    timeout: 5000
+- tapOn:
+    id: "btn-season-settings"
+- extendedWaitUntil:
+    visible: "Change Treasurer"
+    timeout: 5000
+- takeScreenshot: "season-settings-screen"
+# Tap the back button in the header
+- tapOn:
+    point: "10%,6%"
+
+# Step 5: Verify we returned to dashboard
+- extendedWaitUntil:
+    visible: "Season Feb 2026"
+    timeout: 5000
+- assertVisible: "Deposit Status"
+- takeScreenshot: "season-setup-final"

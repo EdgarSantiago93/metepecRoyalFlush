@@ -10,18 +10,19 @@ name: Season Setup - Admin navigation
 # Test: Navigate to Host Order screen
 - tapOn:
     id: "btn-edit-host-order"
-- assertVisible: "Host Order"
-  timeout: 3000
-- assertVisible: "Randomize"
+- extendedWaitUntil:
+    visible: "Randomize"
+    timeout: 3000
 - assertVisible: "Save Order"
 # Go back
-- tapOn: "Host Order" # back button in header has the screen title
+- back
 
 # Test: Navigate to Season Settings screen
 - tapOn:
     id: "btn-season-settings"
-- assertVisible: "Change Treasurer"
-  timeout: 3000
+- extendedWaitUntil:
+    visible: "Change Treasurer"
+    timeout: 3000
 # Go back
 - back
 - assertVisible: "Season Feb 2026"

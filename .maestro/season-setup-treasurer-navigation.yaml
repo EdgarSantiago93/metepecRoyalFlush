@@ -10,8 +10,9 @@ name: Season Setup - Treasurer navigation
 # Test: Navigate to Deposit Approvals screen
 - tapOn:
     id: "btn-review-deposits"
-- assertVisible: "Deposit Approvals"
-  timeout: 3000
+- extendedWaitUntil:
+    visible: "Deposit Approvals"
+    timeout: 3000
 - assertVisible: "All"
 - assertVisible: "Pending"
 # Go back
