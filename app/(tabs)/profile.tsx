@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import { DevStateToggle } from '@/components/profile/dev-state-toggle';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function ProfileScreen() {
@@ -11,7 +12,7 @@ export default function ProfileScreen() {
   const { user, logout } = auth;
 
   return (
-    <View className="flex-1 bg-white px-6 pt-16 dark:bg-gray-900">
+    <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 pt-16 pb-8">
       <View className="mb-8 items-center">
         <View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
           <Text className="text-3xl font-bold text-blue-600 dark:text-blue-300">
@@ -43,6 +44,8 @@ export default function ProfileScreen() {
           </Text>
         </Pressable>
       </View>
-    </View>
+
+      {__DEV__ && <DevStateToggle />}
+    </ScrollView>
   );
 }

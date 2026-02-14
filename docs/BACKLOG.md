@@ -17,15 +17,18 @@ Single source of truth for all v1 work items, organized by development phase.
 
 Infrastructure that everything else builds on.
 
-- [ ] **Navigation shell** — Bottom tab navigator with 4 tabs: Season, Session, Ledger, Profile. Placeholder screens for each tab.
+- [x] **Navigation shell** — Bottom tab navigator with 4 tabs: Season, Session, Ledger, Profile. Placeholder screens for each tab.
   - Screens: global nav
-- [ ] **Database setup** — Turso/SQLite client, connection config, schema migration runner, ULID generation utility. Create all tables from data model.
+  - PR: #4
+- ~~**Database setup**~~ — Turso/SQLite client, connection config, schema migration runner, ULID generation utility. Out of scope for mobile app; handled entirely in backend (NestJS).
   - Tables: `users`, `seasons`, `season_members`, `season_deposit_submissions`, `season_host_order`, `sessions`, `session_participants`, `session_injections`, `ending_submissions`, `session_finalize_notes`, `notifications`
-- [ ] **Auth: login + session** — Login screen (email field, "Send login link"), magic-link flow, allowlisted-email guard, persistent auth state.
+- [x] **Auth: login + session** — Login screen (email field, "Send login link"), magic-link flow, allowlisted-email guard, persistent auth state. Currently uses mock API client swappable for real backend.
   - Screens: 1.1
   - Tables: `users`
-- [ ] **App state router** — Bootstrap logic that routes the user to the correct screen based on current app state (no season → create season, season in setup → season setup, active season → session home, etc.).
+  - PR: #5
+- [x] **App state router** — Bootstrap logic that routes the user to the correct screen based on current app state (no season → create season, season in setup → season setup, active season → session home, etc.).
   - Screens: 1.2
+  - PR: #6
 
 ---
 
@@ -33,9 +36,10 @@ Infrastructure that everything else builds on.
 
 Creating and configuring a season before play begins.
 
-- [ ] **Create Season screen** — Admin-only form: assign treasurer (dropdown), optional season name. On save: create season record (`status=setup`), initialize host order, initialize deposit statuses.
+- [x] **Create Season screen** — Admin-only form: assign treasurer (dropdown), optional season name. On save: create season record (`status=setup`), initialize host order, initialize deposit statuses.
   - Screens: 2.5 (partial — season creation)
   - Tables: `seasons`, `season_members`, `season_host_order`
+  - PR: #6
 - [ ] **Season Home screen** — Stateful hub showing season status, treasurer name, player's current balance, deposit status badge, host order preview (read-only). Role-based action buttons.
   - Screens: 2.1
   - Tables: `seasons`, `season_members`
@@ -223,14 +227,14 @@ These are **not** tracked as v1 work items.
 
 | Table | Backlog Phase(s) |
 |-------|-----------------|
-| `users` | Phase 0 (DB + Auth), Phase 10 |
-| `seasons` | Phase 0 (DB), Phase 1, Phase 8 |
-| `season_members` | Phase 0 (DB), Phase 1, Phase 6, Phase 7, Phase 8, Phase 10 |
-| `season_deposit_submissions` | Phase 0 (DB), Phase 1 |
-| `season_host_order` | Phase 0 (DB), Phase 1 |
-| `sessions` | Phase 0 (DB), Phase 2, Phase 3, Phase 6, Phase 7 |
-| `session_participants` | Phase 0 (DB), Phase 3, Phase 4, Phase 6, Phase 7 |
-| `session_injections` | Phase 0 (DB), Phase 3 (guest buy-in), Phase 4, Phase 6, Phase 7 |
-| `ending_submissions` | Phase 0 (DB), Phase 5, Phase 6, Phase 7 |
-| `session_finalize_notes` | Phase 0 (DB), Phase 6, Phase 7 |
-| `notifications` | Phase 0 (DB), Phase 9 |
+| `users` | Backend (DB), Phase 0 (Auth), Phase 10 |
+| `seasons` | Backend (DB), Phase 1, Phase 8 |
+| `season_members` | Backend (DB), Phase 1, Phase 6, Phase 7, Phase 8, Phase 10 |
+| `season_deposit_submissions` | Backend (DB), Phase 1 |
+| `season_host_order` | Backend (DB), Phase 1 |
+| `sessions` | Backend (DB), Phase 2, Phase 3, Phase 6, Phase 7 |
+| `session_participants` | Backend (DB), Phase 3, Phase 4, Phase 6, Phase 7 |
+| `session_injections` | Backend (DB), Phase 3 (guest buy-in), Phase 4, Phase 6, Phase 7 |
+| `ending_submissions` | Backend (DB), Phase 5, Phase 6, Phase 7 |
+| `session_finalize_notes` | Backend (DB), Phase 6, Phase 7 |
+| `notifications` | Backend (DB), Phase 9 |
