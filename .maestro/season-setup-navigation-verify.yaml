@@ -1,15 +1,14 @@
-appId: host.exp.Exponent
+appId: com.edgarsant93.metepecroyalflush
 name: Season Setup - Verify navigation fix
 ---
 # Full self-contained test: restarts app, switches preset, navigates sub-screens.
 
-# Kill and relaunch Expo Go to start fresh
+# Kill and relaunch dev build to start fresh
 - stopApp
 - launchApp:
-    appId: host.exp.Exponent
-- tapOn: "Poker Ledger"
+    appId: com.edgarsant93.metepecroyalflush
 
-# Wait for our app to fully load (either default or preset state)
+# Wait for app to fully load (either default or preset state)
 - extendedWaitUntil:
     visible: "Create Season"
     timeout: 30000
@@ -45,7 +44,7 @@ name: Season Setup - Verify navigation fix
     visible: "Randomize"
     timeout: 5000
 - assertVisible: "Save Order"
-- assertVisible: "Tap arrows to reorder hosts"
+- assertVisible: "Long press and drag to reorder hosts"
 - takeScreenshot: "host-order-screen"
 # Tap the back button in the header (left side)
 - tapOn:
