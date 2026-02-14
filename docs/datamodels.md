@@ -1,8 +1,8 @@
 # DataModel.md — Poker Season Ledger App (v1)
 
 This document defines the v1 data model (SQLite/Turso-friendly).  
-**IDs are ULIDs stored as TEXT.**  
-**Money is stored as INTEGER (MXN whole pesos).**
+**IDs are ULIDs stored as TEXT.**
+**Money is stored as INTEGER in MXN cents (100 cents = 1 peso).**
 
 ---
 
