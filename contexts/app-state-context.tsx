@@ -18,6 +18,8 @@ export type AppState =
 
 export type AppStateContextValue = AppState & {
   createSeason: (req: CreateSeasonRequest) => Promise<void>;
+  startSeason: () => Promise<void>;
+  updateTreasurer: (userId: string) => Promise<void>;
   refresh: () => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
@@ -74,6 +76,21 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const startSeason = useCallback(async () => {
+    if (state.status !== 'season_setup') return;
+    await api.startSeason(state.season.id);
+    await load();
+  }, [state, load]);
+
+  const updateTreasurer = useCallback(
+    async (userId: string) => {
+      if (state.status !== 'season_setup') return;
+      await api.updateTreasurer({ seasonId: state.season.id, treasurerUserId: userId });
+      await load();
+    },
+    [state, load],
+  );
+
   const _devSetPreset = useCallback(
     async (key: PresetKey) => {
       applyPreset(key);
@@ -83,8 +100,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<AppStateContextValue>(
-    () => ({ ...state, createSeason, refresh: load, _devSetPreset }),
-    [state, createSeason, load, _devSetPreset],
+    () => ({ ...state, createSeason, startSeason, updateTreasurer, refresh: load, _devSetPreset }),
+    [state, createSeason, startSeason, updateTreasurer, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

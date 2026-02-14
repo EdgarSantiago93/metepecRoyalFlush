@@ -5,6 +5,7 @@ import type { PresetKey } from '@/data/seed-seasons';
 const PRESETS: { key: PresetKey; label: string }[] = [
   { key: 'no_season', label: 'No Season' },
   { key: 'season_setup', label: 'Season Setup' },
+  { key: 'season_setup_mixed', label: 'Setup (mixed)' },
   { key: 'season_active_no_session', label: 'Active (no session)' },
   { key: 'season_active_with_session', label: 'Active (with session)' },
   { key: 'season_ended', label: 'Season Ended' },
@@ -12,7 +13,7 @@ const PRESETS: { key: PresetKey; label: string }[] = [
 
 function statusToPreset(status: string, hasSession: boolean): PresetKey {
   if (status === 'no_season') return 'no_season';
-  if (status === 'season_setup') return 'season_setup';
+  if (status === 'season_setup') return 'season_setup'; // can't distinguish mixed from default at runtime
   if (status === 'season_active') return hasSession ? 'season_active_with_session' : 'season_active_no_session';
   if (status === 'season_ended') return 'season_ended';
   return 'no_season';
