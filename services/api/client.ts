@@ -1,4 +1,5 @@
-import { SEED_USERS_BY_EMAIL } from '@/data/seed-users';
+import { mockStore } from '@/data/seed-seasons';
+import { SEED_USERS, SEED_USERS_BY_EMAIL } from '@/data/seed-users';
 import type { ApiClient } from './types';
 
 const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -63,5 +64,55 @@ export const api: ApiClient = {
     }
 
     throw new Error('Invalid or expired session');
+  },
+
+  async getActiveSeason() {
+    await delay(300);
+    return { season: mockStore.season, members: mockStore.members };
+  },
+
+  async getActiveSession() {
+    await delay(200);
+    return { session: mockStore.session };
+  },
+
+  async getUsers() {
+    await delay(200);
+    return { users: SEED_USERS };
+  },
+
+  async createSeason(req) {
+    await delay(600);
+    const now = new Date().toISOString();
+    const seasonId = `01SE${Date.now().toString(36).padStart(22, '0')}`.slice(0, 26);
+
+    const season = {
+      id: seasonId,
+      name: req.name ?? null,
+      status: 'setup' as const,
+      createdByUserId: SEED_USERS[0].id, // current user — mock assumes admin
+      treasurerUserId: req.treasurerUserId,
+      createdAt: now,
+      startedAt: null,
+      endedAt: null,
+    };
+
+    const members = SEED_USERS.map((u, i) => ({
+      id: `01SM${Date.now().toString(36).padStart(22, '0')}`.slice(0, 24) + String(i).padStart(2, '0'),
+      seasonId,
+      userId: u.id,
+      approvalStatus: 'not_submitted' as const,
+      currentBalanceCents: 0,
+      approvedAt: null,
+      approvedByUserId: null,
+      rejectionNote: null,
+      createdAt: now,
+    }));
+
+    mockStore.season = season;
+    mockStore.members = members;
+    mockStore.session = null;
+
+    return { season, members };
   },
 };

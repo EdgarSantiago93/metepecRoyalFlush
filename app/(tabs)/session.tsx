@@ -1,12 +1,26 @@
-import { Text, View } from 'react-native';
+import { ErrorView } from '@/components/ui/error-view';
+import { LoadingView } from '@/components/ui/loading-view';
+import { NoSeasonSession } from '@/components/session/no-season-session';
+import { NoSession } from '@/components/session/no-session';
+import { SessionActive } from '@/components/session/session-active';
+import { useAppState } from '@/hooks/use-app-state';
 
 export default function SessionScreen() {
-  return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-2xl font-bold text-gray-900 dark:text-white">Session</Text>
-      <Text className="mt-2 text-base text-gray-500 dark:text-gray-400">
-        Session hub coming soon
-      </Text>
-    </View>
-  );
+  const appState = useAppState();
+
+  switch (appState.status) {
+    case 'loading':
+      return <LoadingView />;
+    case 'error':
+      return <ErrorView message={appState.message} onRetry={appState.refresh} />;
+    case 'no_season':
+    case 'season_setup':
+    case 'season_ended':
+      return <NoSeasonSession />;
+    case 'season_active':
+      if (appState.session) {
+        return <SessionActive session={appState.session} users={appState.users} />;
+      }
+      return <NoSession />;
+  }
 }

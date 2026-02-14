@@ -15,7 +15,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (auth.status === 'loading') {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
+      <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
         <ActivityIndicator size="large" />
       </View>
     );
