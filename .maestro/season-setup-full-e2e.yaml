@@ -1,13 +1,12 @@
-appId: host.exp.Exponent
+appId: com.edgarsant93.metepecroyalflush
 name: Season Setup - Full E2E flow
 ---
 # Full flow: login as admin → switch preset → verify dashboard → navigate all screens
 
 # Step 1: Login as Edgar (admin)
 - launchApp:
-    appId: host.exp.Exponent
+    appId: com.edgarsant93.metepecroyalflush
     clearState: true
-- openLink: exp://127.0.0.1:8081
 - extendedWaitUntil:
     visible: "Metepec Royal Flush"
     timeout: 25000
@@ -49,7 +48,7 @@ name: Season Setup - Full E2E flow
     visible: "Randomize"
     timeout: 3000
 - assertVisible: "Save Order"
-- assertVisible: "Tap arrows to reorder hosts"
+- assertVisible: "Long press and drag to reorder hosts"
 # Test randomize
 - tapOn: "Randomize"
 - back
