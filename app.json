@@ -39,7 +39,14 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Poker Ledger to access your photos for deposit proof uploads.",
+          "cameraPermission": "Allow Poker Ledger to use the camera for deposit proof photos."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

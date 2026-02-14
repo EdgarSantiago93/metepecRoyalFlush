@@ -1,0 +1,20 @@
+appId: host.exp.Exponent
+name: Switch to Season Setup Mixed preset
+---
+# Navigate to Profile tab and switch dev preset
+- tapOn:
+    id: "tab-profile"
+- scrollUntilVisible:
+    element: "Setup (mixed)"
+    direction: DOWN
+- tapOn:
+    id: "dev-preset-season_setup_mixed"
+# Wait for state to reload
+- extendedWaitUntil:
+    visible: "Season"
+    timeout: 5000
+# Go back to Season tab
+- tapOn:
+    id: "tab-season"
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Setup"

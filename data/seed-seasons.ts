@@ -1,4 +1,4 @@
-import type { Season, SeasonMember, Session } from '@/types';
+import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session } from '@/types';
 import { SEED_USERS } from './seed-users';
 
 // ---------------------------------------------------------------------------
@@ -9,12 +9,16 @@ export type MockStore = {
   season: Season | null;
   members: SeasonMember[];
   session: Session | null;
+  depositSubmissions: SeasonDepositSubmission[];
+  hostOrder: SeasonHostOrder[];
 };
 
 export const mockStore: MockStore = {
   season: null,
   members: [],
   session: null,
+  depositSubmissions: [],
+  hostOrder: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -24,6 +28,7 @@ export const mockStore: MockStore = {
 export type PresetKey =
   | 'no_season'
   | 'season_setup'
+  | 'season_setup_mixed'
   | 'season_active_no_session'
   | 'season_active_with_session'
   | 'season_ended';
@@ -38,9 +43,19 @@ function makeMembers(seasonId: string, approved: boolean): SeasonMember[] {
     approvalStatus: approved ? 'approved' : 'not_submitted',
     currentBalanceCents: approved ? 50000 : 0, // 500 MXN
     approvedAt: approved ? NOW : null,
-    approvedByUserId: approved ? SEED_USERS[0].id : null,
+    approvedByUserId: approved ? SEED_USERS[1].id : null, // treasurer approves
     rejectionNote: null,
     createdAt: NOW,
+  }));
+}
+
+function makeHostOrder(seasonId: string): SeasonHostOrder[] {
+  return SEED_USERS.map((u, i) => ({
+    id: `01SH000000000000000000${String(i + 1).padStart(4, '0')}`,
+    seasonId,
+    userId: u.id,
+    sortIndex: i,
+    updatedAt: NOW,
   }));
 }
 
@@ -49,6 +64,8 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     season: null,
     members: [],
     session: null,
+    depositSubmissions: [],
+    hostOrder: [],
   }),
 
   season_setup: () => {
@@ -66,6 +83,79 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       },
       members: makeMembers(seasonId, false),
       session: null,
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
+    };
+  },
+
+  season_setup_mixed: () => {
+    const seasonId = '01SE0000000000000000000001';
+    const treasurer = SEED_USERS[1]; // Carlos
+
+    // Mixed statuses: 0=Edgar(not_submitted admin), 1=Carlos(approved treasurer),
+    // 2=Miguel(approved), 3=Andres(pending), 4=Jorge(pending),
+    // 5=Luis(rejected), 6-9=not_submitted
+    const statuses: Array<'not_submitted' | 'pending' | 'approved' | 'rejected'> = [
+      'not_submitted', 'approved', 'approved', 'pending', 'pending',
+      'rejected', 'not_submitted', 'not_submitted', 'not_submitted', 'not_submitted',
+    ];
+
+    const members: SeasonMember[] = SEED_USERS.map((u, i) => ({
+      id: `01SM000000000000000000${String(i + 1).padStart(4, '0')}`,
+      seasonId,
+      userId: u.id,
+      approvalStatus: statuses[i],
+      currentBalanceCents: statuses[i] === 'approved' ? 50000 : 0,
+      approvedAt: statuses[i] === 'approved' ? NOW : null,
+      approvedByUserId: statuses[i] === 'approved' ? treasurer.id : null,
+      rejectionNote: statuses[i] === 'rejected' ? 'Photo is blurry, please resubmit' : null,
+      createdAt: NOW,
+    }));
+
+    const depositSubmissions: SeasonDepositSubmission[] = [];
+
+    // Create submissions for approved, pending, and rejected members
+    statuses.forEach((status, i) => {
+      if (status === 'not_submitted') return;
+      depositSubmissions.push({
+        id: `01SD000000000000000000${String(i + 1).padStart(4, '0')}`,
+        seasonId,
+        userId: SEED_USERS[i].id,
+        photoUrl: `https://placeholder.mock/deposit-${i + 1}.jpg`,
+        note: i === 3 ? 'Transferencia SPEI' : null,
+        status: status as 'pending' | 'approved' | 'rejected',
+        reviewedAt: status === 'approved' || status === 'rejected' ? NOW : null,
+        reviewedByUserId: status === 'approved' || status === 'rejected' ? treasurer.id : null,
+        reviewNote: status === 'rejected' ? 'Photo is blurry, please resubmit' : null,
+        createdAt: NOW,
+      });
+    });
+
+    // Shuffled host order for testing
+    const shuffled = [...SEED_USERS].sort(() => Math.random() - 0.5);
+    const hostOrder: SeasonHostOrder[] = shuffled.map((u, i) => ({
+      id: `01SH000000000000000000${String(i + 1).padStart(4, '0')}`,
+      seasonId,
+      userId: u.id,
+      sortIndex: i,
+      updatedAt: NOW,
+    }));
+
+    return {
+      season: {
+        id: seasonId,
+        name: 'Season Feb 2026',
+        status: 'setup',
+        createdByUserId: SEED_USERS[0].id,
+        treasurerUserId: treasurer.id,
+        createdAt: NOW,
+        startedAt: null,
+        endedAt: null,
+      },
+      members,
+      session: null,
+      depositSubmissions,
+      hostOrder,
     };
   },
 
@@ -84,6 +174,8 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       },
       members: makeMembers(seasonId, true),
       session: null,
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
     };
   },
 
@@ -117,6 +209,8 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         finalizedAt: null,
         finalizedByUserId: null,
       },
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
     };
   },
 
@@ -135,6 +229,8 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       },
       members: makeMembers(seasonId, true),
       session: null,
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
     };
   },
 };
@@ -144,4 +240,6 @@ export function applyPreset(key: PresetKey): void {
   mockStore.season = data.season;
   mockStore.members = data.members;
   mockStore.session = data.session;
+  mockStore.depositSubmissions = data.depositSubmissions;
+  mockStore.hostOrder = data.hostOrder;
 }

@@ -1,0 +1,69 @@
+appId: host.exp.Exponent
+name: Season Setup - Full E2E flow
+---
+# Full flow: login as admin → switch preset → verify dashboard → navigate all screens
+
+# Step 1: Login as Edgar (admin)
+- launchApp:
+    appId: host.exp.Exponent
+    clearState: true
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: "Metepec Royal Flush"
+    timeout: 25000
+- tapOn:
+    id: "login-email-input"
+- inputText: "edgar@poker.local"
+- tapOn:
+    id: "login-send-button"
+- extendedWaitUntil:
+    visible: "Season"
+    timeout: 15000
+
+# Step 2: Switch to mixed preset
+- tapOn:
+    id: "tab-profile"
+- scrollUntilVisible:
+    element: "Setup (mixed)"
+    direction: DOWN
+- tapOn:
+    id: "dev-preset-season_setup_mixed"
+- extendedWaitUntil:
+    visible: "Season"
+    timeout: 5000
+- tapOn:
+    id: "tab-season"
+
+# Step 3: Verify dashboard shows correct info
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Setup"
+- assertVisible: "Deposit Status"
+- assertVisible: "Host Order"
+- assertVisible: "Edit Host Order"
+- assertVisible: "Season Settings"
+
+# Step 4: Navigate to Host Order
+- tapOn:
+    id: "btn-edit-host-order"
+- extendedWaitUntil:
+    visible: "Randomize"
+    timeout: 3000
+- assertVisible: "Save Order"
+- assertVisible: "Tap arrows to reorder hosts"
+# Test randomize
+- tapOn: "Randomize"
+- back
+
+# Step 5: Navigate to Season Settings
+- tapOn:
+    id: "btn-season-settings"
+- extendedWaitUntil:
+    visible: "Change Treasurer"
+    timeout: 3000
+- assertVisible: "Current treasurer"
+- back
+
+# Step 6: Verify dashboard is still intact
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Deposit Status"
+- takeScreenshot: "season-setup-dashboard"
