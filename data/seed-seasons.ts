@@ -30,6 +30,7 @@ export type PresetKey =
   | 'season_setup'
   | 'season_setup_mixed'
   | 'season_active_no_session'
+  | 'season_active_scheduled'
   | 'season_active_with_session'
   | 'season_ended';
 
@@ -174,6 +175,41 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       },
       members: makeMembers(seasonId, true),
       session: null,
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
+    };
+  },
+
+  season_active_scheduled: () => {
+    const seasonId = '01SE0000000000000000000005';
+    return {
+      season: {
+        id: seasonId,
+        name: 'Season Feb 2026',
+        status: 'active' as const,
+        createdByUserId: SEED_USERS[0].id,
+        treasurerUserId: SEED_USERS[1].id, // Carlos
+        createdAt: NOW,
+        startedAt: NOW,
+        endedAt: null,
+      },
+      members: makeMembers(seasonId, true),
+      session: {
+        id: '01SS0000000000000000000002',
+        seasonId,
+        state: 'scheduled' as const,
+        hostUserId: SEED_USERS[2].id, // Miguel
+        scheduledFor: '2026-02-15T20:00:00.000Z',
+        location: "Miguel's place",
+        scheduledAt: NOW,
+        scheduledByUserId: SEED_USERS[1].id, // Carlos scheduled it
+        startedAt: null,
+        startedByUserId: null,
+        endedAt: null,
+        endedByUserId: null,
+        finalizedAt: null,
+        finalizedByUserId: null,
+      },
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
     };

@@ -106,6 +106,36 @@ export type StartSeasonResponse = {
   season: Season;
 };
 
+// ---------------------------------------------------------------------------
+// Session scheduling
+// ---------------------------------------------------------------------------
+
+export type ScheduleSessionRequest = {
+  seasonId: string;
+  hostUserId: string;
+  scheduledFor?: string;
+  location?: string;
+};
+
+export type ScheduleSessionResponse = {
+  session: Session;
+};
+
+export type UpdateScheduledSessionRequest = {
+  sessionId: string;
+  hostUserId?: string;
+  scheduledFor?: string | null;
+  location?: string | null;
+};
+
+export type UpdateScheduledSessionResponse = {
+  session: Session;
+};
+
+export type StartSessionResponse = {
+  session: Session;
+};
+
 /** Mock-swappable API client interface. */
 export type ApiClient = {
   sendMagicLink: (email: string) => Promise<SendMagicLinkResponse>;
@@ -122,4 +152,7 @@ export type ApiClient = {
   saveHostOrder: (req: SaveHostOrderRequest) => Promise<SaveHostOrderResponse>;
   updateTreasurer: (req: UpdateTreasurerRequest) => Promise<UpdateTreasurerResponse>;
   startSeason: (seasonId: string) => Promise<StartSeasonResponse>;
+  scheduleSession: (req: ScheduleSessionRequest) => Promise<ScheduleSessionResponse>;
+  updateScheduledSession: (req: UpdateScheduledSessionRequest) => Promise<UpdateScheduledSessionResponse>;
+  startSession: (sessionId: string) => Promise<StartSessionResponse>;
 };

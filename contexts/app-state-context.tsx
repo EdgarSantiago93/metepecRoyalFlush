@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Season, SeasonMember, Session, User } from '@/types';
-import type { CreateSeasonRequest } from '@/services/api/types';
+import type { CreateSeasonRequest, ScheduleSessionRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
 import { api } from '@/services/api/client';
 import { applyPreset, type PresetKey } from '@/data/seed-seasons';
 
@@ -20,6 +20,9 @@ export type AppStateContextValue = AppState & {
   createSeason: (req: CreateSeasonRequest) => Promise<void>;
   startSeason: () => Promise<void>;
   updateTreasurer: (userId: string) => Promise<void>;
+  scheduleSession: (req: ScheduleSessionRequest) => Promise<void>;
+  updateScheduledSession: (req: UpdateScheduledSessionRequest) => Promise<void>;
+  startSession: () => Promise<void>;
   refresh: () => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
@@ -91,6 +94,30 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [state, load],
   );
 
+  const scheduleSession = useCallback(
+    async (req: ScheduleSessionRequest) => {
+      if (state.status !== 'season_active') return;
+      await api.scheduleSession(req);
+      await load();
+    },
+    [state, load],
+  );
+
+  const updateScheduledSession = useCallback(
+    async (req: UpdateScheduledSessionRequest) => {
+      if (state.status !== 'season_active') return;
+      await api.updateScheduledSession(req);
+      await load();
+    },
+    [state, load],
+  );
+
+  const startSession = useCallback(async () => {
+    if (state.status !== 'season_active' || !state.session) return;
+    await api.startSession(state.session.id);
+    await load();
+  }, [state, load]);
+
   const _devSetPreset = useCallback(
     async (key: PresetKey) => {
       applyPreset(key);
@@ -100,8 +127,18 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<AppStateContextValue>(
-    () => ({ ...state, createSeason, startSeason, updateTreasurer, refresh: load, _devSetPreset }),
-    [state, createSeason, startSeason, updateTreasurer, load, _devSetPreset],
+    () => ({
+      ...state,
+      createSeason,
+      startSeason,
+      updateTreasurer,
+      scheduleSession,
+      updateScheduledSession,
+      startSession,
+      refresh: load,
+      _devSetPreset,
+    }),
+    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

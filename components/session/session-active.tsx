@@ -1,12 +1,121 @@
-import { Text, View } from 'react-native';
-import type { Session, User } from '@/types';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAuth } from '@/hooks/use-auth';
+import { useAppState } from '@/hooks/use-app-state';
+import type { Season, SeasonMember, Session, User } from '@/types';
 
 type Props = {
   session: Session;
+  season: Season;
+  members: SeasonMember[];
   users: User[];
 };
 
-export function SessionActive({ session, users }: Props) {
+export function SessionActive({ session, season, members, users }: Props) {
+  if (session.state === 'scheduled') {
+    return <SessionScheduled session={session} season={season} members={members} users={users} />;
+  }
+
+  // dealing | in_progress | closing | finalized — placeholder for future phases
+  return <SessionInProgressPlaceholder session={session} users={users} />;
+}
+
+// ---------------------------------------------------------------------------
+// Scheduled sub-component
+// ---------------------------------------------------------------------------
+
+function SessionScheduled({ session, season, users }: Props) {
+  const router = useRouter();
+  const auth = useAuth();
+  const appState = useAppState();
+  const [starting, setStarting] = useState(false);
+
+  const currentUser = auth.status === 'authenticated' ? auth.user : null;
+  const isTreasurer = currentUser?.id === season.treasurerUserId;
+  const isAdmin = currentUser?.isAdmin === true;
+  const canManage = isTreasurer || isAdmin;
+
+  const host = users.find((u) => u.id === session.hostUserId);
+  const scheduledBy = users.find((u) => u.id === session.scheduledByUserId);
+
+  const handleStart = useCallback(async () => {
+    if (starting) return;
+    setStarting(true);
+    try {
+      await appState.startSession();
+    } catch (e) {
+      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to start session');
+    } finally {
+      setStarting(false);
+    }
+  }, [starting, appState]);
+
+  return (
+    <ScrollView
+      className="flex-1 bg-sand-50 dark:bg-sand-900"
+      contentContainerClassName="px-6 pt-16 pb-8"
+    >
+      <Text className="mb-1 text-2xl font-bold text-sand-950 dark:text-sand-50">
+        Session Scheduled
+      </Text>
+
+      <View className="mt-1 mb-6 self-start rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900/40">
+        <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
+          Scheduled
+        </Text>
+      </View>
+
+      {/* Session details card */}
+      <View className="mb-6 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
+        <InfoRow label="Host" value={host?.displayName ?? 'Unknown'} />
+        {session.scheduledFor && <InfoRow label="When" value={session.scheduledFor} />}
+        {session.location && <InfoRow label="Location" value={session.location} />}
+        {scheduledBy && <InfoRow label="Scheduled by" value={scheduledBy.displayName} />}
+      </View>
+
+      {/* Action buttons for Treasurer/Admin */}
+      {canManage && (
+        <View className="gap-3">
+          <Pressable
+            className={`items-center rounded-lg py-3.5 ${
+              !starting ? 'bg-gold-500 active:bg-gold-600' : 'bg-sand-300 dark:bg-sand-700'
+            }`}
+            onPress={handleStart}
+            disabled={starting}
+          >
+            {starting ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-base font-semibold text-white">Start Session</Text>
+            )}
+          </Pressable>
+          <Pressable
+            className="items-center rounded-lg border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+            onPress={() => router.push('/schedule-session?edit=1' as never)}
+            disabled={starting}
+          >
+            <Text className="text-base font-semibold text-sand-700 dark:text-sand-300">
+              Edit Schedule
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {!canManage && (
+        <Text className="text-center text-sm text-sand-500 dark:text-sand-400">
+          Waiting for the treasurer to start the session.
+        </Text>
+      )}
+    </ScrollView>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Placeholder for non-scheduled states (future phases)
+// ---------------------------------------------------------------------------
+
+function SessionInProgressPlaceholder({ session, users }: { session: Session; users: User[] }) {
   const host = users.find((u) => u.id === session.hostUserId);
 
   return (
@@ -33,6 +142,10 @@ export function SessionActive({ session, users }: Props) {
     </View>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Shared
+// ---------------------------------------------------------------------------
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
