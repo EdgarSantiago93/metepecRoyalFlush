@@ -40,20 +40,32 @@ Creating and configuring a season before play begins.
   - Screens: 2.5 (partial — season creation)
   - Tables: `seasons`, `season_members`, `season_host_order`
   - PR: #6
-- [ ] **Season Home screen** — Stateful hub showing season status, treasurer name, player's current balance, deposit status badge, host order preview (read-only). Role-based action buttons.
-  - Screens: 2.1
+- [x] **Season Setup Dashboard** — Hub for setup phase showing deposit status list, host order preview, progress card, role-based action buttons (upload deposit, review deposits, edit host order, season settings, start season).
+  - Screens: 2.1 (setup state), 2.4
   - Tables: `seasons`, `season_members`
-- [ ] **Upload Deposit Proof screen** — Photo picker/camera, optional note, submit. Shows current status (pending/approved/rejected). Re-upload allowed after rejection.
+  - PR: #7, #8
+- [x] **Upload Deposit Proof screen** — Photo picker/camera, optional note, submit. Shows current status (pending/approved/rejected). Re-upload allowed after rejection.
   - Screens: 2.2
   - Tables: `season_deposit_submissions`
-- [ ] **Deposit Approvals screen** — Treasurer view: member list with status filters (all/pending/approved/rejected/not submitted). Detail view: proof photo, approve/reject (reject requires note), submission history. On approve: set `season_members.current_balance_mxn = 500`.
+  - PR: #7
+- [x] **Deposit Approvals screen** — Treasurer view: member list with status filters (all/pending/approved/rejected/not submitted). Detail view: proof photo, approve/reject (reject requires note), submission history. On approve: set `season_members.current_balance_mxn = 500`.
   - Screens: 2.3
   - Tables: `season_deposit_submissions`, `season_members`
-- [ ] **Host Order Planning screen** — Admin-only: randomize button, drag-and-drop reorder, save. Shows all group members regardless of deposit status.
+  - PR: #7
+- [x] **Host Order Planning screen** — Admin-only: randomize button, drag-and-drop reorder (long-press + pan gesture with haptics), save.
   - Screens: 2.5 (partial — host order)
   - Tables: `season_host_order`
-- [ ] **Season Setup Review + Start Season** — Treasurer view: summary page with treasurer name, approved count, member list + deposit statuses, host order preview. "Start Season" button enabled only when treasurer assigned + ≥2 members approved. On start: `status=active`, persist `started_at`, notify everyone.
+  - PR: #7, #8, #9, #10
+- [x] **Season Settings screen** — Admin-only: change treasurer.
+  - Screens: 2.5 (partial — settings)
+  - Tables: `seasons`
+  - PR: #7
+- [x] **Start Season action** — Treasurer-only button on setup dashboard. Enabled when ≥2 members approved. On start: `status=active`, persist `started_at`.
   - Screens: 2.4
+  - Tables: `seasons`, `season_members`
+  - PR: #7
+- [x] **Season Home screen (active state)** — Stateful hub showing season status, treasurer name, player's current balance, deposit status badge, host order preview (read-only). Role-based action buttons.
+  - Screens: 2.1 (active state)
   - Tables: `seasons`, `season_members`
 
 ---
@@ -62,13 +74,13 @@ Creating and configuring a season before play begins.
 
 Creating and editing scheduled sessions within an active season.
 
-- [ ] **Session Home (stateful hub)** — Renders different UI based on session state: no session ("Waiting for next session"), scheduled (host/date/location), dealing (confirmation progress), in progress (rebuys feed), closing (submission progress), finalized (summary). Role-based actions throughout.
+- [x] **Session Home (stateful hub)** — Renders different UI based on session state: no session ("Waiting for next session"), scheduled (host/date/location + Start/Edit actions), dealing/in_progress/closing/finalized (placeholder for future phases). Role-based actions throughout.
   - Screens: 3.1
   - Tables: `sessions`, `session_participants`
-- [ ] **Schedule Next Session** — Treasurer/Admin form: host picker (from host order), optional date/time, optional location. On save: create session (`state=scheduled`), notify everyone. Enforces one non-finalized session at a time.
+- [x] **Schedule Next Session** — Treasurer/Admin form: host picker (from host order), optional date/time, optional location. On save: create session (`state=scheduled`). Enforces one non-finalized session at a time.
   - Screens: 3.2
   - Tables: `sessions`
-- [ ] **Edit Scheduled Session** — Same form as Schedule, prefilled with current values. On save: update session, notify everyone.
+- [x] **Edit Scheduled Session** — Same form as Schedule, prefilled with current values (`?edit=1` param). On save: update session.
   - Screens: 3.3
   - Tables: `sessions`
 

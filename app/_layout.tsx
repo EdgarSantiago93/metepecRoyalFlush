@@ -51,6 +51,7 @@ function RootNavigation() {
           <Stack.Screen name="deposit-approvals" options={{ title: 'Deposit Approvals' }} />
           <Stack.Screen name="host-order" options={{ title: 'Host Order' }} />
           <Stack.Screen name="season-settings" options={{ title: 'Season Settings' }} />
+          <Stack.Screen name="schedule-session" options={{ title: 'Schedule Session' }} />
         </Stack>
         </AppStateProvider>
       </AuthGate>

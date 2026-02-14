@@ -19,8 +19,21 @@ export default function SessionScreen() {
       return <NoSeasonSession />;
     case 'season_active':
       if (appState.session) {
-        return <SessionActive session={appState.session} users={appState.users} />;
+        return (
+          <SessionActive
+            session={appState.session}
+            season={appState.season}
+            members={appState.members}
+            users={appState.users}
+          />
+        );
       }
-      return <NoSession />;
+      return (
+        <NoSession
+          season={appState.season}
+          members={appState.members}
+          users={appState.users}
+        />
+      );
   }
 }

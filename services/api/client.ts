@@ -275,4 +275,84 @@ export const api: ApiClient = {
 
     return { season: mockStore.season };
   },
+
+  // ---------------------------------------------------------------------------
+  // Session scheduling
+  // ---------------------------------------------------------------------------
+
+  async scheduleSession(req) {
+    await delay(500);
+    const now = new Date().toISOString();
+
+    if (!mockStore.season || mockStore.season.id !== req.seasonId) {
+      throw new Error('Season not found');
+    }
+    if (mockStore.season.status !== 'active') {
+      throw new Error('Season must be active to schedule a session');
+    }
+    if (mockStore.session && mockStore.session.state !== 'finalized') {
+      throw new Error('A non-finalized session already exists');
+    }
+
+    const session = {
+      id: makeId('01SS'),
+      seasonId: req.seasonId,
+      state: 'scheduled' as const,
+      hostUserId: req.hostUserId,
+      scheduledFor: req.scheduledFor ?? null,
+      location: req.location ?? null,
+      scheduledAt: now,
+      scheduledByUserId: SEED_USERS[0].id, // mock assumes current user
+      startedAt: null,
+      startedByUserId: null,
+      endedAt: null,
+      endedByUserId: null,
+      finalizedAt: null,
+      finalizedByUserId: null,
+    };
+
+    mockStore.session = session;
+    return { session };
+  },
+
+  async updateScheduledSession(req) {
+    await delay(400);
+
+    if (!mockStore.session || mockStore.session.id !== req.sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'scheduled') {
+      throw new Error('Can only edit a session in scheduled state');
+    }
+
+    if (req.hostUserId !== undefined) {
+      mockStore.session.hostUserId = req.hostUserId;
+    }
+    if (req.scheduledFor !== undefined) {
+      mockStore.session.scheduledFor = req.scheduledFor;
+    }
+    if (req.location !== undefined) {
+      mockStore.session.location = req.location;
+    }
+
+    return { session: mockStore.session };
+  },
+
+  async startSession(sessionId: string) {
+    await delay(500);
+    const now = new Date().toISOString();
+
+    if (!mockStore.session || mockStore.session.id !== sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'scheduled') {
+      throw new Error('Session must be in scheduled state to start');
+    }
+
+    mockStore.session.state = 'dealing';
+    mockStore.session.startedAt = now;
+    mockStore.session.startedByUserId = SEED_USERS[0].id; // mock assumes current user
+
+    return { session: mockStore.session };
+  },
 };
