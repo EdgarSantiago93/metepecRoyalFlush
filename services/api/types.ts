@@ -1,4 +1,4 @@
-import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, User } from '@/types';
+import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionParticipant, User } from '@/types';
 
 export type SendMagicLinkResponse = {
   success: boolean;
@@ -136,6 +136,40 @@ export type StartSessionResponse = {
   session: Session;
 };
 
+// ---------------------------------------------------------------------------
+// Session participants (dealing phase)
+// ---------------------------------------------------------------------------
+
+export type GetSessionParticipantsResponse = {
+  participants: SessionParticipant[];
+};
+
+export type CheckInResponse = {
+  participant: SessionParticipant;
+};
+
+export type ConfirmStartResponse = {
+  participant: SessionParticipant;
+};
+
+export type DisputeStartRequest = {
+  sessionId: string;
+  participantId: string;
+  note: string;
+};
+
+export type DisputeStartResponse = {
+  participant: SessionParticipant;
+};
+
+export type RemoveParticipantResponse = {
+  participant: SessionParticipant;
+};
+
+export type MoveToInProgressResponse = {
+  session: Session;
+};
+
 /** Mock-swappable API client interface. */
 export type ApiClient = {
   sendMagicLink: (email: string) => Promise<SendMagicLinkResponse>;
@@ -155,4 +189,10 @@ export type ApiClient = {
   scheduleSession: (req: ScheduleSessionRequest) => Promise<ScheduleSessionResponse>;
   updateScheduledSession: (req: UpdateScheduledSessionRequest) => Promise<UpdateScheduledSessionResponse>;
   startSession: (sessionId: string) => Promise<StartSessionResponse>;
+  getSessionParticipants: (sessionId: string) => Promise<GetSessionParticipantsResponse>;
+  checkInToSession: (sessionId: string) => Promise<CheckInResponse>;
+  confirmStartingStack: (sessionId: string, participantId: string) => Promise<ConfirmStartResponse>;
+  disputeStartingStack: (req: DisputeStartRequest) => Promise<DisputeStartResponse>;
+  removeParticipant: (sessionId: string, participantId: string) => Promise<RemoveParticipantResponse>;
+  moveSessionToInProgress: (sessionId: string) => Promise<MoveToInProgressResponse>;
 };

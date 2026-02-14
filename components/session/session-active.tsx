@@ -3,21 +3,36 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'rea
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
-import type { Season, SeasonMember, Session, User } from '@/types';
+import type { Season, SeasonMember, Session, SessionParticipant, User } from '@/types';
+import { SessionDealing } from './session-dealing';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 
 type Props = {
   session: Session;
   season: Season;
   members: SeasonMember[];
+  participants: SessionParticipant[];
   users: User[];
 };
 
-export function SessionActive({ session, season, members, users }: Props) {
+export function SessionActive({ session, season, members, participants, users }: Props) {
   if (session.state === 'scheduled') {
     return <SessionScheduled session={session} season={season} members={members} users={users} />;
   }
 
-  // dealing | in_progress | closing | finalized — placeholder for future phases
+  if (session.state === 'dealing') {
+    return (
+      <SessionDealing
+        session={session}
+        season={season}
+        members={members}
+        participants={participants}
+        users={users}
+      />
+    );
+  }
+
+  // in_progress | closing | finalized — placeholder for future phases
   return <SessionInProgressPlaceholder session={session} users={users} />;
 }
 
@@ -25,11 +40,12 @@ export function SessionActive({ session, season, members, users }: Props) {
 // Scheduled sub-component
 // ---------------------------------------------------------------------------
 
-function SessionScheduled({ session, season, users }: Props) {
+function SessionScheduled({ session, season, users }: Omit<Props, 'participants'>) {
   const router = useRouter();
   const auth = useAuth();
   const appState = useAppState();
   const [starting, setStarting] = useState(false);
+  const [showStartModal, setShowStartModal] = useState(false);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
@@ -40,16 +56,16 @@ function SessionScheduled({ session, season, users }: Props) {
   const scheduledBy = users.find((u) => u.id === session.scheduledByUserId);
 
   const handleStart = useCallback(async () => {
-    if (starting) return;
     setStarting(true);
     try {
       await appState.startSession();
+      setShowStartModal(false);
     } catch (e) {
       Alert.alert('Error', e instanceof Error ? e.message : 'Failed to start session');
     } finally {
       setStarting(false);
     }
-  }, [starting, appState]);
+  }, [appState]);
 
   return (
     <ScrollView
@@ -81,7 +97,7 @@ function SessionScheduled({ session, season, users }: Props) {
             className={`items-center rounded-lg py-3.5 ${
               !starting ? 'bg-gold-500 active:bg-gold-600' : 'bg-sand-300 dark:bg-sand-700'
             }`}
-            onPress={handleStart}
+            onPress={() => setShowStartModal(true)}
             disabled={starting}
           >
             {starting ? (
@@ -107,6 +123,17 @@ function SessionScheduled({ session, season, users }: Props) {
           Waiting for the treasurer to start the session.
         </Text>
       )}
+
+      <ConfirmationModal
+        visible={showStartModal}
+        title="Start Session"
+        message="Start the dealing phase? Players will be able to check in and receive their starting stacks."
+        confirmLabel="Start Session"
+        cancelLabel="Cancel"
+        onConfirm={handleStart}
+        onCancel={() => setShowStartModal(false)}
+        loading={starting}
+      />
     </ScrollView>
   );
 }
