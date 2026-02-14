@@ -1,0 +1,19 @@
+appId: host.exp.Exponent
+name: Season Setup - Treasurer navigation
+---
+# Prerequisites: logged in as Carlos, season_setup_mixed preset active
+# Verify setup dashboard with treasurer-specific elements
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Start Season"
+- assertVisible: "Review Deposits"
+
+# Test: Navigate to Deposit Approvals screen
+- tapOn:
+    id: "btn-review-deposits"
+- assertVisible: "Deposit Approvals"
+  timeout: 3000
+- assertVisible: "All"
+- assertVisible: "Pending"
+# Go back
+- back
+- assertVisible: "Season Feb 2026"

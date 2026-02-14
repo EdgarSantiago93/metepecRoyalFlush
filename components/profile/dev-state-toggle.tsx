@@ -44,6 +44,7 @@ export function DevStateToggle() {
         return (
           <Pressable
             key={key}
+            testID={`dev-preset-${key}`}
             className={`mb-2 rounded-lg border px-4 py-2.5 ${
               isActive
                 ? 'border-orange-500 bg-orange-50 dark:border-orange-400 dark:bg-orange-900/30'

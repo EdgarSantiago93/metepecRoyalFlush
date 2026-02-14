@@ -1,0 +1,56 @@
+appId: host.exp.Exponent
+name: Season Setup - Full E2E flow
+---
+# Full flow: login as admin → switch preset → verify dashboard → navigate all screens
+
+# Step 1: Login as Edgar (admin)
+- tapOn:
+    id: "login-email-input"
+- inputText: "edgar@poker.local"
+- tapOn:
+    id: "login-send-button"
+- assertVisible: "Season"
+  timeout: 10000
+
+# Step 2: Switch to mixed preset
+- tapOn: "Profile"
+- scrollUntilVisible:
+    element: "Setup (mixed)"
+    direction: DOWN
+- tapOn:
+    id: "dev-preset-season_setup_mixed"
+- assertVisible: "Season"
+  timeout: 5000
+- tapOn: "Season"
+
+# Step 3: Verify dashboard shows correct info
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Setup"
+- assertVisible: "Deposit Status"
+- assertVisible: "Host Order"
+- assertVisible: "Edit Host Order"
+- assertVisible: "Season Settings"
+
+# Step 4: Navigate to Host Order
+- tapOn:
+    id: "btn-edit-host-order"
+- assertVisible: "Randomize"
+  timeout: 3000
+- assertVisible: "Save Order"
+- assertVisible: "Drag to reorder hosts"
+# Test randomize
+- tapOn: "Randomize"
+- back
+
+# Step 5: Navigate to Season Settings
+- tapOn:
+    id: "btn-season-settings"
+- assertVisible: "Change Treasurer"
+  timeout: 3000
+- assertVisible: "Current treasurer"
+- back
+
+# Step 6: Verify dashboard is still intact
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Deposit Status"
+- takeScreenshot: "season-setup-dashboard"

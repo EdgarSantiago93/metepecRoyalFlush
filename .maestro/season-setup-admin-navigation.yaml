@@ -1,0 +1,27 @@
+appId: host.exp.Exponent
+name: Season Setup - Admin navigation
+---
+# Prerequisites: logged in as Edgar, season_setup or season_setup_mixed preset active
+# Verify we're on the setup dashboard
+- assertVisible: "Season Feb 2026"
+- assertVisible: "Deposit Status"
+- assertVisible: "Host Order"
+
+# Test: Navigate to Host Order screen
+- tapOn:
+    id: "btn-edit-host-order"
+- assertVisible: "Host Order"
+  timeout: 3000
+- assertVisible: "Randomize"
+- assertVisible: "Save Order"
+# Go back
+- tapOn: "Host Order" # back button in header has the screen title
+
+# Test: Navigate to Season Settings screen
+- tapOn:
+    id: "btn-season-settings"
+- assertVisible: "Change Treasurer"
+  timeout: 3000
+# Go back
+- back
+- assertVisible: "Season Feb 2026"

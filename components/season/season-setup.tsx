@@ -91,6 +91,7 @@ export function SeasonSetup({ season, members, users }: Props) {
         {isTreasurer && (
           <View className="mb-6">
             <Pressable
+              testID="btn-start-season"
               className={`items-center rounded-lg py-3.5 ${
                 canStart && !starting
                   ? 'bg-felt-600 active:bg-felt-700'
@@ -123,26 +124,30 @@ export function SeasonSetup({ season, members, users }: Props) {
         <View className="mb-6 gap-2">
           {needsDeposit && (
             <ActionButton
+              testID="btn-upload-deposit"
               label="Upload Deposit Proof"
-              onPress={() => router.push('/index/deposit-upload')}
+              onPress={() => router.push('/(tabs)/index/deposit-upload')}
             />
           )}
           {isTreasurer && (
             <ActionButton
+              testID="btn-review-deposits"
               label="Review Deposits"
-              onPress={() => router.push('/index/deposit-approvals')}
+              onPress={() => router.push('/(tabs)/index/deposit-approvals')}
               variant="gold"
             />
           )}
           {isAdmin && (
             <>
               <ActionButton
+                testID="btn-edit-host-order"
                 label="Edit Host Order"
-                onPress={() => router.push('/index/host-order')}
+                onPress={() => router.push('/(tabs)/index/host-order')}
               />
               <ActionButton
+                testID="btn-season-settings"
                 label="Season Settings"
-                onPress={() => router.push('/index/season-settings')}
+                onPress={() => router.push('/(tabs)/index/season-settings')}
                 variant="outline"
               />
             </>
@@ -165,7 +170,7 @@ export function SeasonSetup({ season, members, users }: Props) {
                   right={<StatusBadge variant={member.approvalStatus} />}
                   onPress={
                     member.userId === currentUser?.id && needsDeposit
-                      ? () => router.push('/index/deposit-upload')
+                      ? () => router.push('/(tabs)/index/deposit-upload')
                       : undefined
                   }
                 />
@@ -179,7 +184,7 @@ export function SeasonSetup({ season, members, users }: Props) {
           <View className="mb-3 flex-row items-center justify-between">
             <Text className="text-lg font-bold text-sand-950 dark:text-sand-50">Host Order</Text>
             {isAdmin && (
-              <Pressable onPress={() => router.push('/index/host-order')}>
+              <Pressable onPress={() => router.push('/(tabs)/index/host-order')}>
                 <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
                   Edit
                 </Text>
@@ -215,10 +220,12 @@ function ActionButton({
   label,
   onPress,
   variant = 'default',
+  testID,
 }: {
   label: string;
   onPress: () => void;
   variant?: 'default' | 'gold' | 'outline';
+  testID?: string;
 }) {
   const bgClass =
     variant === 'gold'
@@ -233,7 +240,7 @@ function ActionButton({
       : 'text-white';
 
   return (
-    <Pressable className={`items-center rounded-lg py-3 ${bgClass}`} onPress={onPress}>
+    <Pressable testID={testID} className={`items-center rounded-lg py-3 ${bgClass}`} onPress={onPress}>
       <Text className={`text-base font-semibold ${textClass}`}>{label}</Text>
     </Pressable>
   );

@@ -1,0 +1,12 @@
+appId: host.exp.Exponent
+name: Login as Carlos (treasurer)
+---
+# Login flow for Carlos — treasurer role
+- tapOn:
+    id: "login-email-input"
+- inputText: "carlos@poker.local"
+- tapOn:
+    id: "login-send-button"
+# Wait for auto-verify + redirect
+- assertVisible: "Season"
+  timeout: 10000

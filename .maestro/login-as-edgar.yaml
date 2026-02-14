@@ -1,0 +1,12 @@
+appId: host.exp.Exponent
+name: Login as Edgar (admin)
+---
+# Login flow for Edgar — admin role
+- tapOn:
+    id: "login-email-input"
+- inputText: "edgar@poker.local"
+- tapOn:
+    id: "login-send-button"
+# Wait for auto-verify + redirect
+- assertVisible: "Season"
+  timeout: 10000

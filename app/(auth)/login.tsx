@@ -50,6 +50,7 @@ export default function LoginScreen() {
         </Text>
 
         <TextInput
+          testID="login-email-input"
           className="mb-4 w-full rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
           placeholder="you@poker.local"
           placeholderTextColor="#b5ac9e"
@@ -69,6 +70,7 @@ export default function LoginScreen() {
         )}
 
         <Pressable
+          testID="login-send-button"
           className="w-full items-center rounded-lg bg-gold-500 px-4 py-3 active:bg-gold-600"
           onPress={handleSend}
           disabled={loading}
