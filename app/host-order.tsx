@@ -126,6 +126,7 @@ export default function HostOrderScreen() {
   const [items, setItems] = useState<HostItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isAdmin = currentUser?.isAdmin === true;
