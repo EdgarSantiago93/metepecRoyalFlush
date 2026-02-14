@@ -30,11 +30,11 @@ export function DevStateToggle() {
         );
 
   return (
-    <View className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
+    <View className="mt-6 border-t border-sand-200 pt-6 dark:border-sand-700">
       <Text className="mb-1 text-sm font-bold text-orange-600 dark:text-orange-400">
         Dev Tools
       </Text>
-      <Text className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+      <Text className="mb-3 text-xs text-sand-500 dark:text-sand-400">
         Switch app state preset
       </Text>
 
@@ -46,7 +46,7 @@ export function DevStateToggle() {
             className={`mb-2 rounded-lg border px-4 py-2.5 ${
               isActive
                 ? 'border-orange-500 bg-orange-50 dark:border-orange-400 dark:bg-orange-900/30'
-                : 'border-gray-200 bg-white active:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:active:bg-gray-700'
+                : 'border-sand-200 bg-sand-50 active:bg-sand-100 dark:border-sand-700 dark:bg-sand-800 dark:active:bg-sand-700'
             }`}
             onPress={() => appState._devSetPreset(key)}
             disabled={appState.status === 'loading'}
@@ -55,7 +55,7 @@ export function DevStateToggle() {
               className={`text-sm font-medium ${
                 isActive
                   ? 'text-orange-700 dark:text-orange-300'
-                  : 'text-gray-700 dark:text-gray-300'
+                  : 'text-sand-700 dark:text-sand-300'
               }`}
             >
               {label}

@@ -31,9 +31,9 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
-      <View className="border-b border-gray-200 px-6 pb-4 pt-16 dark:border-gray-700">
-        <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+    <View className="flex-1 bg-sand-50 dark:bg-sand-900">
+      <View className="border-b border-sand-200 px-6 pb-4 pt-16 dark:border-sand-700">
+        <Text className="text-2xl font-bold text-sand-950 dark:text-sand-50">
           Create Season
         </Text>
       </View>
@@ -41,13 +41,13 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
       <ScrollView className="flex-1 px-6" contentContainerClassName="py-6">
         {/* Season Name */}
         <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
             Season Name (optional)
           </Text>
           <TextInput
-            className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-base text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
             placeholder="e.g. Season Feb 2026"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#b5ac9e"
             value={seasonName}
             onChangeText={setSeasonName}
             editable={!submitting}
@@ -56,10 +56,10 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
 
         {/* Treasurer Picker */}
         <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
             Treasurer (required)
           </Text>
-          <Text className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+          <Text className="mb-3 text-sm text-sand-500 dark:text-sand-400">
             Select who will manage deposits and session approvals.
           </Text>
 
@@ -70,8 +70,8 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
                 key={user.id}
                 className={`mb-2 flex-row items-center rounded-lg border px-4 py-3 ${
                   isSelected
-                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/30'
-                    : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
+                    ? 'border-felt-600 bg-felt-50 dark:border-felt-400 dark:bg-felt-900/30'
+                    : 'border-sand-200 bg-sand-50 dark:border-sand-700 dark:bg-sand-800'
                 }`}
                 onPress={() => setSelectedTreasurer(user.id)}
                 disabled={submitting}
@@ -79,13 +79,13 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
                 <View
                   className={`mr-3 h-10 w-10 items-center justify-center rounded-full ${
                     isSelected
-                      ? 'bg-blue-600'
-                      : 'bg-gray-200 dark:bg-gray-600'
+                      ? 'bg-felt-600'
+                      : 'bg-sand-200 dark:bg-sand-600'
                   }`}
                 >
                   <Text
                     className={`text-lg font-bold ${
-                      isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                      isSelected ? 'text-white' : 'text-sand-600 dark:text-sand-300'
                     }`}
                   >
                     {user.displayName.charAt(0)}
@@ -95,21 +95,21 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
                   <Text
                     className={`text-base font-medium ${
                       isSelected
-                        ? 'text-blue-700 dark:text-blue-300'
-                        : 'text-gray-900 dark:text-white'
+                        ? 'text-felt-700 dark:text-felt-300'
+                        : 'text-sand-950 dark:text-sand-50'
                     }`}
                   >
                     {user.displayName}
                   </Text>
                   {user.isAdmin && (
-                    <Text className="text-xs text-amber-600 dark:text-amber-400">Admin</Text>
+                    <Text className="text-xs text-gold-600 dark:text-gold-400">Admin</Text>
                   )}
                 </View>
                 <View
                   className={`h-5 w-5 items-center justify-center rounded-full border-2 ${
                     isSelected
-                      ? 'border-blue-600 bg-blue-600'
-                      : 'border-gray-300 dark:border-gray-500'
+                      ? 'border-felt-600 bg-felt-600'
+                      : 'border-sand-300 dark:border-sand-500'
                   }`}
                 >
                   {isSelected && (
@@ -123,21 +123,21 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
       </ScrollView>
 
       {/* Bottom Actions */}
-      <View className="flex-row gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+      <View className="flex-row gap-3 border-t border-sand-200 px-6 py-4 dark:border-sand-700">
         <Pressable
-          className="flex-1 items-center rounded-lg border border-gray-300 py-3 active:bg-gray-100 dark:border-gray-600 dark:active:bg-gray-800"
+          className="flex-1 items-center rounded-lg border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
           onPress={onCancel}
           disabled={submitting}
         >
-          <Text className="text-base font-semibold text-gray-700 dark:text-gray-300">
+          <Text className="text-base font-semibold text-sand-700 dark:text-sand-300">
             Cancel
           </Text>
         </Pressable>
         <Pressable
           className={`flex-1 items-center rounded-lg py-3 ${
             selectedTreasurer && !submitting
-              ? 'bg-blue-600 active:bg-blue-700'
-              : 'bg-gray-300 dark:bg-gray-700'
+              ? 'bg-gold-500 active:bg-gold-600'
+              : 'bg-sand-300 dark:bg-sand-700'
           }`}
           onPress={handleSubmit}
           disabled={!selectedTreasurer || submitting}
@@ -147,7 +147,7 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
           ) : (
             <Text
               className={`text-base font-semibold ${
-                selectedTreasurer ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                selectedTreasurer ? 'text-white' : 'text-sand-500 dark:text-sand-400'
               }`}
             >
               Create

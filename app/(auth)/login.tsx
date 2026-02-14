@@ -39,20 +39,20 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white dark:bg-gray-900"
+      className="flex-1 bg-sand-50 dark:bg-sand-900"
     >
       <View className="flex-1 items-center justify-center px-8">
-        <Text className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+        <Text className="mb-2 text-3xl font-bold text-sand-950 dark:text-sand-50">
           Metepec Royal Flush
         </Text>
-        <Text className="mb-8 text-base text-gray-500 dark:text-gray-400">
+        <Text className="mb-8 text-base text-sand-500 dark:text-sand-400">
           Sign in with your poker email
         </Text>
 
         <TextInput
-          className="mb-4 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-base text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          className="mb-4 w-full rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
           placeholder="you@poker.local"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#b5ac9e"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -69,7 +69,7 @@ export default function LoginScreen() {
         )}
 
         <Pressable
-          className="w-full items-center rounded-lg bg-blue-600 px-4 py-3 active:bg-blue-700"
+          className="w-full items-center rounded-lg bg-gold-500 px-4 py-3 active:bg-gold-600"
           onPress={handleSend}
           disabled={loading}
         >
