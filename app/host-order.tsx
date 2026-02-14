@@ -3,16 +3,12 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  GestureHandlerRootView,
-  Gesture,
-  GestureDetector,
-  ScrollView,
-} from 'react-native-gesture-handler';
+import { GestureHandlerRootView, Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -33,74 +29,47 @@ type HostItem = {
 
 const ROW_HEIGHT = 56;
 const ROW_GAP = 8;
-const TOTAL_ROW_HEIGHT = ROW_HEIGHT + ROW_GAP;
+const TOTAL_HEIGHT = ROW_HEIGHT + ROW_GAP;
 
 function DraggableRow({
   item,
   index,
   itemCount,
-  onDragStart,
-  onDragEnd,
   onReorder,
 }: {
   item: HostItem;
   index: number;
   itemCount: number;
-  onDragStart: () => void;
-  onDragEnd: () => void;
   onReorder: (from: number, to: number) => void;
 }) {
   const isActive = useSharedValue(false);
   const translateY = useSharedValue(0);
-
-  // Track the "live" index during a drag. We store the starting index when
-  // the gesture begins and update it every time the parent re-orders items.
-  const startIndexRef = useRef(index);
-  const liveIndexRef = useRef(index);
-
-  // Keep liveIndexRef in sync with the prop (the parent re-orders items,
-  // which changes the index prop for each row).
-  liveIndexRef.current = index;
+  const currentIndex = useRef(index);
+  currentIndex.current = index;
 
   const hapticGrab = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   const hapticMove = () => Haptics.selectionAsync();
   const hapticDrop = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-  const doReorder = (from: number, to: number) => {
-    onReorder(from, to);
-  };
-
   const gesture = Gesture.Pan()
     .activateAfterLongPress(200)
     .onStart(() => {
       isActive.value = true;
-      startIndexRef.current = liveIndexRef.current;
       runOnJS(hapticGrab)();
-      runOnJS(onDragStart)();
     })
     .onUpdate((e) => {
       translateY.value = e.translationY;
-
-      // Compute the target index based on how far we've dragged from the
-      // start position. We use startIndexRef (captured at gesture start)
-      // combined with the raw translationY so the calculation is always
-      // relative to where the drag began.
-      const rawOffset = Math.round(e.translationY / TOTAL_ROW_HEIGHT);
-      const targetIndex = Math.min(
-        Math.max(startIndexRef.current + rawOffset, 0),
-        itemCount - 1,
-      );
-
-      if (targetIndex !== liveIndexRef.current) {
+      const offset = Math.round(e.translationY / TOTAL_HEIGHT);
+      const clampedTo = Math.min(Math.max(currentIndex.current + offset, 0), itemCount - 1);
+      if (clampedTo !== currentIndex.current) {
         runOnJS(hapticMove)();
-        runOnJS(doReorder)(liveIndexRef.current, targetIndex);
+        runOnJS(onReorder)(currentIndex.current, clampedTo);
       }
     })
     .onFinalize(() => {
       translateY.value = withSpring(0, { damping: 20, stiffness: 200 });
       isActive.value = false;
       runOnJS(hapticDrop)();
-      runOnJS(onDragEnd)();
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -122,6 +91,7 @@ function DraggableRow({
           {
             height: ROW_HEIGHT,
             marginBottom: ROW_GAP,
+            marginHorizontal: 24,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
           },
@@ -142,7 +112,7 @@ function DraggableRow({
         <Text className="flex-1 text-base font-medium text-sand-950 dark:text-sand-50">
           {item.name}
         </Text>
-        <Text className="text-lg text-sand-400 dark:text-sand-500">☰</Text>
+        <Text className="text-lg text-sand-400">☰</Text>
       </Animated.View>
     </GestureDetector>
   );
@@ -180,14 +150,6 @@ export default function HostOrderScreen() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [season]);
-
-  const handleDragStart = useCallback(() => {
-    setScrollEnabled(false);
-  }, []);
-
-  const handleDragEnd = useCallback(() => {
-    setScrollEnabled(true);
-  }, []);
 
   const handleReorder = useCallback((from: number, to: number) => {
     setItems((prev) => {
@@ -299,22 +261,14 @@ export default function HostOrderScreen() {
           Long press and drag to reorder hosts
         </Text>
 
-        {/* Draggable host list — ScrollView is from react-native-gesture-handler
-            so it cooperates with the Pan gesture on each row. We also disable
-            scrolling while a drag is active to prevent conflicts. */}
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="px-6 pb-8"
-          scrollEnabled={scrollEnabled}
-        >
-          {items.map((item, idx) => (
+        {/* Draggable host list */}
+        <ScrollView className="flex-1" contentContainerClassName="pb-8">
+          {items.map((item, index) => (
             <DraggableRow
               key={item.id}
               item={item}
-              index={idx}
+              index={index}
               itemCount={items.length}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
               onReorder={handleReorder}
             />
           ))}
