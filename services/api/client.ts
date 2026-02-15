@@ -4,6 +4,21 @@ import type { ApiClient } from './types';
 
 const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
+// ---------------------------------------------------------------------------
+// Mock authenticated user tracking
+// ---------------------------------------------------------------------------
+
+let _mockCurrentUserId: string | null = null;
+
+export function setMockCurrentUserId(id: string | null): void {
+  _mockCurrentUserId = id;
+}
+
+function getCurrentUserId(): string {
+  if (!_mockCurrentUserId) throw new Error('No authenticated user');
+  return _mockCurrentUserId;
+}
+
 /**
  * Parse a mock token to extract the email.
  * Format: `mock-session-<email>-<timestamp>`
@@ -94,7 +109,7 @@ export const api: ApiClient = {
       id: seasonId,
       name: req.name ?? null,
       status: 'setup' as const,
-      createdByUserId: SEED_USERS[0].id, // current user — mock assumes admin
+      createdByUserId: getCurrentUserId(),
       treasurerUserId: req.treasurerUserId,
       createdAt: now,
       startedAt: null,
@@ -305,7 +320,7 @@ export const api: ApiClient = {
       scheduledFor: req.scheduledFor ?? null,
       location: req.location ?? null,
       scheduledAt: now,
-      scheduledByUserId: SEED_USERS[0].id, // mock assumes current user
+      scheduledByUserId: getCurrentUserId(),
       startedAt: null,
       startedByUserId: null,
       endedAt: null,
@@ -354,7 +369,7 @@ export const api: ApiClient = {
 
     mockStore.session.state = 'dealing';
     mockStore.session.startedAt = now;
-    mockStore.session.startedByUserId = SEED_USERS[0].id; // mock assumes current user
+    mockStore.session.startedByUserId = getCurrentUserId();
 
     return { session: mockStore.session };
   },
@@ -374,7 +389,7 @@ export const api: ApiClient = {
   async checkInToSession(sessionId: string) {
     await delay(400);
     const now = new Date().toISOString();
-    const currentUserId = SEED_USERS[0].id; // mock assumes current user (Edgar)
+    const currentUserId = getCurrentUserId();
 
     if (!mockStore.session || mockStore.session.id !== sessionId) {
       throw new Error('Session not found');
@@ -461,7 +476,7 @@ export const api: ApiClient = {
     if (!participant) throw new Error('Participant not found');
 
     participant.removedAt = now;
-    participant.removedByUserId = SEED_USERS[0].id; // mock assumes current user
+    participant.removedByUserId = getCurrentUserId();
     // TODO: WebSocket broadcast — participant removed
     return { participant };
   },
@@ -518,7 +533,7 @@ export const api: ApiClient = {
   async requestRebuy(req) {
     await delay(400);
     const now = new Date().toISOString();
-    const currentUserId = SEED_USERS[0].id; // mock assumes current user (Edgar)
+    const currentUserId = getCurrentUserId();
 
     if (!mockStore.session || mockStore.session.id !== req.sessionId) {
       throw new Error('Session not found');
@@ -572,7 +587,7 @@ export const api: ApiClient = {
 
     injection.status = req.action === 'approve' ? 'approved' : 'rejected';
     injection.reviewedAt = now;
-    injection.reviewedByUserId = SEED_USERS[0].id; // mock assumes current user
+    injection.reviewedByUserId = getCurrentUserId();
     injection.reviewNote = req.reviewNote ?? null;
 
     // TODO: WebSocket broadcast — rebuy reviewed
@@ -592,7 +607,7 @@ export const api: ApiClient = {
 
     mockStore.session.state = 'closing';
     mockStore.session.endedAt = now;
-    mockStore.session.endedByUserId = SEED_USERS[0].id; // mock assumes current user
+    mockStore.session.endedByUserId = getCurrentUserId();
     // TODO: WebSocket broadcast — session ended
 
     return { session: mockStore.session };
@@ -635,7 +650,7 @@ export const api: ApiClient = {
       endingStackCents: req.endingStackCents,
       photoUrl: req.photoUrl,
       submittedAt: now,
-      submittedByUserId: req.submittedByUserId ?? SEED_USERS[0].id,
+      submittedByUserId: req.submittedByUserId ?? getCurrentUserId(),
       note: req.note ?? null,
       status: 'pending',
       reviewedAt: null,
@@ -667,7 +682,7 @@ export const api: ApiClient = {
 
     submission.status = req.action === 'validate' ? 'validated' : 'rejected';
     submission.reviewedAt = now;
-    submission.reviewedByUserId = SEED_USERS[0].id; // mock assumes current user
+    submission.reviewedByUserId = getCurrentUserId();
     submission.reviewNote = req.reviewNote ?? null;
 
     // TODO: WebSocket broadcast — ending submission reviewed
@@ -731,7 +746,7 @@ export const api: ApiClient = {
         id: makeId('01FN'),
         sessionId: req.sessionId,
         note: req.overrideNote,
-        createdByUserId: SEED_USERS[0].id, // mock assumes current user
+        createdByUserId: getCurrentUserId(),
         createdAt: now,
       };
       mockStore.sessionFinalizeNotes.push(finalizeNote);
@@ -740,7 +755,7 @@ export const api: ApiClient = {
     // Finalize the session
     mockStore.session.state = 'finalized';
     mockStore.session.finalizedAt = now;
-    mockStore.session.finalizedByUserId = SEED_USERS[0].id; // mock assumes current user
+    mockStore.session.finalizedByUserId = getCurrentUserId();
 
     // Update season balances for member participants
     for (const p of activeParticipants) {
