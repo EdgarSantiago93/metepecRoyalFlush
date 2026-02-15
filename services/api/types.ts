@@ -1,4 +1,4 @@
-import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
 
 export type SendMagicLinkResponse = {
@@ -203,6 +203,56 @@ export type EndSessionResponse = {
   session: Session;
 };
 
+// ---------------------------------------------------------------------------
+// Ending submissions (closing phase)
+// ---------------------------------------------------------------------------
+
+export type GetEndingSubmissionsResponse = {
+  submissions: EndingSubmission[];
+};
+
+export type SubmitEndingStackRequest = {
+  sessionId: string;
+  participantId: string;
+  endingStackCents: number;
+  photoUrl: string;
+  note?: string;
+  submittedByUserId?: string;
+};
+
+export type SubmitEndingStackResponse = {
+  submission: EndingSubmission;
+};
+
+export type ReviewEndingSubmissionRequest = {
+  submissionId: string;
+  action: 'validate' | 'reject';
+  reviewNote?: string;
+};
+
+export type ReviewEndingSubmissionResponse = {
+  submission: EndingSubmission;
+};
+
+// ---------------------------------------------------------------------------
+// Session finalization (Phase 6)
+// ---------------------------------------------------------------------------
+
+export type FinalizeSessionRequest = {
+  sessionId: string;
+  overrideNote?: string; // required when sum(PnL) != 0
+};
+
+export type FinalizeSessionResponse = {
+  session: Session;
+  members: SeasonMember[];
+  finalizeNote: SessionFinalizeNote | null;
+};
+
+export type GetSessionFinalizeNoteResponse = {
+  finalizeNote: SessionFinalizeNote | null;
+};
+
 /** Mock-swappable API client interface. */
 export type ApiClient = {
   sendMagicLink: (email: string) => Promise<SendMagicLinkResponse>;
@@ -232,4 +282,9 @@ export type ApiClient = {
   requestRebuy: (req: RequestRebuyRequest) => Promise<RequestRebuyResponse>;
   reviewInjection: (req: ReviewInjectionRequest) => Promise<ReviewInjectionResponse>;
   endSession: (sessionId: string) => Promise<EndSessionResponse>;
+  getEndingSubmissions: (sessionId: string) => Promise<GetEndingSubmissionsResponse>;
+  submitEndingStack: (req: SubmitEndingStackRequest) => Promise<SubmitEndingStackResponse>;
+  reviewEndingSubmission: (req: ReviewEndingSubmissionRequest) => Promise<ReviewEndingSubmissionResponse>;
+  finalizeSession: (req: FinalizeSessionRequest) => Promise<FinalizeSessionResponse>;
+  getSessionFinalizeNote: (sessionId: string) => Promise<GetSessionFinalizeNoteResponse>;
 };

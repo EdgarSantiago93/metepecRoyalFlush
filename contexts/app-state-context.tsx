@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import type { Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
 import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
 import { api } from '@/services/api/client';
@@ -14,7 +14,7 @@ export type AppState =
   | { status: 'error'; message: string }
   | { status: 'no_season'; users: User[] }
   | { status: 'season_setup'; season: Season; members: SeasonMember[]; users: User[] }
-  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; users: User[] }
+  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; endingSubmissions: EndingSubmission[]; finalizeNote: SessionFinalizeNote | null; users: User[] }
   | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[] };
 
 export type AppStateContextValue = AppState & {
@@ -34,6 +34,10 @@ export type AppStateContextValue = AppState & {
   reviewInjection: (injectionId: string, action: 'approve' | 'reject', note?: string) => Promise<void>;
   endSession: () => Promise<void>;
   refreshInjections: () => Promise<void>;
+  submitEndingStack: (participantId: string, endingStackCents: number, photoUrl: string, note?: string) => Promise<void>;
+  reviewEndingSubmission: (submissionId: string, action: 'validate' | 'reject', note?: string) => Promise<void>;
+  refreshEndingSubmissions: () => Promise<void>;
+  finalizeSession: (overrideNote?: string) => Promise<void>;
   refresh: () => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
@@ -65,18 +69,28 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       } else if (season.status === 'setup') {
         setState({ status: 'season_setup', season, members, users });
       } else if (season.status === 'active') {
-        // Fetch participants when session is in dealing or in_progress state
+        // Fetch participants when session is in dealing, in_progress, closing, or finalized state
         let participants: SessionParticipant[] = [];
         let injections: SessionInjection[] = [];
-        if (session && (session.state === 'dealing' || session.state === 'in_progress')) {
+        let endingSubmissions: EndingSubmission[] = [];
+        let finalizeNote: SessionFinalizeNote | null = null;
+        if (session && (session.state === 'dealing' || session.state === 'in_progress' || session.state === 'closing' || session.state === 'finalized')) {
           const partRes = await api.getSessionParticipants(session.id);
           participants = partRes.participants;
         }
-        if (session && session.state === 'in_progress') {
+        if (session && (session.state === 'in_progress' || session.state === 'closing' || session.state === 'finalized')) {
           const injRes = await api.getSessionInjections(session.id);
           injections = injRes.injections;
         }
-        setState({ status: 'season_active', season, members, session, participants, injections, users });
+        if (session && (session.state === 'closing' || session.state === 'finalized')) {
+          const subRes = await api.getEndingSubmissions(session.id);
+          endingSubmissions = subRes.submissions;
+        }
+        if (session && session.state === 'finalized') {
+          const noteRes = await api.getSessionFinalizeNote(session.id);
+          finalizeNote = noteRes.finalizeNote;
+        }
+        setState({ status: 'season_active', season, members, session, participants, injections, endingSubmissions, finalizeNote, users });
       } else {
         setState({ status: 'season_ended', season, members, users });
       }
@@ -259,6 +273,68 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     await load(); // full reload — session state changes
   }, [state, load]);
 
+  // ---------------------------------------------------------------------------
+  // Ending submission actions — refresh submissions only (no full reload)
+  // ---------------------------------------------------------------------------
+
+  const refreshEndingSubmissions = useCallback(async () => {
+    // TODO: WebSocket — replace polling with real-time updates
+    if (state.status !== 'season_active' || !state.session) return;
+    const { submissions } = await api.getEndingSubmissions(state.session.id);
+    setState((prev) => {
+      if (prev.status !== 'season_active') return prev;
+      return { ...prev, endingSubmissions: submissions };
+    });
+  }, [state]);
+
+  const submitEndingStack = useCallback(
+    async (participantId: string, endingStackCents: number, photoUrl: string, note?: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.submitEndingStack({
+        sessionId: state.session.id,
+        participantId,
+        endingStackCents,
+        photoUrl,
+        note,
+      });
+      const { submissions } = await api.getEndingSubmissions(state.session.id);
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return { ...prev, endingSubmissions: submissions };
+      });
+    },
+    [state],
+  );
+
+  const reviewEndingSubmission = useCallback(
+    async (submissionId: string, action: 'validate' | 'reject', note?: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.reviewEndingSubmission({ submissionId, action, reviewNote: note });
+      const { submissions } = await api.getEndingSubmissions(state.session.id);
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return { ...prev, endingSubmissions: submissions };
+      });
+    },
+    [state],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Finalization actions
+  // ---------------------------------------------------------------------------
+
+  const finalizeSession = useCallback(
+    async (overrideNote?: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.finalizeSession({
+        sessionId: state.session.id,
+        overrideNote,
+      });
+      await load(); // full reload — session state changes, members updated
+    },
+    [state, load],
+  );
+
   const _devSetPreset = useCallback(
     async (key: PresetKey) => {
       applyPreset(key);
@@ -286,10 +362,14 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       reviewInjection,
       endSession,
       refreshInjections,
+      submitEndingStack,
+      reviewEndingSubmission,
+      refreshEndingSubmissions,
+      finalizeSession,
       refresh: load,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, load, _devSetPreset],
+    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
