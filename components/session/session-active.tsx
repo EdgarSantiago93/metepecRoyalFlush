@@ -3,8 +3,9 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'rea
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
-import type { Season, SeasonMember, Session, SessionParticipant, User } from '@/types';
+import type { Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
 import { SessionDealing } from './session-dealing';
+import { SessionInProgress } from './session-in-progress';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 
 type Props = {
@@ -12,10 +13,11 @@ type Props = {
   season: Season;
   members: SeasonMember[];
   participants: SessionParticipant[];
+  injections: SessionInjection[];
   users: User[];
 };
 
-export function SessionActive({ session, season, members, participants, users }: Props) {
+export function SessionActive({ session, season, members, participants, injections, users }: Props) {
   if (session.state === 'scheduled') {
     return <SessionScheduled session={session} season={season} members={members} users={users} />;
   }
@@ -32,15 +34,28 @@ export function SessionActive({ session, season, members, participants, users }:
     );
   }
 
-  // in_progress | closing | finalized — placeholder for future phases
-  return <SessionInProgressPlaceholder session={session} users={users} />;
+  if (session.state === 'in_progress') {
+    return (
+      <SessionInProgress
+        session={session}
+        season={season}
+        members={members}
+        participants={participants}
+        injections={injections}
+        users={users}
+      />
+    );
+  }
+
+  // closing | finalized — placeholder for future phases
+  return <SessionClosingPlaceholder session={session} users={users} />;
 }
 
 // ---------------------------------------------------------------------------
 // Scheduled sub-component
 // ---------------------------------------------------------------------------
 
-function SessionScheduled({ session, season, users }: Omit<Props, 'participants'>) {
+function SessionScheduled({ session, season, users }: Omit<Props, 'participants' | 'injections'>) {
   const router = useRouter();
   const auth = useAuth();
   const appState = useAppState();
@@ -142,7 +157,7 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
 // Placeholder for non-scheduled states (future phases)
 // ---------------------------------------------------------------------------
 
-function SessionInProgressPlaceholder({ session, users }: { session: Session; users: User[] }) {
+function SessionClosingPlaceholder({ session, users }: { session: Session; users: User[] }) {
   const host = users.find((u) => u.id === session.hostUserId);
 
   return (
@@ -164,7 +179,7 @@ function SessionInProgressPlaceholder({ session, users }: { session: Session; us
       </View>
 
       <Text className="mt-6 text-center text-sm text-sand-500 dark:text-sand-400">
-        Session management features coming soon.
+        Closing and finalization features coming soon.
       </Text>
     </View>
   );

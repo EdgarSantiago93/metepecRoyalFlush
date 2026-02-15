@@ -127,6 +127,7 @@ export const api: ApiClient = {
     mockStore.depositSubmissions = [];
     mockStore.hostOrder = hostOrder;
     mockStore.sessionParticipants = [];
+    mockStore.sessionInjections = [];
 
     return { season, members };
   },
@@ -497,6 +498,101 @@ export const api: ApiClient = {
     mockStore.session.state = 'in_progress';
     mockStore.session.startedAt = mockStore.session.startedAt ?? now;
     // TODO: WebSocket broadcast — session moved to in_progress
+
+    return { session: mockStore.session };
+  },
+
+  // ---------------------------------------------------------------------------
+  // Session injections (rebuys — in_progress phase)
+  // ---------------------------------------------------------------------------
+
+  async getSessionInjections(sessionId: string) {
+    await delay(200);
+    const injections = mockStore.sessionInjections.filter(
+      (inj) => inj.sessionId === sessionId,
+    );
+    return { injections };
+  },
+
+  async requestRebuy(req) {
+    await delay(400);
+    const now = new Date().toISOString();
+    const currentUserId = SEED_USERS[0].id; // mock assumes current user (Edgar)
+
+    if (!mockStore.session || mockStore.session.id !== req.sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'in_progress') {
+      throw new Error('Rebuys can only be requested while the session is in progress');
+    }
+
+    // Find participant record for current user
+    const participant = mockStore.sessionParticipants.find(
+      (p) => p.sessionId === req.sessionId && p.userId === currentUserId && p.removedAt === null,
+    );
+    if (!participant) {
+      throw new Error('You must be a session participant to request a rebuy');
+    }
+
+    const amountCents = req.type === 'rebuy_500' ? 50000 : req.type === 'half_250' ? 25000 : 50000;
+
+    const injection: import('@/types').SessionInjection = {
+      id: makeId('01SI'),
+      sessionId: req.sessionId,
+      participantId: participant.id,
+      type: req.type,
+      amountCents,
+      requestedByUserId: currentUserId,
+      requestedAt: now,
+      proofPhotoUrl: req.proofPhotoUrl ?? null,
+      status: 'pending',
+      reviewedAt: null,
+      reviewedByUserId: null,
+      reviewNote: null,
+      createdAt: now,
+    };
+
+    mockStore.sessionInjections.push(injection);
+    // TODO: WebSocket broadcast — rebuy requested
+    return { injection };
+  },
+
+  async reviewInjection(req) {
+    await delay(400);
+    const now = new Date().toISOString();
+
+    const injection = mockStore.sessionInjections.find((inj) => inj.id === req.injectionId);
+    if (!injection) throw new Error('Injection not found');
+    if (injection.status !== 'pending') throw new Error('Injection already reviewed');
+
+    if (!mockStore.session || mockStore.session.state !== 'in_progress') {
+      throw new Error('Rebuys can only be reviewed while the session is in progress');
+    }
+
+    injection.status = req.action === 'approve' ? 'approved' : 'rejected';
+    injection.reviewedAt = now;
+    injection.reviewedByUserId = SEED_USERS[0].id; // mock assumes current user
+    injection.reviewNote = req.reviewNote ?? null;
+
+    // TODO: WebSocket broadcast — rebuy reviewed
+    return { injection };
+  },
+
+  async endSession(sessionId: string) {
+    await delay(500);
+    const now = new Date().toISOString();
+
+    if (!mockStore.session || mockStore.session.id !== sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'in_progress') {
+      throw new Error('Session must be in progress to end');
+    }
+
+    mockStore.session.state = 'closing';
+    mockStore.session.endedAt = now;
+    mockStore.session.endedByUserId = SEED_USERS[0].id; // mock assumes current user
+    // TODO: WebSocket broadcast — session ended
 
     return { session: mockStore.session };
   },

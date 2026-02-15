@@ -1,3 +1,4 @@
+import type React from 'react';
 import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
+  children?: React.ReactNode;
 };
 
 export function ConfirmationModal({
@@ -22,6 +24,7 @@ export function ConfirmationModal({
   onConfirm,
   onCancel,
   loading = false,
+  children,
 }: Props) {
   const confirmBg =
     variant === 'destructive'
@@ -40,9 +43,11 @@ export function ConfirmationModal({
           <Text className="mb-2 text-lg font-bold text-sand-950 dark:text-sand-50">
             {title}
           </Text>
-          <Text className="mb-6 text-sm leading-5 text-sand-600 dark:text-sand-300">
+          <Text className="mb-4 text-sm leading-5 text-sand-600 dark:text-sand-300">
             {message}
           </Text>
+
+          {children && <View className="mb-4">{children}</View>}
 
           <View className="flex-row gap-3">
             <Pressable
