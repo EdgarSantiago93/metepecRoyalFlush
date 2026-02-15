@@ -109,13 +109,13 @@ Starting a session and managing check-in / starting stack confirmation.
 
 Rebuy requests and approvals during active play.
 
-- [ ] **In Progress session view** — Participants list with running approved-injection totals per player. Rebuy feed (timeline). Treasurer/Admin: "End Session" action.
+- [x] **In Progress session view** — Participants list with running approved-injection totals per player. Rebuy feed (approved only). Treasurer/Admin: "End Session" action (transitions to `closing`).
   - Screens: 3.1 (in_progress state)
   - Tables: `session_participants`, `session_injections`
-- [ ] **Request Rebuy** — Player action: +500 / +250 buttons, optional proof photo, submit. Creates pending injection record.
+- [x] **Request Rebuy** — Player action: +500 / +250 buttons, optional proof photo via camera/library (expo-image-picker), submit. Creates pending injection record. Only allowed while session is `in_progress`.
   - Screens: 3.6
   - Tables: `session_injections`
-- [ ] **Rebuy Approvals** — Treasurer view: pending requests list (player, amount, timestamp, photo). Approve / reject (reject requires note). Server-enforced idempotent approvals.
+- [x] **Rebuy Approvals** — Treasurer view: pending requests list (player, amount, timestamp, photo). Approve / reject (reject requires note). Only allowed while session is `in_progress`.
   - Screens: 3.7
   - Tables: `session_injections`
 

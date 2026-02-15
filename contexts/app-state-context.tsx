@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import type { Season, SeasonMember, Session, SessionParticipant, User } from '@/types';
+import type { Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import type { InjectionType } from '@/types/models/session';
 import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
 import { api } from '@/services/api/client';
 import { applyPreset, type PresetKey } from '@/data/seed-seasons';
@@ -13,7 +14,7 @@ export type AppState =
   | { status: 'error'; message: string }
   | { status: 'no_season'; users: User[] }
   | { status: 'season_setup'; season: Season; members: SeasonMember[]; users: User[] }
-  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; users: User[] }
+  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; users: User[] }
   | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[] };
 
 export type AppStateContextValue = AppState & {
@@ -29,6 +30,10 @@ export type AppStateContextValue = AppState & {
   removeParticipant: (participantId: string) => Promise<void>;
   moveToInProgress: () => Promise<void>;
   refreshParticipants: () => Promise<void>;
+  requestRebuy: (type: InjectionType, proofPhotoUrl?: string) => Promise<void>;
+  reviewInjection: (injectionId: string, action: 'approve' | 'reject', note?: string) => Promise<void>;
+  endSession: () => Promise<void>;
+  refreshInjections: () => Promise<void>;
   refresh: () => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
@@ -62,11 +67,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       } else if (season.status === 'active') {
         // Fetch participants when session is in dealing or in_progress state
         let participants: SessionParticipant[] = [];
+        let injections: SessionInjection[] = [];
         if (session && (session.state === 'dealing' || session.state === 'in_progress')) {
           const partRes = await api.getSessionParticipants(session.id);
           participants = partRes.participants;
         }
-        setState({ status: 'season_active', season, members, session, participants, users });
+        if (session && session.state === 'in_progress') {
+          const injRes = await api.getSessionInjections(session.id);
+          injections = injRes.injections;
+        }
+        setState({ status: 'season_active', season, members, session, participants, injections, users });
       } else {
         setState({ status: 'season_ended', season, members, users });
       }
@@ -203,6 +213,52 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     await load(); // full reload — session state changes
   }, [state, load]);
 
+  // ---------------------------------------------------------------------------
+  // Injection actions — refresh injections only (no full reload)
+  // ---------------------------------------------------------------------------
+
+  const refreshInjections = useCallback(async () => {
+    // TODO: WebSocket — replace polling with real-time updates
+    if (state.status !== 'season_active' || !state.session) return;
+    const { injections } = await api.getSessionInjections(state.session.id);
+    setState((prev) => {
+      if (prev.status !== 'season_active') return prev;
+      return { ...prev, injections };
+    });
+  }, [state]);
+
+  const requestRebuy = useCallback(
+    async (type: InjectionType, proofPhotoUrl?: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.requestRebuy({ sessionId: state.session.id, type, proofPhotoUrl });
+      const { injections } = await api.getSessionInjections(state.session.id);
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return { ...prev, injections };
+      });
+    },
+    [state],
+  );
+
+  const reviewInjection = useCallback(
+    async (injectionId: string, action: 'approve' | 'reject', note?: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.reviewInjection({ injectionId, action, reviewNote: note });
+      const { injections } = await api.getSessionInjections(state.session.id);
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return { ...prev, injections };
+      });
+    },
+    [state],
+  );
+
+  const endSession = useCallback(async () => {
+    if (state.status !== 'season_active' || !state.session) return;
+    await api.endSession(state.session.id);
+    await load(); // full reload — session state changes
+  }, [state, load]);
+
   const _devSetPreset = useCallback(
     async (key: PresetKey) => {
       applyPreset(key);
@@ -226,10 +282,14 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       removeParticipant,
       moveToInProgress,
       refreshParticipants,
+      requestRebuy,
+      reviewInjection,
+      endSession,
+      refreshInjections,
       refresh: load,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, load, _devSetPreset],
+    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

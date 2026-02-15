@@ -1,4 +1,5 @@
-import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionParticipant, User } from '@/types';
+import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import type { InjectionType } from '@/types/models/session';
 
 export type SendMagicLinkResponse = {
   success: boolean;
@@ -170,6 +171,38 @@ export type MoveToInProgressResponse = {
   session: Session;
 };
 
+// ---------------------------------------------------------------------------
+// Session injections (rebuys — in_progress phase)
+// ---------------------------------------------------------------------------
+
+export type GetSessionInjectionsResponse = {
+  injections: SessionInjection[];
+};
+
+export type RequestRebuyRequest = {
+  sessionId: string;
+  type: InjectionType;
+  proofPhotoUrl?: string;
+};
+
+export type RequestRebuyResponse = {
+  injection: SessionInjection;
+};
+
+export type ReviewInjectionRequest = {
+  injectionId: string;
+  action: 'approve' | 'reject';
+  reviewNote?: string;
+};
+
+export type ReviewInjectionResponse = {
+  injection: SessionInjection;
+};
+
+export type EndSessionResponse = {
+  session: Session;
+};
+
 /** Mock-swappable API client interface. */
 export type ApiClient = {
   sendMagicLink: (email: string) => Promise<SendMagicLinkResponse>;
@@ -195,4 +228,8 @@ export type ApiClient = {
   disputeStartingStack: (req: DisputeStartRequest) => Promise<DisputeStartResponse>;
   removeParticipant: (sessionId: string, participantId: string) => Promise<RemoveParticipantResponse>;
   moveSessionToInProgress: (sessionId: string) => Promise<MoveToInProgressResponse>;
+  getSessionInjections: (sessionId: string) => Promise<GetSessionInjectionsResponse>;
+  requestRebuy: (req: RequestRebuyRequest) => Promise<RequestRebuyResponse>;
+  reviewInjection: (req: ReviewInjectionRequest) => Promise<ReviewInjectionResponse>;
+  endSession: (sessionId: string) => Promise<EndSessionResponse>;
 };

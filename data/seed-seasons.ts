@@ -1,4 +1,4 @@
-import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionParticipant } from '@/types';
+import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionInjection, SessionParticipant } from '@/types';
 import { SEED_USERS } from './seed-users';
 
 // ---------------------------------------------------------------------------
@@ -12,6 +12,7 @@ export type MockStore = {
   depositSubmissions: SeasonDepositSubmission[];
   hostOrder: SeasonHostOrder[];
   sessionParticipants: SessionParticipant[];
+  sessionInjections: SessionInjection[];
 };
 
 export const mockStore: MockStore = {
@@ -21,6 +22,7 @@ export const mockStore: MockStore = {
   depositSubmissions: [],
   hostOrder: [],
   sessionParticipants: [],
+  sessionInjections: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -34,6 +36,7 @@ export type PresetKey =
   | 'season_active_no_session'
   | 'season_active_scheduled'
   | 'season_active_dealing'
+  | 'season_active_in_progress'
   | 'season_active_with_session'
   | 'season_ended';
 
@@ -71,6 +74,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     depositSubmissions: [],
     hostOrder: [],
     sessionParticipants: [],
+    sessionInjections: [],
   }),
 
   season_setup: () => {
@@ -91,6 +95,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
       sessionParticipants: [],
+      sessionInjections: [],
     };
   },
 
@@ -163,6 +168,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       depositSubmissions,
       hostOrder,
       sessionParticipants: [],
+      sessionInjections: [],
     };
   },
 
@@ -184,6 +190,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
       sessionParticipants: [],
+      sessionInjections: [],
     };
   },
 
@@ -220,6 +227,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
       sessionParticipants: [],
+      sessionInjections: [],
     };
   },
 
@@ -306,6 +314,176 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
       sessionParticipants: participants,
+      sessionInjections: [],
+    };
+  },
+
+  season_active_in_progress: () => {
+    const seasonId = '01SE0000000000000000000007';
+    const sessionId = '01SS0000000000000000000004';
+
+    const participants: SessionParticipant[] = [
+      // Edgar (admin/current user): checked in + confirmed
+      {
+        id: '01SP0000000000000000000010',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[0].id,
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Carlos (treasurer): checked in + confirmed
+      {
+        id: '01SP0000000000000000000011',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[1].id,
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Miguel (host): checked in + confirmed
+      {
+        id: '01SP0000000000000000000012',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[2].id,
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Andres: checked in + confirmed
+      {
+        id: '01SP0000000000000000000013',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[3].id,
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+    ];
+
+    const injections: SessionInjection[] = [
+      // Edgar: approved 500 rebuy
+      {
+        id: '01SI0000000000000000000001',
+        sessionId,
+        participantId: '01SP0000000000000000000010',
+        type: 'rebuy_500',
+        amountCents: 50000,
+        requestedByUserId: SEED_USERS[0].id,
+        requestedAt: '2026-02-13T13:00:00.000Z',
+        proofPhotoUrl: null,
+        status: 'approved',
+        reviewedAt: '2026-02-13T13:05:00.000Z',
+        reviewedByUserId: SEED_USERS[1].id, // Carlos approved
+        reviewNote: null,
+        createdAt: '2026-02-13T13:00:00.000Z',
+      },
+      // Miguel: pending 500 rebuy
+      {
+        id: '01SI0000000000000000000002',
+        sessionId,
+        participantId: '01SP0000000000000000000012',
+        type: 'rebuy_500',
+        amountCents: 50000,
+        requestedByUserId: SEED_USERS[2].id,
+        requestedAt: '2026-02-13T13:30:00.000Z',
+        proofPhotoUrl: 'https://placeholder.mock/rebuy-proof-1.jpg',
+        status: 'pending',
+        reviewedAt: null,
+        reviewedByUserId: null,
+        reviewNote: null,
+        createdAt: '2026-02-13T13:30:00.000Z',
+      },
+      // Andres: rejected 250 rebuy
+      {
+        id: '01SI0000000000000000000003',
+        sessionId,
+        participantId: '01SP0000000000000000000013',
+        type: 'half_250',
+        amountCents: 25000,
+        requestedByUserId: SEED_USERS[3].id,
+        requestedAt: '2026-02-13T13:15:00.000Z',
+        proofPhotoUrl: null,
+        status: 'rejected',
+        reviewedAt: '2026-02-13T13:20:00.000Z',
+        reviewedByUserId: SEED_USERS[1].id,
+        reviewNote: 'No proof photo attached',
+        createdAt: '2026-02-13T13:15:00.000Z',
+      },
+      // Carlos: pending 250 rebuy
+      {
+        id: '01SI0000000000000000000004',
+        sessionId,
+        participantId: '01SP0000000000000000000011',
+        type: 'half_250',
+        amountCents: 25000,
+        requestedByUserId: SEED_USERS[1].id,
+        requestedAt: '2026-02-13T14:00:00.000Z',
+        proofPhotoUrl: null,
+        status: 'pending',
+        reviewedAt: null,
+        reviewedByUserId: null,
+        reviewNote: null,
+        createdAt: '2026-02-13T14:00:00.000Z',
+      },
+    ];
+
+    return {
+      season: {
+        id: seasonId,
+        name: 'Season Feb 2026',
+        status: 'active' as const,
+        createdByUserId: SEED_USERS[0].id,
+        treasurerUserId: SEED_USERS[1].id, // Carlos
+        createdAt: NOW,
+        startedAt: NOW,
+        endedAt: null,
+      },
+      members: makeMembers(seasonId, true),
+      session: {
+        id: sessionId,
+        seasonId,
+        state: 'in_progress' as const,
+        hostUserId: SEED_USERS[2].id, // Miguel
+        scheduledFor: '2026-02-15T20:00:00.000Z',
+        location: "Miguel's place",
+        scheduledAt: NOW,
+        scheduledByUserId: SEED_USERS[1].id,
+        startedAt: NOW,
+        startedByUserId: SEED_USERS[1].id,
+        endedAt: null,
+        endedByUserId: null,
+        finalizedAt: null,
+        finalizedByUserId: null,
+      },
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: participants,
+      sessionInjections: injections,
     };
   },
 
@@ -342,6 +520,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
       sessionParticipants: [],
+      sessionInjections: [],
     };
   },
 
@@ -363,6 +542,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
       sessionParticipants: [],
+      sessionInjections: [],
     };
   },
 };
@@ -375,4 +555,5 @@ export function applyPreset(key: PresetKey): void {
   mockStore.depositSubmissions = data.depositSubmissions;
   mockStore.hostOrder = data.hostOrder;
   mockStore.sessionParticipants = data.sessionParticipants;
+  mockStore.sessionInjections = data.sessionInjections;
 }
