@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import type { EndingSubmission, Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
 import { ClosingPlayerView } from './closing-player-view';
 import { SubmissionReview } from './submission-review';
 import { ClosingRoster } from './closing-roster';
+import { SessionFinalize } from './session-finalize';
 
 type Props = {
   session: Session;
@@ -40,6 +41,7 @@ export function SessionClosing({
   const auth = useAuth();
   const appState = useAppState();
   const [refreshing, setRefreshing] = useState(false);
+  const [showFinalize, setShowFinalize] = useState(false);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
@@ -60,6 +62,8 @@ export function SessionClosing({
     }).length;
   }, [participants, endingSubmissions]);
 
+  const allValidated = validatedCount === participants.length && participants.length > 0;
+
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -68,6 +72,21 @@ export function SessionClosing({
       setRefreshing(false);
     }
   }, [appState]);
+
+  // Show finalize view when treasurer toggles it
+  if (showFinalize) {
+    return (
+      <SessionFinalize
+        session={session}
+        season={season}
+        members={members}
+        participants={participants}
+        injections={injections}
+        endingSubmissions={endingSubmissions}
+        users={users}
+      />
+    );
+  }
 
   return (
     <ScrollView
@@ -118,6 +137,33 @@ export function SessionClosing({
           endingSubmissions={endingSubmissions}
           users={users}
         />
+
+        {/* Review & Finalize button — treasurer/admin only, when all validated */}
+        {canManage && allValidated && (
+          <View className="mx-6 mt-2">
+            <Pressable
+              className="items-center rounded-lg bg-gold-500 py-3.5 active:bg-gold-600"
+              onPress={() => setShowFinalize(true)}
+            >
+              <Text className="text-base font-semibold text-white">
+                Review & Finalize
+              </Text>
+            </Pressable>
+          </View>
+        )}
+
+        {canManage && !allValidated && (
+          <View className="mx-6 mt-2">
+            <View className="items-center rounded-lg bg-sand-300 py-3.5 dark:bg-sand-700">
+              <Text className="text-base font-semibold text-sand-500 dark:text-sand-400">
+                Review & Finalize
+              </Text>
+            </View>
+            <Text className="mt-2 text-center text-xs text-sand-400 dark:text-sand-500">
+              All submissions must be validated first
+            </Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

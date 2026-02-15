@@ -1,4 +1,4 @@
-import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
 
 export type SendMagicLinkResponse = {
@@ -234,6 +234,25 @@ export type ReviewEndingSubmissionResponse = {
   submission: EndingSubmission;
 };
 
+// ---------------------------------------------------------------------------
+// Session finalization (Phase 6)
+// ---------------------------------------------------------------------------
+
+export type FinalizeSessionRequest = {
+  sessionId: string;
+  overrideNote?: string; // required when sum(PnL) != 0
+};
+
+export type FinalizeSessionResponse = {
+  session: Session;
+  members: SeasonMember[];
+  finalizeNote: SessionFinalizeNote | null;
+};
+
+export type GetSessionFinalizeNoteResponse = {
+  finalizeNote: SessionFinalizeNote | null;
+};
+
 /** Mock-swappable API client interface. */
 export type ApiClient = {
   sendMagicLink: (email: string) => Promise<SendMagicLinkResponse>;
@@ -266,4 +285,6 @@ export type ApiClient = {
   getEndingSubmissions: (sessionId: string) => Promise<GetEndingSubmissionsResponse>;
   submitEndingStack: (req: SubmitEndingStackRequest) => Promise<SubmitEndingStackResponse>;
   reviewEndingSubmission: (req: ReviewEndingSubmissionRequest) => Promise<ReviewEndingSubmissionResponse>;
+  finalizeSession: (req: FinalizeSessionRequest) => Promise<FinalizeSessionResponse>;
+  getSessionFinalizeNote: (sessionId: string) => Promise<GetSessionFinalizeNoteResponse>;
 };

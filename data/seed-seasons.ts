@@ -1,4 +1,4 @@
-import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionInjection, SessionParticipant } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionFinalizeNote, SessionInjection, SessionParticipant } from '@/types';
 import { SEED_USERS } from './seed-users';
 
 // ---------------------------------------------------------------------------
@@ -14,6 +14,7 @@ export type MockStore = {
   sessionParticipants: SessionParticipant[];
   sessionInjections: SessionInjection[];
   endingSubmissions: EndingSubmission[];
+  sessionFinalizeNotes: SessionFinalizeNote[];
 };
 
 export const mockStore: MockStore = {
@@ -25,6 +26,7 @@ export const mockStore: MockStore = {
   sessionParticipants: [],
   sessionInjections: [],
   endingSubmissions: [],
+  sessionFinalizeNotes: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -40,6 +42,7 @@ export type PresetKey =
   | 'season_active_dealing'
   | 'season_active_in_progress'
   | 'season_active_closing'
+  | 'season_active_finalized'
   | 'season_active_with_session'
   | 'season_ended';
 
@@ -79,6 +82,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     sessionParticipants: [],
     sessionInjections: [],
     endingSubmissions: [],
+    sessionFinalizeNotes: [],
   }),
 
   season_setup: () => {
@@ -101,6 +105,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: [],
       sessionInjections: [],
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -175,6 +180,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: [],
       sessionInjections: [],
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -198,6 +204,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: [],
       sessionInjections: [],
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -236,6 +243,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: [],
       sessionInjections: [],
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -324,6 +332,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: participants,
       sessionInjections: [],
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -494,6 +503,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: participants,
       sessionInjections: injections,
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -668,6 +678,217 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: participants,
       sessionInjections: injections,
       endingSubmissions,
+      sessionFinalizeNotes: [],
+    };
+  },
+
+  season_active_finalized: () => {
+    const seasonId = '01SE0000000000000000000009';
+    const sessionId = '01SS0000000000000000000006';
+
+    const participants: SessionParticipant[] = [
+      {
+        id: '01SP0000000000000000000030',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[0].id, // Edgar
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      {
+        id: '01SP0000000000000000000031',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[1].id, // Carlos
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      {
+        id: '01SP0000000000000000000032',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[2].id, // Miguel
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      {
+        id: '01SP0000000000000000000033',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[3].id, // Andres
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+    ];
+
+    // Edgar: 1x approved $500 rebuy
+    const injections: SessionInjection[] = [
+      {
+        id: '01SI0000000000000000000020',
+        sessionId,
+        participantId: '01SP0000000000000000000030',
+        type: 'rebuy_500',
+        amountCents: 50000,
+        requestedByUserId: SEED_USERS[0].id,
+        requestedAt: '2026-02-13T13:00:00.000Z',
+        proofPhotoUrl: null,
+        status: 'approved',
+        reviewedAt: '2026-02-13T13:05:00.000Z',
+        reviewedByUserId: SEED_USERS[1].id,
+        reviewNote: null,
+        createdAt: '2026-02-13T13:00:00.000Z',
+      },
+    ];
+
+    // All validated, balanced:
+    // Edgar: start=500, rebuys=500, total_in=1000, ending=850 => PnL = 850-500-500 = -150
+    // Carlos: start=500, rebuys=0, total_in=500, ending=600 => PnL = 600-500-0 = +100
+    // Miguel: start=500, rebuys=0, total_in=500, ending=300 => PnL = 300-500-0 = -200
+    // Andres: start=500, rebuys=0, total_in=500, ending=750 => PnL = 750-500-0 = +250
+    // Sum: -150+100-200+250 = 0 (balanced)
+    const endingSubmissions: EndingSubmission[] = [
+      {
+        id: '01ES0000000000000000000010',
+        sessionId,
+        participantId: '01SP0000000000000000000030',
+        endingStackCents: 85000,
+        photoUrl: 'https://placeholder.mock/ending-edgar.jpg',
+        submittedAt: '2026-02-13T15:00:00.000Z',
+        submittedByUserId: SEED_USERS[0].id,
+        note: null,
+        status: 'validated',
+        reviewedAt: '2026-02-13T15:05:00.000Z',
+        reviewedByUserId: SEED_USERS[1].id,
+        reviewNote: null,
+        createdAt: '2026-02-13T15:00:00.000Z',
+      },
+      {
+        id: '01ES0000000000000000000011',
+        sessionId,
+        participantId: '01SP0000000000000000000031',
+        endingStackCents: 60000,
+        photoUrl: 'https://placeholder.mock/ending-carlos.jpg',
+        submittedAt: '2026-02-13T15:10:00.000Z',
+        submittedByUserId: SEED_USERS[1].id,
+        note: null,
+        status: 'validated',
+        reviewedAt: '2026-02-13T15:15:00.000Z',
+        reviewedByUserId: SEED_USERS[1].id,
+        reviewNote: null,
+        createdAt: '2026-02-13T15:10:00.000Z',
+      },
+      {
+        id: '01ES0000000000000000000012',
+        sessionId,
+        participantId: '01SP0000000000000000000032',
+        endingStackCents: 30000,
+        photoUrl: 'https://placeholder.mock/ending-miguel.jpg',
+        submittedAt: '2026-02-13T15:15:00.000Z',
+        submittedByUserId: SEED_USERS[2].id,
+        note: null,
+        status: 'validated',
+        reviewedAt: '2026-02-13T15:20:00.000Z',
+        reviewedByUserId: SEED_USERS[1].id,
+        reviewNote: null,
+        createdAt: '2026-02-13T15:15:00.000Z',
+      },
+      {
+        id: '01ES0000000000000000000013',
+        sessionId,
+        participantId: '01SP0000000000000000000033',
+        endingStackCents: 75000,
+        photoUrl: 'https://placeholder.mock/ending-andres.jpg',
+        submittedAt: '2026-02-13T15:20:00.000Z',
+        submittedByUserId: SEED_USERS[3].id,
+        note: null,
+        status: 'validated',
+        reviewedAt: '2026-02-13T15:25:00.000Z',
+        reviewedByUserId: SEED_USERS[1].id,
+        reviewNote: null,
+        createdAt: '2026-02-13T15:20:00.000Z',
+      },
+    ];
+
+    // Season members with updated balances post-finalization
+    const members: SeasonMember[] = SEED_USERS.map((u, i) => {
+      // Only the 4 participants get updated balances
+      const balanceMap: Record<string, number> = {
+        [SEED_USERS[0].id]: 85000, // Edgar: ending=850
+        [SEED_USERS[1].id]: 60000, // Carlos: ending=600
+        [SEED_USERS[2].id]: 30000, // Miguel: ending=300
+        [SEED_USERS[3].id]: 75000, // Andres: ending=750
+      };
+      return {
+        id: `01SM000000000000000000${String(i + 1).padStart(4, '0')}`,
+        seasonId,
+        userId: u.id,
+        approvalStatus: 'approved' as const,
+        currentBalanceCents: balanceMap[u.id] ?? 50000,
+        approvedAt: NOW,
+        approvedByUserId: SEED_USERS[1].id,
+        rejectionNote: null,
+        createdAt: NOW,
+      };
+    });
+
+    return {
+      season: {
+        id: seasonId,
+        name: 'Season Feb 2026',
+        status: 'active' as const,
+        createdByUserId: SEED_USERS[0].id,
+        treasurerUserId: SEED_USERS[1].id,
+        createdAt: NOW,
+        startedAt: NOW,
+        endedAt: null,
+      },
+      members,
+      session: {
+        id: sessionId,
+        seasonId,
+        state: 'finalized' as const,
+        hostUserId: SEED_USERS[2].id,
+        scheduledFor: '2026-02-15T20:00:00.000Z',
+        location: "Miguel's place",
+        scheduledAt: NOW,
+        scheduledByUserId: SEED_USERS[1].id,
+        startedAt: NOW,
+        startedByUserId: SEED_USERS[1].id,
+        endedAt: '2026-02-13T14:30:00.000Z',
+        endedByUserId: SEED_USERS[1].id,
+        finalizedAt: '2026-02-13T16:00:00.000Z',
+        finalizedByUserId: SEED_USERS[1].id,
+      },
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: participants,
+      sessionInjections: injections,
+      endingSubmissions,
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -706,6 +927,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: [],
       sessionInjections: [],
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 
@@ -729,6 +951,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       sessionParticipants: [],
       sessionInjections: [],
       endingSubmissions: [],
+      sessionFinalizeNotes: [],
     };
   },
 };
@@ -743,4 +966,5 @@ export function applyPreset(key: PresetKey): void {
   mockStore.sessionParticipants = data.sessionParticipants;
   mockStore.sessionInjections = data.sessionInjections;
   mockStore.endingSubmissions = data.endingSubmissions;
+  mockStore.sessionFinalizeNotes = data.sessionFinalizeNotes;
 }

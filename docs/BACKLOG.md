@@ -141,13 +141,13 @@ Ending active play and collecting ending stack submissions.
 
 Balance verification and session close-out.
 
-- [ ] **Balance Check + Finalize screen** — Treasurer/Admin view: per-participant PnL table (starting stack, injections, ending stack, computed SessionPnL). Sum==0 indicator. If mismatch: finalize blocked unless override with required resolution note. Finalize button.
+- [x] **Balance Check + Finalize screen** — Treasurer/Admin view: per-participant PnL table (starting stack, injections, ending stack, computed SessionPnL). Sum==0 indicator. If mismatch: finalize blocked unless override with required resolution note. Finalize button.
   - Screens: 3.10
   - Tables: `ending_submissions`, `session_injections`, `session_participants`, `session_finalize_notes`
-- [ ] **Finalize action** — On finalize: set `finalized_at`/`finalized_by`, update `season_members.current_balance_mxn = ending_stack` for each member participant. Guests removed from season tracking.
+- [x] **Finalize action** — On finalize: set `finalized_at`/`finalized_by`, update `season_members.current_balance_mxn = ending_stack` for each member participant. Guests removed from season tracking.
   - Screens: 3.10 (action)
   - Tables: `sessions`, `season_members`
-- [ ] **Session Summary screen (finalized)** — Read-only breakdown: per-participant starting → ending stack, rebuy totals, computed PnL, mismatch resolution notes (if any), updated season balances.
+- [x] **Session Summary screen (finalized)** — Read-only breakdown: per-participant starting → ending stack, rebuy totals, computed PnL, mismatch resolution notes (if any), updated season balances.
   - Screens: 3.11
   - Tables: `sessions`, `session_participants`, `session_injections`, `ending_submissions`, `session_finalize_notes`
 

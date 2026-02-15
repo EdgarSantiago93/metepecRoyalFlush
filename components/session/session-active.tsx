@@ -3,10 +3,11 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'rea
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
-import type { EndingSubmission, Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import { SessionDealing } from './session-dealing';
 import { SessionInProgress } from './session-in-progress';
 import { SessionClosing } from './session-closing';
+import { SessionFinalized } from './session-finalized';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 
 type Props = {
@@ -16,10 +17,11 @@ type Props = {
   participants: SessionParticipant[];
   injections: SessionInjection[];
   endingSubmissions: EndingSubmission[];
+  finalizeNote: SessionFinalizeNote | null;
   users: User[];
 };
 
-export function SessionActive({ session, season, members, participants, injections, endingSubmissions, users }: Props) {
+export function SessionActive({ session, season, members, participants, injections, endingSubmissions, finalizeNote, users }: Props) {
   if (session.state === 'scheduled') {
     return <SessionScheduled session={session} season={season} members={members} users={users} />;
   }
@@ -63,15 +65,26 @@ export function SessionActive({ session, season, members, participants, injectio
     );
   }
 
-  // finalized — placeholder for future phases
-  return <SessionFinalizedPlaceholder session={session} users={users} />;
+  // finalized — read-only session summary
+  return (
+    <SessionFinalized
+      session={session}
+      season={season}
+      members={members}
+      participants={participants}
+      injections={injections}
+      endingSubmissions={endingSubmissions}
+      finalizeNote={finalizeNote}
+      users={users}
+    />
+  );
 }
 
 // ---------------------------------------------------------------------------
 // Scheduled sub-component
 // ---------------------------------------------------------------------------
 
-function SessionScheduled({ session, season, users }: Omit<Props, 'participants' | 'injections' | 'endingSubmissions'>) {
+function SessionScheduled({ session, season, users }: Omit<Props, 'participants' | 'injections' | 'endingSubmissions' | 'finalizeNote'>) {
   const router = useRouter();
   const auth = useAuth();
   const appState = useAppState();
@@ -166,38 +179,6 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
         loading={starting}
       />
     </ScrollView>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Placeholder for non-scheduled states (future phases)
-// ---------------------------------------------------------------------------
-
-function SessionFinalizedPlaceholder({ session, users }: { session: Session; users: User[] }) {
-  const host = users.find((u) => u.id === session.hostUserId);
-
-  return (
-    <View className="flex-1 bg-sand-50 px-6 pt-16 dark:bg-sand-900">
-      <Text className="mb-1 text-2xl font-bold text-sand-950 dark:text-sand-50">
-        Active Session
-      </Text>
-
-      <View className="mt-1 mb-6 self-start rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900">
-        <Text className="text-xs font-semibold text-felt-700 dark:text-felt-300">
-          {session.state.replace('_', ' ')}
-        </Text>
-      </View>
-
-      <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-        <InfoRow label="Host" value={host?.displayName ?? 'Unknown'} />
-        {session.location && <InfoRow label="Location" value={session.location} />}
-        <InfoRow label="State" value={session.state} />
-      </View>
-
-      <Text className="mt-6 text-center text-sm text-sand-500 dark:text-sand-400">
-        Finalization features coming soon.
-      </Text>
-    </View>
   );
 }
 

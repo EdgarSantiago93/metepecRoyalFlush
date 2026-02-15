@@ -673,4 +673,95 @@ export const api: ApiClient = {
     // TODO: WebSocket broadcast — ending submission reviewed
     return { submission };
   },
+
+  // ---------------------------------------------------------------------------
+  // Session finalization (Phase 6)
+  // ---------------------------------------------------------------------------
+
+  async finalizeSession(req) {
+    await delay(600);
+    const now = new Date().toISOString();
+
+    if (!mockStore.session || mockStore.session.id !== req.sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'closing') {
+      throw new Error('Session must be in closing state to finalize');
+    }
+
+    // Get active participants
+    const activeParticipants = mockStore.sessionParticipants.filter(
+      (p) => p.sessionId === req.sessionId && p.removedAt === null,
+    );
+
+    // Verify all participants have validated submissions
+    for (const p of activeParticipants) {
+      const latestSubmission = mockStore.endingSubmissions
+        .filter((s) => s.participantId === p.id)
+        .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
+      if (!latestSubmission || latestSubmission.status !== 'validated') {
+        throw new Error(`Participant ${p.userId ?? p.guestName} does not have a validated ending submission`);
+      }
+    }
+
+    // Compute PnL and check balance
+    let sumPnl = 0;
+    for (const p of activeParticipants) {
+      const approvedInjections = mockStore.sessionInjections
+        .filter((inj) => inj.participantId === p.id && inj.status === 'approved')
+        .reduce((sum, inj) => sum + inj.amountCents, 0);
+      const latestSubmission = mockStore.endingSubmissions
+        .filter((s) => s.participantId === p.id && s.status === 'validated')
+        .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
+      const pnl = latestSubmission.endingStackCents - p.startingStackCents - approvedInjections;
+      sumPnl += pnl;
+    }
+
+    const isBalanced = sumPnl === 0;
+
+    // If not balanced, require override note
+    if (!isBalanced && !req.overrideNote?.trim()) {
+      throw new Error('Session is not balanced. A resolution note is required to override.');
+    }
+
+    // Create finalize note if override was needed
+    let finalizeNote: import('@/types').SessionFinalizeNote | null = null;
+    if (!isBalanced && req.overrideNote) {
+      finalizeNote = {
+        id: makeId('01FN'),
+        sessionId: req.sessionId,
+        note: req.overrideNote,
+        createdByUserId: SEED_USERS[0].id, // mock assumes current user
+        createdAt: now,
+      };
+      mockStore.sessionFinalizeNotes.push(finalizeNote);
+    }
+
+    // Finalize the session
+    mockStore.session.state = 'finalized';
+    mockStore.session.finalizedAt = now;
+    mockStore.session.finalizedByUserId = SEED_USERS[0].id; // mock assumes current user
+
+    // Update season balances for member participants
+    for (const p of activeParticipants) {
+      if (p.type === 'member' && p.userId) {
+        const latestSubmission = mockStore.endingSubmissions
+          .filter((s) => s.participantId === p.id && s.status === 'validated')
+          .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
+        const member = mockStore.members.find((m) => m.userId === p.userId);
+        if (member && latestSubmission) {
+          member.currentBalanceCents = latestSubmission.endingStackCents;
+        }
+      }
+    }
+
+    // TODO: WebSocket broadcast — session finalized
+    return { session: mockStore.session, members: [...mockStore.members], finalizeNote };
+  },
+
+  async getSessionFinalizeNote(sessionId: string) {
+    await delay(200);
+    const note = mockStore.sessionFinalizeNotes.find((n) => n.sessionId === sessionId) ?? null;
+    return { finalizeNote: note };
+  },
 };

@@ -27,6 +27,7 @@ export default function SessionScreen() {
             participants={appState.participants}
             injections={appState.injections}
             endingSubmissions={appState.endingSubmissions}
+            finalizeNote={appState.finalizeNote}
             users={appState.users}
           />
         );
