@@ -125,13 +125,13 @@ Rebuy requests and approvals during active play.
 
 Ending active play and collecting ending stack submissions.
 
-- [ ] **End Session action** — Treasurer/Admin action: transition to `closing` state. Block new rebuy requests after this point.
+- [x] **End Session action** — Treasurer/Admin action: transition to `closing` state. Block new rebuy requests after this point. *(Implemented in Phase 4)*
   - Screens: 3.1 (action per session.md §8)
   - Tables: `sessions`
-- [ ] **Submit EndingStack screen** — Player/guest: enter ending stack value (MXN), upload required photo, submit. Supports "submit for someone else" (leaving early) with submitter tracking.
+- [x] **Submit EndingStack screen** — Player/guest: enter ending stack value (MXN), upload required photo, submit. Supports "submit for someone else" (leaving early) with submitter tracking.
   - Screens: 3.8
   - Tables: `ending_submissions`
-- [ ] **Submissions Review & Validation** — Treasurer view: per-participant list showing starting stack, approved injections total, ending stack submitted status, photo thumbnail. Actions: validate / reject (reject requires note). On validate: lock participant's ending stack.
+- [x] **Submissions Review & Validation** — Treasurer view: per-participant list showing starting stack, approved injections total, ending stack submitted status, photo thumbnail. Actions: validate / reject (reject requires note). On validate: lock participant's ending stack.
   - Screens: 3.9
   - Tables: `ending_submissions`
 
