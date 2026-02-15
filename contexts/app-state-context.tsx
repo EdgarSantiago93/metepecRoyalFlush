@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import type { Season, SeasonMember, Session, User } from '@/types';
-import type { CreateSeasonRequest, ScheduleSessionRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
+import type { Season, SeasonMember, Session, SessionParticipant, User } from '@/types';
+import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
 import { api } from '@/services/api/client';
 import { applyPreset, type PresetKey } from '@/data/seed-seasons';
 
@@ -13,7 +13,7 @@ export type AppState =
   | { status: 'error'; message: string }
   | { status: 'no_season'; users: User[] }
   | { status: 'season_setup'; season: Season; members: SeasonMember[]; users: User[] }
-  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; users: User[] }
+  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; users: User[] }
   | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[] };
 
 export type AppStateContextValue = AppState & {
@@ -23,6 +23,12 @@ export type AppStateContextValue = AppState & {
   scheduleSession: (req: ScheduleSessionRequest) => Promise<void>;
   updateScheduledSession: (req: UpdateScheduledSessionRequest) => Promise<void>;
   startSession: () => Promise<void>;
+  checkIn: () => Promise<void>;
+  confirmStart: (participantId: string) => Promise<void>;
+  disputeStart: (participantId: string, note: string) => Promise<void>;
+  removeParticipant: (participantId: string) => Promise<void>;
+  moveToInProgress: () => Promise<void>;
+  refreshParticipants: () => Promise<void>;
   refresh: () => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
@@ -54,7 +60,13 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       } else if (season.status === 'setup') {
         setState({ status: 'season_setup', season, members, users });
       } else if (season.status === 'active') {
-        setState({ status: 'season_active', season, members, session, users });
+        // Fetch participants when session is in dealing or in_progress state
+        let participants: SessionParticipant[] = [];
+        if (session && (session.state === 'dealing' || session.state === 'in_progress')) {
+          const partRes = await api.getSessionParticipants(session.id);
+          participants = partRes.participants;
+        }
+        setState({ status: 'season_active', season, members, session, participants, users });
       } else {
         setState({ status: 'season_ended', season, members, users });
       }
@@ -118,6 +130,79 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     await load();
   }, [state, load]);
 
+  // ---------------------------------------------------------------------------
+  // Participant actions — refresh participants only (no full reload)
+  // ---------------------------------------------------------------------------
+
+  const refreshParticipants = useCallback(async () => {
+    // TODO: WebSocket — replace polling with real-time updates
+    if (state.status !== 'season_active' || !state.session) return;
+    const { participants } = await api.getSessionParticipants(state.session.id);
+    setState((prev) => {
+      if (prev.status !== 'season_active') return prev;
+      return { ...prev, participants };
+    });
+  }, [state]);
+
+  const checkIn = useCallback(async () => {
+    if (state.status !== 'season_active' || !state.session) return;
+    await api.checkInToSession(state.session.id);
+    const { participants } = await api.getSessionParticipants(state.session.id);
+    setState((prev) => {
+      if (prev.status !== 'season_active') return prev;
+      return { ...prev, participants };
+    });
+  }, [state]);
+
+  const confirmStart = useCallback(
+    async (participantId: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.confirmStartingStack(state.session.id, participantId);
+      const { participants } = await api.getSessionParticipants(state.session.id);
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return { ...prev, participants };
+      });
+    },
+    [state],
+  );
+
+  const disputeStart = useCallback(
+    async (participantId: string, note: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.disputeStartingStack({
+        sessionId: state.session.id,
+        participantId,
+        note,
+      } satisfies DisputeStartRequest);
+      const { participants } = await api.getSessionParticipants(state.session.id);
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return { ...prev, participants };
+      });
+    },
+    [state],
+  );
+
+  const removeParticipant = useCallback(
+    async (participantId: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      await api.removeParticipant(state.session.id, participantId);
+      const { participants } = await api.getSessionParticipants(state.session.id);
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return { ...prev, participants };
+      });
+    },
+    [state],
+  );
+
+  const moveToInProgress = useCallback(async () => {
+    if (state.status !== 'season_active' || !state.session) return;
+    await api.moveSessionToInProgress(state.session.id);
+    await load(); // full reload — session state changes
+  }, [state, load]);
+
   const _devSetPreset = useCallback(
     async (key: PresetKey) => {
       applyPreset(key);
@@ -135,10 +220,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       scheduleSession,
       updateScheduledSession,
       startSession,
+      checkIn,
+      confirmStart,
+      disputeStart,
+      removeParticipant,
+      moveToInProgress,
+      refreshParticipants,
       refresh: load,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, load, _devSetPreset],
+    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

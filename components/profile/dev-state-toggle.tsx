@@ -8,6 +8,7 @@ const PRESETS: { key: PresetKey; label: string }[] = [
   { key: 'season_setup_mixed', label: 'Setup (mixed)' },
   { key: 'season_active_no_session', label: 'Active (no session)' },
   { key: 'season_active_scheduled', label: 'Active (scheduled)' },
+  { key: 'season_active_dealing', label: 'Active (dealing)' },
   { key: 'season_active_with_session', label: 'Active (with session)' },
   { key: 'season_ended', label: 'Season Ended' },
 ];

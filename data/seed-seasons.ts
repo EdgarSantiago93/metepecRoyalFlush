@@ -1,4 +1,4 @@
-import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session } from '@/types';
+import type { Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionParticipant } from '@/types';
 import { SEED_USERS } from './seed-users';
 
 // ---------------------------------------------------------------------------
@@ -11,6 +11,7 @@ export type MockStore = {
   session: Session | null;
   depositSubmissions: SeasonDepositSubmission[];
   hostOrder: SeasonHostOrder[];
+  sessionParticipants: SessionParticipant[];
 };
 
 export const mockStore: MockStore = {
@@ -19,6 +20,7 @@ export const mockStore: MockStore = {
   session: null,
   depositSubmissions: [],
   hostOrder: [],
+  sessionParticipants: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -31,6 +33,7 @@ export type PresetKey =
   | 'season_setup_mixed'
   | 'season_active_no_session'
   | 'season_active_scheduled'
+  | 'season_active_dealing'
   | 'season_active_with_session'
   | 'season_ended';
 
@@ -67,6 +70,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     session: null,
     depositSubmissions: [],
     hostOrder: [],
+    sessionParticipants: [],
   }),
 
   season_setup: () => {
@@ -86,6 +90,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       session: null,
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: [],
     };
   },
 
@@ -157,6 +162,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       session: null,
       depositSubmissions,
       hostOrder,
+      sessionParticipants: [],
     };
   },
 
@@ -177,6 +183,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       session: null,
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: [],
     };
   },
 
@@ -212,6 +219,93 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       },
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: [],
+    };
+  },
+
+  season_active_dealing: () => {
+    const seasonId = '01SE0000000000000000000006';
+    const sessionId = '01SS0000000000000000000003';
+    const participants: SessionParticipant[] = [
+      // Carlos (treasurer): checked in + confirmed
+      {
+        id: '01SP0000000000000000000001',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[1].id, // Carlos
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Miguel (host): checked in, not confirmed
+      {
+        id: '01SP0000000000000000000002',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[2].id, // Miguel
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: null,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Andres: checked in, disputed
+      {
+        id: '01SP0000000000000000000003',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[3].id, // Andres
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: null,
+        startDisputeNote: 'I received 450 not 500',
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Edgar (admin/current user): NOT checked in — no participant record
+    ];
+
+    return {
+      season: {
+        id: seasonId,
+        name: 'Season Feb 2026',
+        status: 'active' as const,
+        createdByUserId: SEED_USERS[0].id,
+        treasurerUserId: SEED_USERS[1].id, // Carlos
+        createdAt: NOW,
+        startedAt: NOW,
+        endedAt: null,
+      },
+      members: makeMembers(seasonId, true),
+      session: {
+        id: sessionId,
+        seasonId,
+        state: 'dealing' as const,
+        hostUserId: SEED_USERS[2].id, // Miguel
+        scheduledFor: '2026-02-15T20:00:00.000Z',
+        location: "Miguel's place",
+        scheduledAt: NOW,
+        scheduledByUserId: SEED_USERS[1].id,
+        startedAt: NOW,
+        startedByUserId: SEED_USERS[1].id,
+        endedAt: null,
+        endedByUserId: null,
+        finalizedAt: null,
+        finalizedByUserId: null,
+      },
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: participants,
     };
   },
 
@@ -247,6 +341,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       },
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: [],
     };
   },
 
@@ -267,6 +362,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       session: null,
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: [],
     };
   },
 };
@@ -278,4 +374,5 @@ export function applyPreset(key: PresetKey): void {
   mockStore.session = data.session;
   mockStore.depositSubmissions = data.depositSubmissions;
   mockStore.hostOrder = data.hostOrder;
+  mockStore.sessionParticipants = data.sessionParticipants;
 }

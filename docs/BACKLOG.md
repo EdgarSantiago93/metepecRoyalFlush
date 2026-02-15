@@ -90,16 +90,16 @@ Creating and editing scheduled sessions within an active season.
 
 Starting a session and managing check-in / starting stack confirmation.
 
-- [ ] **Start Session action** — Treasurer/Admin confirmation dialog. On confirm: set `started_at`, transition to `dealing` state.
+- [x] **Start Session action** — Treasurer/Admin confirmation dialog. On confirm: set `started_at`, transition to `dealing` state.
   - Screens: 3.4
   - Tables: `sessions`
-- [ ] **Check-in & Dealing Dashboard** — Player view: "Check in" button, then "You should receive $X" with confirm/dispute. Treasurer view: live roster list (name, type, starting stack, checked-in status, confirmed status), kick/remove player. Starting stack auto-derived from season balance (500 for first session, last ending stack otherwise).
+- [x] **Check-in & Dealing Dashboard** — Player view: "Check in" button, then "You should receive $X" with confirm/dispute. Treasurer view: live roster list (name, type, starting stack, checked-in status, confirmed status), kick/remove player. Starting stack auto-derived from season balance (500 for first session, last ending stack otherwise).
   - Screens: 3.5
   - Tables: `session_participants`, `season_members`
-- [ ] **Add Guest modal** — Treasurer action: select existing user (guest with app) or create ephemeral guest (name only). On save: add to roster, auto-create initial buy-in 500 (pending approval), auto-check-in.
+- [ ] **Add Guest modal** — DEFERRED to follow-up phase. Treasurer action: select existing user (guest with app) or create ephemeral guest (name only). On save: add to roster, auto-create initial buy-in 500 (pending approval), auto-check-in.
   - Screens: 3.5 (sub-flow per session.md §4)
   - Tables: `session_participants`, `session_injections`
-- [ ] **Move to In Progress guard** — Button enabled only when all checked-in participants confirmed starting stack and ≥2 participants. Transition to `in_progress` state.
+- [x] **Move to In Progress guard** — Button enabled only when all checked-in participants confirmed starting stack and ≥2 participants. Transition to `in_progress` state.
   - Screens: 3.5 (action)
   - Tables: `sessions`
 

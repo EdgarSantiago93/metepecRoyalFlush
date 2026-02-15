@@ -126,6 +126,7 @@ export const api: ApiClient = {
     mockStore.session = null;
     mockStore.depositSubmissions = [];
     mockStore.hostOrder = hostOrder;
+    mockStore.sessionParticipants = [];
 
     return { season, members };
   },
@@ -352,6 +353,150 @@ export const api: ApiClient = {
     mockStore.session.state = 'dealing';
     mockStore.session.startedAt = now;
     mockStore.session.startedByUserId = SEED_USERS[0].id; // mock assumes current user
+
+    return { session: mockStore.session };
+  },
+
+  // ---------------------------------------------------------------------------
+  // Session participants (dealing phase)
+  // ---------------------------------------------------------------------------
+
+  async getSessionParticipants(sessionId: string) {
+    await delay(200);
+    const participants = mockStore.sessionParticipants.filter(
+      (p) => p.sessionId === sessionId && p.removedAt === null,
+    );
+    return { participants };
+  },
+
+  async checkInToSession(sessionId: string) {
+    await delay(400);
+    const now = new Date().toISOString();
+    const currentUserId = SEED_USERS[0].id; // mock assumes current user (Edgar)
+
+    if (!mockStore.session || mockStore.session.id !== sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'dealing') {
+      throw new Error('Session must be in dealing state to check in');
+    }
+
+    // Validate user is approved season member
+    const member = mockStore.members.find(
+      (m) => m.userId === currentUserId && m.approvalStatus === 'approved',
+    );
+    if (!member) {
+      throw new Error('You must be an approved season member to check in');
+    }
+
+    // Validate not already checked in
+    const existing = mockStore.sessionParticipants.find(
+      (p) => p.sessionId === sessionId && p.userId === currentUserId && p.removedAt === null,
+    );
+    if (existing) {
+      throw new Error('You are already checked in to this session');
+    }
+
+    const participant: import('@/types').SessionParticipant = {
+      id: makeId('01SP'),
+      sessionId,
+      type: 'member',
+      userId: currentUserId,
+      guestName: null,
+      startingStackCents: member.currentBalanceCents,
+      checkedInAt: now,
+      confirmedStartAt: null,
+      startDisputeNote: null,
+      removedAt: null,
+      removedByUserId: null,
+      createdAt: now,
+    };
+
+    mockStore.sessionParticipants.push(participant);
+    // TODO: WebSocket broadcast — participant checked in
+    return { participant };
+  },
+
+  async confirmStartingStack(sessionId: string, participantId: string) {
+    await delay(300);
+    const now = new Date().toISOString();
+
+    const participant = mockStore.sessionParticipants.find(
+      (p) => p.id === participantId && p.sessionId === sessionId && p.removedAt === null,
+    );
+    if (!participant) throw new Error('Participant not found');
+    if (!participant.checkedInAt) throw new Error('Participant has not checked in');
+    if (participant.confirmedStartAt) throw new Error('Already confirmed');
+
+    participant.confirmedStartAt = now;
+    participant.startDisputeNote = null; // clear any previous dispute
+    // TODO: WebSocket broadcast — participant confirmed
+    return { participant };
+  },
+
+  async disputeStartingStack(req) {
+    await delay(300);
+
+    const participant = mockStore.sessionParticipants.find(
+      (p) => p.id === req.participantId && p.sessionId === req.sessionId && p.removedAt === null,
+    );
+    if (!participant) throw new Error('Participant not found');
+    if (!participant.checkedInAt) throw new Error('Participant has not checked in');
+
+    participant.startDisputeNote = req.note;
+    participant.confirmedStartAt = null; // un-confirm if was confirmed
+    // TODO: WebSocket broadcast — participant disputed
+    return { participant };
+  },
+
+  async removeParticipant(sessionId: string, participantId: string) {
+    await delay(300);
+    const now = new Date().toISOString();
+
+    const participant = mockStore.sessionParticipants.find(
+      (p) => p.id === participantId && p.sessionId === sessionId && p.removedAt === null,
+    );
+    if (!participant) throw new Error('Participant not found');
+
+    participant.removedAt = now;
+    participant.removedByUserId = SEED_USERS[0].id; // mock assumes current user
+    // TODO: WebSocket broadcast — participant removed
+    return { participant };
+  },
+
+  async moveSessionToInProgress(sessionId: string) {
+    await delay(500);
+    const now = new Date().toISOString();
+
+    if (!mockStore.session || mockStore.session.id !== sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'dealing') {
+      throw new Error('Session must be in dealing state');
+    }
+
+    const active = mockStore.sessionParticipants.filter(
+      (p) => p.sessionId === sessionId && p.removedAt === null,
+    );
+    const checkedIn = active.filter((p) => p.checkedInAt !== null);
+
+    if (checkedIn.length < 2) {
+      throw new Error('At least 2 checked-in participants required');
+    }
+
+    const unconfirmed = checkedIn.filter((p) => p.confirmedStartAt === null);
+    if (unconfirmed.length > 0) {
+      throw new Error(`${unconfirmed.length} participant(s) have not confirmed their starting stack`);
+    }
+
+    const disputed = checkedIn.filter((p) => p.startDisputeNote !== null);
+    if (disputed.length > 0) {
+      throw new Error(`${disputed.length} participant(s) have unresolved disputes`);
+    }
+
+    mockStore.session.state = 'in_progress';
+    mockStore.session.startedAt = mockStore.session.startedAt ?? now;
+    // TODO: WebSocket broadcast — session moved to in_progress
 
     return { session: mockStore.session };
   },

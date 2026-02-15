@@ -24,6 +24,7 @@ export default function SessionScreen() {
             session={appState.session}
             season={appState.season}
             members={appState.members}
+            participants={appState.participants}
             users={appState.users}
           />
         );
