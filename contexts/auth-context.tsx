@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { User } from '@/types';
 import { authService } from '@/services/auth/auth-service';
+import { setMockCurrentUserId } from '@/services/api/client';
 
 type AuthState =
   | { status: 'loading' }
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     authService.restoreSession().then((session) => {
       if (session) {
+        setMockCurrentUserId(session.user.id);
         setState({ status: 'authenticated', user: session.user, token: session.token });
       } else {
         setState({ status: 'unauthenticated' });
@@ -34,11 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyMagicLink = useCallback(async (email: string, code: string) => {
     const session = await authService.verifyMagicLink(email, code);
+    setMockCurrentUserId(session.user.id);
     setState({ status: 'authenticated', user: session.user, token: session.token });
   }, []);
 
   const logout = useCallback(async () => {
     await authService.logout();
+    setMockCurrentUserId(null);
     setState({ status: 'unauthenticated' });
   }, []);
 
