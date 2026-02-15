@@ -128,6 +128,7 @@ export const api: ApiClient = {
     mockStore.hostOrder = hostOrder;
     mockStore.sessionParticipants = [];
     mockStore.sessionInjections = [];
+    mockStore.endingSubmissions = [];
 
     return { season, members };
   },
@@ -595,5 +596,81 @@ export const api: ApiClient = {
     // TODO: WebSocket broadcast — session ended
 
     return { session: mockStore.session };
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ending submissions (closing phase)
+  // ---------------------------------------------------------------------------
+
+  async getEndingSubmissions(sessionId: string) {
+    await delay(200);
+    const submissions = mockStore.endingSubmissions.filter(
+      (s) => s.sessionId === sessionId,
+    );
+    return { submissions };
+  },
+
+  async submitEndingStack(req) {
+    await delay(400);
+    const now = new Date().toISOString();
+
+    if (!mockStore.session || mockStore.session.id !== req.sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'closing') {
+      throw new Error('Ending stacks can only be submitted while the session is closing');
+    }
+
+    const participant = mockStore.sessionParticipants.find(
+      (p) => p.id === req.participantId && p.sessionId === req.sessionId && p.removedAt === null,
+    );
+    if (!participant) {
+      throw new Error('Participant not found or has been removed');
+    }
+
+    const submission: import('@/types').EndingSubmission = {
+      id: makeId('01ES'),
+      sessionId: req.sessionId,
+      participantId: req.participantId,
+      endingStackCents: req.endingStackCents,
+      photoUrl: req.photoUrl,
+      submittedAt: now,
+      submittedByUserId: req.submittedByUserId ?? SEED_USERS[0].id,
+      note: req.note ?? null,
+      status: 'pending',
+      reviewedAt: null,
+      reviewedByUserId: null,
+      reviewNote: null,
+      createdAt: now,
+    };
+
+    mockStore.endingSubmissions.push(submission);
+    // TODO: WebSocket broadcast — ending stack submitted
+    return { submission };
+  },
+
+  async reviewEndingSubmission(req) {
+    await delay(400);
+    const now = new Date().toISOString();
+
+    const submission = mockStore.endingSubmissions.find((s) => s.id === req.submissionId);
+    if (!submission) throw new Error('Submission not found');
+    if (submission.status !== 'pending') throw new Error('Submission already reviewed');
+
+    if (!mockStore.session || mockStore.session.state !== 'closing') {
+      throw new Error('Submissions can only be reviewed while the session is closing');
+    }
+
+    if (req.action === 'reject' && !req.reviewNote?.trim()) {
+      throw new Error('Rejection requires a review note');
+    }
+
+    submission.status = req.action === 'validate' ? 'validated' : 'rejected';
+    submission.reviewedAt = now;
+    submission.reviewedByUserId = SEED_USERS[0].id; // mock assumes current user
+    submission.reviewNote = req.reviewNote ?? null;
+
+    // TODO: WebSocket broadcast — ending submission reviewed
+    return { submission };
   },
 };
