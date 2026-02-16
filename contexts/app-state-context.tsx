@@ -28,6 +28,7 @@ export type AppStateContextValue = AppState & {
   confirmStart: (participantId: string) => Promise<void>;
   disputeStart: (participantId: string, note: string) => Promise<void>;
   removeParticipant: (participantId: string) => Promise<void>;
+  addGuest: (guestName: string) => Promise<void>;
   moveToInProgress: () => Promise<void>;
   refreshParticipants: () => Promise<void>;
   requestRebuy: (type: InjectionType, proofPhotoUrl?: string) => Promise<void>;
@@ -216,10 +217,32 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     async (participantId: string) => {
       if (state.status !== 'season_active' || !state.session) return;
       await api.removeParticipant(state.session.id, participantId);
-      const { participants } = await api.getSessionParticipants(state.session.id);
+      const [partRes, injRes] = await Promise.all([
+        api.getSessionParticipants(state.session.id),
+        api.getSessionInjections(state.session.id),
+      ]);
       setState((prev) => {
         if (prev.status !== 'season_active') return prev;
-        return { ...prev, participants };
+        return { ...prev, participants: partRes.participants, injections: injRes.injections };
+      });
+    },
+    [state],
+  );
+
+  const addGuest = useCallback(
+    async (guestName: string) => {
+      if (state.status !== 'season_active' || !state.session) return;
+      const { participant, injection } = await api.addGuest({
+        sessionId: state.session.id,
+        guestName,
+      });
+      setState((prev) => {
+        if (prev.status !== 'season_active') return prev;
+        return {
+          ...prev,
+          participants: [...prev.participants, participant],
+          injections: [...prev.injections, injection],
+        };
       });
     },
     [state],
@@ -367,6 +390,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       confirmStart,
       disputeStart,
       removeParticipant,
+      addGuest,
       moveToInProgress,
       refreshParticipants,
       requestRebuy,
@@ -381,7 +405,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       refresh: load,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, load, _devSetPreset],
+    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, addGuest, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

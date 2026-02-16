@@ -167,6 +167,16 @@ export type RemoveParticipantResponse = {
   participant: SessionParticipant;
 };
 
+export type AddGuestRequest = {
+  sessionId: string;
+  guestName: string;
+};
+
+export type AddGuestResponse = {
+  participant: SessionParticipant;
+  injection: SessionInjection;
+};
+
 export type MoveToInProgressResponse = {
   session: Session;
 };
@@ -300,6 +310,7 @@ export type ApiClient = {
   confirmStartingStack: (sessionId: string, participantId: string) => Promise<ConfirmStartResponse>;
   disputeStartingStack: (req: DisputeStartRequest) => Promise<DisputeStartResponse>;
   removeParticipant: (sessionId: string, participantId: string) => Promise<RemoveParticipantResponse>;
+  addGuest: (req: AddGuestRequest) => Promise<AddGuestResponse>;
   moveSessionToInProgress: (sessionId: string) => Promise<MoveToInProgressResponse>;
   getSessionInjections: (sessionId: string) => Promise<GetSessionInjectionsResponse>;
   requestRebuy: (req: RequestRebuyRequest) => Promise<RequestRebuyResponse>;

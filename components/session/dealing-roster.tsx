@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, Text, View } from 'react-native';
+import { Alert, Animated, Pressable, Text, TextInput, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import type { SessionParticipant, User } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
@@ -13,12 +13,23 @@ type Props = {
 export function DealingRoster({ participants, users }: Props) {
   const checkedIn = participants.filter((p) => p.checkedInAt !== null);
   const confirmed = checkedIn.filter((p) => p.confirmedStartAt !== null);
+  const [showAddGuest, setShowAddGuest] = useState(false);
 
   return (
     <View className="mx-6 mb-4">
-      <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-        Roster
-      </Text>
+      <View className="mb-3 flex-row items-center justify-between">
+        <Text className="text-base font-semibold text-sand-950 dark:text-sand-50">
+          Roster
+        </Text>
+        <Pressable
+          className="rounded-lg bg-gold-500 px-3 py-1.5 active:bg-gold-600"
+          onPress={() => setShowAddGuest(true)}
+        >
+          <Text className="text-xs font-semibold text-white">Add Guest</Text>
+        </Pressable>
+      </View>
+
+      <AddGuestModal visible={showAddGuest} onClose={() => setShowAddGuest(false)} />
 
       {/* Header */}
       <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 px-3 py-2 dark:border-sand-700 dark:bg-sand-800">
@@ -54,7 +65,7 @@ export function DealingRoster({ participants, users }: Props) {
       {/* Summary footer */}
       <Text className="mt-2 text-center text-xs text-sand-500 dark:text-sand-400">
         {checkedIn.length} checked in, {confirmed.length} confirmed of {participants.length}{' '}
-        {participants.length === 1 ? 'member' : 'members'}
+        {participants.length === 1 ? 'player' : 'players'}
       </Text>
     </View>
   );
@@ -129,12 +140,21 @@ function RosterRow({
             isLast ? 'rounded-b-lg' : ''
           }`}
         >
-          <Text
-            className="flex-1 text-sm font-medium text-sand-950 dark:text-sand-50"
-            numberOfLines={1}
-          >
-            {name}
-          </Text>
+          <View className="flex-1 flex-row items-center gap-2">
+            <Text
+              className="shrink text-sm font-medium text-sand-950 dark:text-sand-50"
+              numberOfLines={1}
+            >
+              {name}
+            </Text>
+            {participant.type === 'guest_ephemeral' && (
+              <View className="rounded-full bg-gold-100 px-2 py-0.5 dark:bg-gold-900/40">
+                <Text className="text-[10px] font-semibold text-gold-700 dark:text-gold-300">
+                  Guest
+                </Text>
+              </View>
+            )}
+          </View>
           <Text className="w-20 text-center text-sm text-sand-600 dark:text-sand-300">
             {stack}
           </Text>
@@ -159,6 +179,55 @@ function RosterRow({
         loading={removing}
       />
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Add Guest Modal
+// ---------------------------------------------------------------------------
+
+function AddGuestModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const appState = useAppState();
+  const [guestName, setGuestName] = useState('');
+  const [adding, setAdding] = useState(false);
+
+  const handleAdd = async () => {
+    const trimmed = guestName.trim();
+    if (!trimmed) return;
+    setAdding(true);
+    try {
+      await appState.addGuest(trimmed);
+      setGuestName('');
+      onClose();
+    } catch (e) {
+      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to add guest');
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  return (
+    <ConfirmationModal
+      visible={visible}
+      title="Add Guest"
+      message="Enter the guest's name. They'll be added with a $500 MXN buy-in."
+      confirmLabel="Add"
+      onConfirm={handleAdd}
+      onCancel={() => {
+        setGuestName('');
+        onClose();
+      }}
+      loading={adding}
+    >
+      <TextInput
+        className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-900 dark:text-sand-50"
+        placeholder="Guest name"
+        placeholderTextColor="#9ca3af"
+        value={guestName}
+        onChangeText={setGuestName}
+        autoFocus
+      />
+    </ConfirmationModal>
   );
 }
 
