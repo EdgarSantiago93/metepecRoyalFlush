@@ -1,8 +1,8 @@
+import { api } from '@/services/api/client';
+import type { Season, SeasonMember, Session, User } from '@/types';
+import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { router } from 'expo-router';
-import type { Season, SeasonMember, Session, User } from '@/types';
-import { api } from '@/services/api/client';
 import { StandingsTab } from './standings-tab';
 import { TimelineTab } from './timeline-tab';
 
@@ -51,12 +51,12 @@ export function LedgerContent({ season, members, users, session }: Props) {
       {/* Tab bar */}
       <View className="mx-6 mb-3 flex-row rounded-lg border border-sand-200 bg-sand-100 p-1 dark:border-sand-700 dark:bg-sand-800">
         <TabButton
-          label="Línea de Tiempo"
+          label="Timeline"
           isActive={activeTab === 'timeline'}
           onPress={() => setActiveTab('timeline')}
         />
         <TabButton
-          label="Clasificación"
+          label="Standings"
           isActive={activeTab === 'standings'}
           onPress={() => setActiveTab('standings')}
         />

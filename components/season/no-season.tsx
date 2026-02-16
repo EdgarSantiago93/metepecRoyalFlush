@@ -1,7 +1,7 @@
+import { useAuth } from '@/hooks/use-auth';
+import type { User } from '@/types';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import type { User } from '@/types';
-import { useAuth } from '@/hooks/use-auth';
 import { CreateSeasonForm } from './create-season-form';
 
 type Props = {
@@ -30,7 +30,7 @@ export function NoSeason({ users, onCreateSeason }: Props) {
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
       <Text className="mb-2 text-2xl font-bold text-sand-950 dark:text-sand-50">
-        Sin Temporada Activa
+        No hay temporada activa
       </Text>
       <Text className="mb-8 text-center text-base text-sand-500 dark:text-sand-400">
         {isAdmin
