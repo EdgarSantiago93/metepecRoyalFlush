@@ -4,14 +4,14 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
-import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/hooks/use-auth';
-import { AuthProvider } from '@/contexts/auth-context';
 import { AppStateProvider } from '@/contexts/app-state-context';
+import { AuthProvider } from '@/contexts/auth-context';
+import { useAuth } from '@/hooks/use-auth';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
@@ -44,19 +44,20 @@ function RootNavigation() {
             headerTintColor: '#c49a3c',
             headerTitleStyle: { color: '#1a1714' },
             headerShadowVisible: false,
+            headerBackTitle: 'Atrás',
           }}
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen name="deposit-upload" options={{ title: 'Upload Deposit' }} />
-          <Stack.Screen name="deposit-approvals" options={{ title: 'Deposit Approvals' }} />
-          <Stack.Screen name="host-order" options={{ title: 'Host Order' }} />
-          <Stack.Screen name="season-settings" options={{ title: 'Season Settings' }} />
-          <Stack.Screen name="schedule-session" options={{ title: 'Schedule Session' }} />
-          <Stack.Screen name="ledger-session-detail" options={{ title: 'Session Detail' }} />
-          <Stack.Screen name="ledger-player-detail" options={{ title: 'Player Detail' }} />
-          <Stack.Screen name="end-season" options={{ title: 'End Season' }} />
+          <Stack.Screen name="deposit-upload" options={{ title: 'Subir Depósito' }} />
+          <Stack.Screen name="deposit-approvals" options={{ title: 'Aprobar Depósitos' }} />
+          <Stack.Screen name="host-order" options={{ title: 'Orden de Host' }} />
+          <Stack.Screen name="season-settings" options={{ title: 'Opciones de Temporada' }} />
+          <Stack.Screen name="schedule-session" options={{ title: 'Programar Juego' }} />
+          <Stack.Screen name="ledger-session-detail" options={{ title: 'Detalle de Juego' }} />
+          <Stack.Screen name="ledger-player-detail" options={{ title: 'Detalle de Jugador' }} />
+          <Stack.Screen name="end-season" options={{ title: 'Finalizar Temporada' }} />
         </Stack>
         </AppStateProvider>
       </AuthGate>

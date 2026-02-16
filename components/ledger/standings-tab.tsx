@@ -1,7 +1,7 @@
+import { api } from '@/services/api/client';
+import type { SeasonMember, Session, SessionInjection, User } from '@/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import type { SeasonMember, Session, SessionInjection, User } from '@/types';
-import { api } from '@/services/api/client';
 
 type SortKey = 'name' | 'balance' | 'sessions' | 'rebuys' | 'pnl';
 type SortDir = 'asc' | 'desc';
@@ -202,7 +202,7 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
               currentSort={sortKey}
               currentDir={sortDir}
               onSort={handleSort}
-              width={80}
+              width={95}
               align="center"
             />
             <SortableHeader
