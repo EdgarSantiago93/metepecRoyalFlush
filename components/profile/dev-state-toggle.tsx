@@ -13,6 +13,7 @@ const PRESETS: { key: PresetKey; label: string }[] = [
   { key: 'season_active_closing', label: 'Active (closing)' },
   { key: 'season_active_finalized', label: 'Active (finalized)' },
   { key: 'season_active_with_session', label: 'Active (with session)' },
+  { key: 'season_active_multi_session', label: 'Active (multi-session ledger)' },
   { key: 'season_ended', label: 'Season Ended' },
 ];
 

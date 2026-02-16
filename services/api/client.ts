@@ -779,4 +779,47 @@ export const api: ApiClient = {
     const note = mockStore.sessionFinalizeNotes.find((n) => n.sessionId === sessionId) ?? null;
     return { finalizeNote: note };
   },
+
+  // ---------------------------------------------------------------------------
+  // Ledger (Phase 7)
+  // ---------------------------------------------------------------------------
+
+  async getSeasonSessions(seasonId: string) {
+    await delay(300);
+    // Combine finalized history + current session if it belongs to this season
+    const sessions = [...mockStore.finalizedSessions.filter((s) => s.seasonId === seasonId)];
+    if (mockStore.session && mockStore.session.seasonId === seasonId) {
+      sessions.push(mockStore.session);
+    }
+    // Sort newest first
+    sessions.sort((a, b) => {
+      const aTime = a.finalizedAt ?? a.startedAt ?? a.scheduledAt;
+      const bTime = b.finalizedAt ?? b.startedAt ?? b.scheduledAt;
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
+    });
+    return { sessions };
+  },
+
+  async getSessionDetail(sessionId: string) {
+    await delay(300);
+    // Find in finalized history or current session
+    const session =
+      mockStore.finalizedSessions.find((s) => s.id === sessionId) ??
+      (mockStore.session?.id === sessionId ? mockStore.session : null);
+    if (!session) throw new Error('Session not found');
+
+    const participants = mockStore.sessionParticipants.filter(
+      (p) => p.sessionId === sessionId && p.removedAt === null,
+    );
+    const injections = mockStore.sessionInjections.filter(
+      (inj) => inj.sessionId === sessionId,
+    );
+    const endingSubmissions = mockStore.endingSubmissions.filter(
+      (s) => s.sessionId === sessionId,
+    );
+    const finalizeNote =
+      mockStore.sessionFinalizeNotes.find((n) => n.sessionId === sessionId) ?? null;
+
+    return { session, participants, injections, endingSubmissions, finalizeNote };
+  },
 };

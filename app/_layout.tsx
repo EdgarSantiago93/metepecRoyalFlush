@@ -54,6 +54,8 @@ function RootNavigation() {
           <Stack.Screen name="host-order" options={{ title: 'Host Order' }} />
           <Stack.Screen name="season-settings" options={{ title: 'Season Settings' }} />
           <Stack.Screen name="schedule-session" options={{ title: 'Schedule Session' }} />
+          <Stack.Screen name="ledger-session-detail" options={{ title: 'Session Detail' }} />
+          <Stack.Screen name="ledger-player-detail" options={{ title: 'Player Detail' }} />
         </Stack>
         </AppStateProvider>
       </AuthGate>
