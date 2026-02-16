@@ -1146,6 +1146,19 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
 
   season_ended: () => {
     const seasonId = '01SE0000000000000000000004';
+    // Varied balances so the payout report has meaningful data
+    const balances = [75000, 80000, 30000, 95000, 115000, 25000, 80000, 50000, 50000, 50000];
+    const members: SeasonMember[] = SEED_USERS.map((u, i) => ({
+      id: `01SM000000000000000000${String(i + 1).padStart(4, '0')}`,
+      seasonId,
+      userId: u.id,
+      approvalStatus: 'approved' as const,
+      currentBalanceCents: balances[i] ?? 50000,
+      approvedAt: NOW,
+      approvedByUserId: SEED_USERS[1].id,
+      rejectionNote: null,
+      createdAt: NOW,
+    }));
     return {
       season: {
         id: seasonId,
@@ -1157,7 +1170,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         startedAt: '2026-01-01T00:00:00.000Z',
         endedAt: NOW,
       },
-      members: makeMembers(seasonId, true),
+      members,
       session: null,
       depositSubmissions: [],
       hostOrder: makeHostOrder(seasonId),

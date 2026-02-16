@@ -17,24 +17,10 @@ const PRESETS: { key: PresetKey; label: string }[] = [
   { key: 'season_ended', label: 'Season Ended' },
 ];
 
-function statusToPreset(status: string, hasSession: boolean): PresetKey {
-  if (status === 'no_season') return 'no_season';
-  if (status === 'season_setup') return 'season_setup'; // can't distinguish mixed from default at runtime
-  if (status === 'season_active') return hasSession ? 'season_active_with_session' : 'season_active_no_session';
-  if (status === 'season_ended') return 'season_ended';
-  return 'no_season';
-}
-
 export function DevStateToggle() {
   const appState = useAppState();
 
-  const currentPreset =
-    appState.status === 'loading' || appState.status === 'error'
-      ? null
-      : statusToPreset(
-          appState.status,
-          appState.status === 'season_active' ? appState.session !== null : false,
-        );
+  const currentPreset = appState._devPresetKey ?? null;
 
   return (
     <View className="mt-6 border-t border-sand-200 pt-6 dark:border-sand-700">

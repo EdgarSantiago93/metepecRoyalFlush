@@ -295,6 +295,31 @@ export const api: ApiClient = {
   },
 
   // ---------------------------------------------------------------------------
+  // End Season
+  // ---------------------------------------------------------------------------
+
+  async endSeason(req) {
+    await delay(600);
+    const now = new Date().toISOString();
+
+    if (!mockStore.season || mockStore.season.id !== req.seasonId) {
+      throw new Error('Season not found');
+    }
+    if (mockStore.season.status !== 'active') {
+      throw new Error('Season must be active to end');
+    }
+    if (mockStore.session && (mockStore.session.state === 'dealing' || mockStore.session.state === 'in_progress' || mockStore.session.state === 'closing')) {
+      throw new Error('Cannot end season while a session is in progress');
+    }
+
+    mockStore.season.status = 'ended';
+    mockStore.season.endedAt = now;
+    mockStore.session = null;
+
+    return { season: mockStore.season };
+  },
+
+  // ---------------------------------------------------------------------------
   // Session scheduling
   // ---------------------------------------------------------------------------
 

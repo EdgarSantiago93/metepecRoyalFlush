@@ -143,6 +143,31 @@ export function SeasonActive({ season, members, session, users }: Props) {
           </Pressable>
         </View>
       )}
+
+      {/* End Season — Treasurer / Admin only */}
+      {canManage && (() => {
+        const sessionActive = session && (session.state === 'dealing' || session.state === 'in_progress' || session.state === 'closing');
+        return (
+          <View className="mt-4">
+            {sessionActive && (
+              <Text className="mb-2 text-xs text-sand-500 dark:text-sand-400">
+                Cannot end season while a session is active
+              </Text>
+            )}
+            <Pressable
+              className={`items-center rounded-lg py-3 ${
+                sessionActive
+                  ? 'bg-red-300 dark:bg-red-800'
+                  : 'bg-red-600 active:bg-red-700'
+              }`}
+              onPress={() => router.push('/end-season' as never)}
+              disabled={!!sessionActive}
+            >
+              <Text className="text-sm font-semibold text-white">End Season</Text>
+            </Pressable>
+          </View>
+        );
+      })()}
     </ScrollView>
   );
 }
