@@ -502,8 +502,71 @@ export const api: ApiClient = {
 
     participant.removedAt = now;
     participant.removedByUserId = getCurrentUserId();
+
+    // Clean up guest buy-in injection when removing an ephemeral guest
+    if (participant.type === 'guest_ephemeral') {
+      mockStore.sessionInjections = mockStore.sessionInjections.filter(
+        (inj) => !(inj.participantId === participantId && inj.type === 'guest_buyin_500'),
+      );
+    }
+
     // TODO: WebSocket broadcast — participant removed
     return { participant };
+  },
+
+  async addGuest(req) {
+    await delay(400);
+    const now = new Date().toISOString();
+
+    if (!mockStore.session || mockStore.session.id !== req.sessionId) {
+      throw new Error('Session not found');
+    }
+    if (mockStore.session.state !== 'dealing') {
+      throw new Error('Guests can only be added during the dealing phase');
+    }
+
+    const trimmedName = req.guestName.trim();
+    if (!trimmedName) {
+      throw new Error('Guest name is required');
+    }
+
+    const participantId = makeId('01SP');
+
+    const participant: import('@/types').SessionParticipant = {
+      id: participantId,
+      sessionId: req.sessionId,
+      type: 'guest_ephemeral',
+      userId: null,
+      guestName: trimmedName,
+      startingStackCents: 0,
+      checkedInAt: now,
+      confirmedStartAt: now,
+      startDisputeNote: null,
+      removedAt: null,
+      removedByUserId: null,
+      createdAt: now,
+    };
+
+    const injection: import('@/types').SessionInjection = {
+      id: makeId('01SI'),
+      sessionId: req.sessionId,
+      participantId: participantId,
+      type: 'guest_buyin_500',
+      amountCents: 50000,
+      requestedByUserId: getCurrentUserId(),
+      requestedAt: now,
+      proofPhotoUrl: null,
+      status: 'approved',
+      reviewedAt: now,
+      reviewedByUserId: getCurrentUserId(),
+      reviewNote: 'Auto-approved guest buy-in',
+      createdAt: now,
+    };
+
+    mockStore.sessionParticipants.push(participant);
+    mockStore.sessionInjections.push(injection);
+
+    return { participant, injection };
   },
 
   async moveSessionToInProgress(sessionId: string) {

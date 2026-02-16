@@ -43,6 +43,7 @@ export type PresetKey =
   | 'season_active_no_session'
   | 'season_active_scheduled'
   | 'season_active_dealing'
+  | 'season_active_dealing_with_guest'
   | 'season_active_in_progress'
   | 'season_active_closing'
   | 'season_active_finalized'
@@ -340,6 +341,114 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       hostOrder: makeHostOrder(seasonId),
       sessionParticipants: participants,
       sessionInjections: [],
+      endingSubmissions: [],
+      sessionFinalizeNotes: [],
+      finalizedSessions: [],
+    };
+  },
+
+  season_active_dealing_with_guest: () => {
+    const seasonId = '01SE000000000000000000000G';
+    const sessionId = '01SS000000000000000000000G';
+    const participants: SessionParticipant[] = [
+      // Carlos (treasurer): checked in + confirmed
+      {
+        id: '01SP000000000000000G000001',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[1].id,
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Miguel: checked in, not confirmed
+      {
+        id: '01SP000000000000000G000002',
+        sessionId,
+        type: 'member',
+        userId: SEED_USERS[2].id,
+        guestName: null,
+        startingStackCents: 50000,
+        checkedInAt: NOW,
+        confirmedStartAt: null,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+      // Guest: Roberto (auto checked-in + confirmed, starting stack 0)
+      {
+        id: '01SP000000000000000G000003',
+        sessionId,
+        type: 'guest_ephemeral',
+        userId: null,
+        guestName: 'Roberto',
+        startingStackCents: 0,
+        checkedInAt: NOW,
+        confirmedStartAt: NOW,
+        startDisputeNote: null,
+        removedAt: null,
+        removedByUserId: null,
+        createdAt: NOW,
+      },
+    ];
+
+    const injections: SessionInjection[] = [
+      // Roberto's auto-approved guest buy-in
+      {
+        id: '01SI000000000000000G000001',
+        sessionId,
+        participantId: '01SP000000000000000G000003',
+        type: 'guest_buyin_500',
+        amountCents: 50000,
+        requestedByUserId: SEED_USERS[1].id,
+        requestedAt: NOW,
+        proofPhotoUrl: null,
+        status: 'approved',
+        reviewedAt: NOW,
+        reviewedByUserId: SEED_USERS[1].id,
+        reviewNote: 'Auto-approved guest buy-in',
+        createdAt: NOW,
+      },
+    ];
+
+    return {
+      season: {
+        id: seasonId,
+        name: 'Season Feb 2026',
+        status: 'active' as const,
+        createdByUserId: SEED_USERS[0].id,
+        treasurerUserId: SEED_USERS[1].id,
+        createdAt: NOW,
+        startedAt: NOW,
+        endedAt: null,
+      },
+      members: makeMembers(seasonId, true),
+      session: {
+        id: sessionId,
+        seasonId,
+        state: 'dealing' as const,
+        hostUserId: SEED_USERS[2].id,
+        scheduledFor: '2026-02-15T20:00:00.000Z',
+        location: "Miguel's place",
+        scheduledAt: NOW,
+        scheduledByUserId: SEED_USERS[1].id,
+        startedAt: NOW,
+        startedByUserId: SEED_USERS[1].id,
+        endedAt: null,
+        endedByUserId: null,
+        finalizedAt: null,
+        finalizedByUserId: null,
+      },
+      depositSubmissions: [],
+      hostOrder: makeHostOrder(seasonId),
+      sessionParticipants: participants,
+      sessionInjections: injections,
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
