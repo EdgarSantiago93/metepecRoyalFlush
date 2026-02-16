@@ -35,7 +35,7 @@ export default function LedgerPlayerDetailScreen() {
       );
       setSessionDetails(details);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load player data');
+      setError(err instanceof Error ? err.message : 'No se pudieron cargar los datos del jugador');
     } finally {
       setLoading(false);
     }
@@ -54,14 +54,14 @@ export default function LedgerPlayerDetailScreen() {
   }
 
   if (error || !userId) {
-    return <ErrorView message={error ?? 'Player not found'} onRetry={loadData} />;
+    return <ErrorView message={error ?? 'Jugador no encontrado'} onRetry={loadData} />;
   }
 
   const player = users.find((u) => u.id === userId);
   const member = members.find((m) => m.userId === userId);
 
   if (!player || !member) {
-    return <ErrorView message="Player not found" onRetry={loadData} />;
+    return <ErrorView message="Jugador no encontrado" onRetry={loadData} />;
   }
 
   return (

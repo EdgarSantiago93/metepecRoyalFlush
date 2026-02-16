@@ -62,10 +62,10 @@ export function SessionScheduleForm({
         {/* Host picker */}
         <View className="mb-6">
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Host (required)
+            Host (requerido)
           </Text>
           <Text className="mb-3 text-sm text-sand-500 dark:text-sand-400">
-            Select who will host the session. Sorted by host rotation order.
+            Selecciona quién será el host del juego. Ordenado por rotación de host.
           </Text>
 
           {sortedHosts.map((ho, index) => {
@@ -109,7 +109,7 @@ export function SessionScheduleForm({
                     {user.displayName}
                   </Text>
                   <Text className="text-xs text-sand-500 dark:text-sand-400">
-                    #{index + 1} in rotation
+                    #{index + 1} en rotación
                   </Text>
                 </View>
                 <View
@@ -131,11 +131,11 @@ export function SessionScheduleForm({
         {/* Date/Time */}
         <View className="mb-6">
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Date / Time (optional)
+            Fecha / Hora (opcional)
           </Text>
           <TextInput
             className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-            placeholder='e.g. "Saturday 8pm"'
+            placeholder='ej. "Sábado 8pm"'
             placeholderTextColor="#b5ac9e"
             value={scheduledFor}
             onChangeText={setScheduledFor}
@@ -146,11 +146,11 @@ export function SessionScheduleForm({
         {/* Location */}
         <View className="mb-6">
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Location (optional)
+            Ubicación (opcional)
           </Text>
           <TextInput
             className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-            placeholder="e.g. Miguel's place"
+            placeholder="ej. Casa de Miguel"
             placeholderTextColor="#b5ac9e"
             value={location}
             onChangeText={setLocation}
@@ -167,7 +167,7 @@ export function SessionScheduleForm({
           disabled={submitting}
         >
           <Text className="text-base font-semibold text-sand-700 dark:text-sand-300">
-            Cancel
+            Cancelar
           </Text>
         </Pressable>
         <Pressable

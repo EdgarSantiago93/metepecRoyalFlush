@@ -12,11 +12,11 @@ import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
 type FilterTab = 'all' | ApprovalStatus;
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'pending', label: 'Pending' },
-  { key: 'approved', label: 'Approved' },
-  { key: 'rejected', label: 'Rejected' },
-  { key: 'not_submitted', label: 'None' },
+  { key: 'all', label: 'Todos' },
+  { key: 'pending', label: 'Pendientes' },
+  { key: 'approved', label: 'Aprobados' },
+  { key: 'rejected', label: 'Rechazados' },
+  { key: 'not_submitted', label: 'Sin enviar' },
 ];
 
 export default function DepositApprovalsScreen() {
@@ -62,7 +62,7 @@ export default function DepositApprovalsScreen() {
     async (submissionId: string, action: 'approve' | 'reject') => {
       if (acting) return;
       if (action === 'reject' && !rejectNote.trim()) {
-        Alert.alert('Note required', 'Please add a note explaining the rejection.');
+        Alert.alert('Nota requerida', 'Por favor agrega una nota explicando el rechazo.');
         return;
       }
       setActing(true);
@@ -77,7 +77,7 @@ export default function DepositApprovalsScreen() {
         await loadSubmissions();
         await appState.refresh();
       } catch (e) {
-        Alert.alert('Error', e instanceof Error ? e.message : 'Review failed');
+        Alert.alert('Error', e instanceof Error ? e.message : 'Revisión fallida');
       } finally {
         setActing(false);
       }
@@ -89,16 +89,16 @@ export default function DepositApprovalsScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
         <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
-          Unauthorized
+          Sin Autorización
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
-          Only the treasurer can review deposit submissions.
+          Solo el tesorero puede revisar envíos de depósito.
         </Text>
         <Pressable
           className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={() => router.back()}
         >
-          <Text className="text-base font-semibold text-white">Go Back</Text>
+          <Text className="text-base font-semibold text-white">Regresar</Text>
         </Pressable>
       </View>
     );
@@ -152,7 +152,7 @@ export default function DepositApprovalsScreen() {
       <ScrollView className="flex-1" contentContainerClassName="px-6 pb-8">
         {filteredMembers.length === 0 && (
           <Text className="mt-8 text-center text-sm text-sand-500 dark:text-sand-400">
-            No members in this category.
+            No hay miembros en esta categoría.
           </Text>
         )}
 
@@ -188,7 +188,7 @@ export default function DepositApprovalsScreen() {
                       )}
                       {submission.note && (
                         <Text className="mb-3 text-sm text-sand-500 dark:text-sand-400">
-                          Note: {submission.note}
+                          Nota: {submission.note}
                         </Text>
                       )}
 
@@ -203,7 +203,7 @@ export default function DepositApprovalsScreen() {
                               {acting ? (
                                 <ActivityIndicator color="white" size="small" />
                               ) : (
-                                <Text className="text-sm font-semibold text-white">Approve</Text>
+                                <Text className="text-sm font-semibold text-white">Aprobar</Text>
                               )}
                             </Pressable>
                             <Pressable
@@ -211,12 +211,12 @@ export default function DepositApprovalsScreen() {
                               onPress={() => handleReview(submission.id, 'reject')}
                               disabled={acting}
                             >
-                              <Text className="text-sm font-semibold text-white">Reject</Text>
+                              <Text className="text-sm font-semibold text-white">Rechazar</Text>
                             </Pressable>
                           </View>
                           <TextInput
                             className="rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-900 dark:text-sand-50"
-                            placeholder="Rejection note (required to reject)"
+                            placeholder="Nota de rechazo (requerida para rechazar)"
                             placeholderTextColor="#b5ac9e"
                             value={rejectNote}
                             onChangeText={setRejectNote}
@@ -226,13 +226,13 @@ export default function DepositApprovalsScreen() {
 
                       {submission.reviewNote && (
                         <Text className="mt-2 text-xs text-sand-500 dark:text-sand-400">
-                          Review note: {submission.reviewNote}
+                          Nota de revisión: {submission.reviewNote}
                         </Text>
                       )}
                     </>
                   ) : (
                     <Text className="text-sm text-sand-500 dark:text-sand-400">
-                      No deposit proof submitted yet.
+                      Aún no se ha enviado comprobante de depósito.
                     </Text>
                   )}
                 </View>

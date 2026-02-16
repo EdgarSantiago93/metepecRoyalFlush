@@ -36,7 +36,7 @@ function NotCheckedIn() {
       await appState.checkIn();
       setShowModal(false);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to check in');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo hacer check in');
     } finally {
       setLoading(false);
     }
@@ -45,10 +45,10 @@ function NotCheckedIn() {
   return (
     <View className="mx-6 mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
       <Text className="mb-1 text-base font-semibold text-sand-950 dark:text-sand-50">
-        You haven&apos;t checked in yet
+        Aún no has hecho check in
       </Text>
       <Text className="mb-4 text-sm text-sand-500 dark:text-sand-400">
-        Check in to receive your starting stack from the treasurer.
+        Haz check in para recibir tu stack inicial del tesorero.
       </Text>
       <Pressable
         className="items-center rounded-lg bg-gold-500 py-3 active:bg-gold-600"
@@ -59,10 +59,9 @@ function NotCheckedIn() {
 
       <ConfirmationModal
         visible={showModal}
-        title="Check In to Session"
-        message="If you check in but do not attend, the big and small blind rule will apply."
+        title="Check In al Juego"
+        message="Si haces check in pero no asistes, se aplicará la regla de big y small blind."
         confirmLabel="Check In"
-        cancelLabel="Cancel"
         onConfirm={handleConfirm}
         onCancel={() => setShowModal(false)}
         loading={loading}
@@ -89,7 +88,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
     try {
       await appState.confirmStart(participant.id);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to confirm');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo confirmar');
     } finally {
       setConfirming(false);
     }
@@ -97,7 +96,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
 
   const handleDispute = useCallback(async () => {
     if (!disputeNote.trim()) {
-      Alert.alert('Required', 'Please describe the issue');
+      Alert.alert('Requerido', 'Por favor describe el problema');
       return;
     }
     setSubmittingDispute(true);
@@ -106,7 +105,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
       setShowDispute(false);
       setDisputeNote('');
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to submit dispute');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo enviar la disputa');
     } finally {
       setSubmittingDispute(false);
     }
@@ -115,10 +114,10 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
   return (
     <View className="mx-6 mb-4 rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
       <Text className="mb-1 text-base font-semibold text-sand-950 dark:text-sand-50">
-        Confirm Your Starting Stack
+        Confirma Tu Stack Inicial
       </Text>
       <Text className="mb-4 text-sm text-sand-600 dark:text-sand-300">
-        You should receive <Text className="font-bold">{formattedStack}</Text> from the treasurer.
+        Deberías recibir <Text className="font-bold">{formattedStack}</Text> del tesorero.
       </Text>
 
       {!showDispute ? (
@@ -129,7 +128,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
             disabled={confirming}
           >
             <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-              Dispute
+              Disputar
             </Text>
           </Pressable>
           <Pressable
@@ -138,7 +137,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
             disabled={confirming}
           >
             <Text className="text-sm font-semibold text-white">
-              {confirming ? 'Confirming...' : 'Confirm Received'}
+              {confirming ? 'Confirmando...' : 'Confirmar Recibido'}
             </Text>
           </Pressable>
         </View>
@@ -163,7 +162,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
               disabled={submittingDispute}
             >
               <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                Cancel
+                Cancelar
               </Text>
             </Pressable>
             <Pressable
@@ -172,7 +171,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
               disabled={submittingDispute}
             >
               <Text className="text-sm font-semibold text-white">
-                {submittingDispute ? 'Submitting...' : 'Submit Dispute'}
+                {submittingDispute ? 'Enviando...' : 'Enviar Disputa'}
               </Text>
             </Pressable>
           </View>
@@ -192,10 +191,10 @@ function Confirmed({ participant }: { participant: SessionParticipant }) {
   return (
     <View className="mx-6 mb-4 rounded-xl border border-felt-300 bg-felt-50 p-4 dark:border-felt-700 dark:bg-felt-900/30">
       <Text className="mb-1 text-base font-semibold text-felt-800 dark:text-felt-200">
-        You&apos;re checked in
+        Estás registrado
       </Text>
       <Text className="text-sm text-felt-700 dark:text-felt-300">
-        Starting stack: <Text className="font-bold">{formattedStack}</Text>
+        Stack inicial: <Text className="font-bold">{formattedStack}</Text>
       </Text>
     </View>
   );
@@ -209,13 +208,13 @@ function Disputed({ participant }: { participant: SessionParticipant }) {
   return (
     <View className="mx-6 mb-4 rounded-xl border border-red-300 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/30">
       <Text className="mb-1 text-base font-semibold text-red-800 dark:text-red-200">
-        Dispute Submitted
+        Disputa Enviada
       </Text>
       <Text className="mb-2 text-sm text-red-700 dark:text-red-300">
         &ldquo;{participant.startDisputeNote}&rdquo;
       </Text>
       <Text className="text-xs text-red-500 dark:text-red-400">
-        Waiting for the treasurer to resolve this dispute.
+        Esperando a que el tesorero resuelva esta disputa.
       </Text>
     </View>
   );

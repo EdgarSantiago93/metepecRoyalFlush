@@ -41,22 +41,22 @@ export function LedgerContent({ season, members, users, session }: Props) {
       {/* Header */}
       <View className="px-6 pb-3 pt-16">
         <Text className="mb-0.5 text-2xl font-bold text-sand-950 dark:text-sand-50">
-          Ledger
+          Registro
         </Text>
         <Text className="text-sm text-sand-500 dark:text-sand-400">
-          {season.name ?? 'Current Season'} — Treasurer: {treasurerName}
+          {season.name ?? 'Temporada Actual'} — Tesorero: {treasurerName}
         </Text>
       </View>
 
       {/* Tab bar */}
       <View className="mx-6 mb-3 flex-row rounded-lg border border-sand-200 bg-sand-100 p-1 dark:border-sand-700 dark:bg-sand-800">
         <TabButton
-          label="Timeline"
+          label="Línea de Tiempo"
           isActive={activeTab === 'timeline'}
           onPress={() => setActiveTab('timeline')}
         />
         <TabButton
-          label="Standings"
+          label="Clasificación"
           isActive={activeTab === 'standings'}
           onPress={() => setActiveTab('standings')}
         />
@@ -70,6 +70,7 @@ export function LedgerContent({ season, members, users, session }: Props) {
           members={members}
           session={session}
           loading={loading}
+          onReloadSessions={loadSessions}
           onNavigateToSession={(sessionId) =>
             router.push({ pathname: '/ledger-session-detail', params: { sessionId } })
           }

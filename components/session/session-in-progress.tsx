@@ -63,7 +63,7 @@ export function SessionInProgress({ session, season, members, participants, inje
       await appState.endSession();
       setShowEndModal(false);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to end session');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo terminar el juego');
     } finally {
       setEnding(false);
     }
@@ -77,7 +77,7 @@ export function SessionInProgress({ session, season, members, participants, inje
     >
       {/* Banner */}
       <View className="bg-felt-600 px-6 pb-5 pt-16 dark:bg-felt-800">
-        <Text className="text-xl font-bold text-white">Session In Progress</Text>
+        <Text className="text-xl font-bold text-white">Juego En Curso</Text>
         {host && (
           <Text className="mt-1 text-sm text-felt-100">
             Host: {host.displayName}
@@ -87,7 +87,7 @@ export function SessionInProgress({ session, season, members, participants, inje
         {pendingCount > 0 && canManage && (
           <View className="mt-2 self-start rounded-full bg-gold-500 px-3 py-1">
             <Text className="text-xs font-semibold text-white">
-              {pendingCount} pending rebuy{pendingCount !== 1 ? 's' : ''}
+              {pendingCount} ribeye{pendingCount !== 1 ? 's' : ''} 🥩 pendiente{pendingCount !== 1 ? 's' : ''}
             </Text>
           </View>
         )}
@@ -117,14 +117,14 @@ export function SessionInProgress({ session, season, members, participants, inje
         {approvedFeed.length > 0 && (
           <View className="mx-6 mb-4">
             <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-              Approved Rebuys
+              Ribeyes 🥩 Aprobados
             </Text>
             {approvedFeed.map((inj) => {
               const participant = participants.find((p) => p.id === inj.participantId);
               const user = users.find((u) => u.id === participant?.userId);
               const name = user?.displayName ?? participant?.guestName ?? 'Unknown';
               const amount = `$${(inj.amountCents / 100).toLocaleString()} MXN`;
-              const time = new Date(inj.reviewedAt!).toLocaleTimeString([], {
+              const time = new Date(inj.reviewedAt!).toLocaleTimeString('es-MX', {
                 hour: '2-digit',
                 minute: '2-digit',
               });
@@ -159,7 +159,7 @@ export function SessionInProgress({ session, season, members, participants, inje
               onPress={() => setShowEndModal(true)}
             >
               <Text className="text-base font-semibold text-red-600 dark:text-red-400">
-                End Session
+                Terminar Juego
               </Text>
             </Pressable>
           </View>
@@ -168,10 +168,9 @@ export function SessionInProgress({ session, season, members, participants, inje
 
       <ConfirmationModal
         visible={showEndModal}
-        title="End Session"
-        message="End this session and move to the closing phase? No more rebuys will be allowed after this point."
-        confirmLabel="End Session"
-        cancelLabel="Cancel"
+        title="Terminar Juego"
+        message="¿Terminar este juego y pasar a la fase de cierre? No se permitirán más ribeyes 🥩 después de este punto."
+        confirmLabel="Terminar Juego"
         variant="destructive"
         onConfirm={handleEndSession}
         onCancel={() => setShowEndModal(false)}

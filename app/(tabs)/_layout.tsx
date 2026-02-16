@@ -25,7 +25,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Season',
+            title: 'Temporada',
 
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="trophy.fill" color={color} />,
           }}
@@ -33,7 +33,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="session"
           options={{
-            title: 'Session',
+            title: 'Juego',
 
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="play.circle.fill" color={color} />
@@ -43,7 +43,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="ledger"
           options={{
-            title: 'Ledger',
+            title: 'Registro',
 
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="book.closed.fill" color={color} />
@@ -53,7 +53,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            title: 'Profile',
+            title: 'Perfil',
 
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="person.crop.circle.fill" color={color} />

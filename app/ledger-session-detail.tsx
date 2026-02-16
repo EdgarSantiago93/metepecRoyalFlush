@@ -30,7 +30,7 @@ export default function LedgerSessionDetailScreen() {
       setEndingSubmissions(detail.endingSubmissions);
       setFinalizeNote(detail.finalizeNote);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load session');
+      setError(err instanceof Error ? err.message : 'No se pudo cargar el juego');
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function LedgerSessionDetailScreen() {
   }
 
   if (error || !session) {
-    return <ErrorView message={error ?? 'Session not found'} onRetry={loadDetail} />;
+    return <ErrorView message={error ?? 'Juego no encontrado'} onRetry={loadDetail} />;
   }
 
   const users = appState.status !== 'loading' && appState.status !== 'error' ? (

@@ -30,19 +30,19 @@ export function NoSeason({ users, onCreateSeason }: Props) {
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
       <Text className="mb-2 text-2xl font-bold text-sand-950 dark:text-sand-50">
-        No Active Season
+        Sin Temporada Activa
       </Text>
       <Text className="mb-8 text-center text-base text-sand-500 dark:text-sand-400">
         {isAdmin
-          ? 'Create a new season to get started.'
-          : 'Waiting for an admin to create a new season.'}
+          ? 'Crea una nueva temporada para comenzar.'
+          : 'Esperando a que un admin cree una nueva temporada.'}
       </Text>
       {isAdmin && (
         <Pressable
           className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={() => setShowForm(true)}
         >
-          <Text className="text-base font-semibold text-white">Create Season</Text>
+          <Text className="text-base font-semibold text-white">Crear Temporada</Text>
         </Pressable>
       )}
     </View>

@@ -16,11 +16,11 @@ export function RebuyApprovals({ injections, participants, users }: Props) {
     return (
       <View className="mx-6 mb-4">
         <Text className="mb-2 text-base font-semibold text-sand-950 dark:text-sand-50">
-          Rebuy Requests
+          Solicitudes de Ribeye 🥩
         </Text>
         <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
           <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
-            No pending rebuy requests
+            Sin solicitudes de ribeye 🥩 pendientes
           </Text>
         </View>
       </View>
@@ -30,7 +30,7 @@ export function RebuyApprovals({ injections, participants, users }: Props) {
   return (
     <View className="mx-6 mb-4">
       <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-        Rebuy Requests ({pending.length} pending)
+        Solicitudes de Ribeye 🥩 ({pending.length} pendientes)
       </Text>
 
       {pending.map((inj) => (
@@ -68,14 +68,14 @@ function PendingInjectionCard({
   const user = users.find((u) => u.id === participant?.userId);
   const playerName = user?.displayName ?? participant?.guestName ?? 'Unknown';
   const amount = `$${(injection.amountCents / 100).toLocaleString()} MXN`;
-  const typeLabel = injection.type === 'rebuy_500' ? 'Full Rebuy' : injection.type === 'half_250' ? 'Half Rebuy' : 'Buy-in';
+  const typeLabel = injection.type === 'rebuy_500' ? 'Ribeye 🥩 Completo' : injection.type === 'half_250' ? 'Medio Ribeye 🥩' : 'Buy-in';
 
   const handleApprove = useCallback(async () => {
     setApproving(true);
     try {
       await appState.reviewInjection(injection.id, 'approve');
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to approve');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo aprobar');
     } finally {
       setApproving(false);
     }
@@ -83,14 +83,14 @@ function PendingInjectionCard({
 
   const handleReject = useCallback(async () => {
     if (!rejectNote.trim()) {
-      Alert.alert('Required', 'Please provide a reason for rejection');
+      Alert.alert('Requerido', 'Por favor proporciona una razón para el rechazo');
       return;
     }
     setRejecting(true);
     try {
       await appState.reviewInjection(injection.id, 'reject', rejectNote.trim());
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to reject');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo rechazar');
     } finally {
       setRejecting(false);
     }
@@ -116,7 +116,7 @@ function PendingInjectionCard({
       </Text>
 
       <Text className="mb-3 text-xs text-sand-500 dark:text-sand-400">
-        Requested {new Date(injection.requestedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        Solicitado {new Date(injection.requestedAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
       </Text>
 
       {injection.proofPhotoUrl && (
@@ -135,7 +135,7 @@ function PendingInjectionCard({
             disabled={busy}
           >
             <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-              Reject
+              Rechazar
             </Text>
           </Pressable>
           <Pressable
@@ -146,7 +146,7 @@ function PendingInjectionCard({
             disabled={busy}
           >
             <Text className="text-sm font-semibold text-white">
-              {approving ? 'Approving...' : 'Approve'}
+              {approving ? 'Aprobando...' : 'Aprobar'}
             </Text>
           </Pressable>
         </View>
@@ -154,7 +154,7 @@ function PendingInjectionCard({
         <View className="gap-3">
           <TextInput
             className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-            placeholder="Reason for rejection (required)"
+            placeholder="Razón del rechazo (requerida)"
             placeholderTextColor="#94a3b8"
             value={rejectNote}
             onChangeText={setRejectNote}
@@ -170,7 +170,7 @@ function PendingInjectionCard({
               disabled={rejecting}
             >
               <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                Cancel
+                Cancelar
               </Text>
             </Pressable>
             <Pressable
@@ -181,7 +181,7 @@ function PendingInjectionCard({
               disabled={rejecting}
             >
               <Text className="text-sm font-semibold text-white">
-                {rejecting ? 'Rejecting...' : 'Reject'}
+                {rejecting ? 'Rechazando...' : 'Rechazar'}
               </Text>
             </Pressable>
           </View>

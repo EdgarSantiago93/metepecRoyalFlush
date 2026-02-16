@@ -4,7 +4,7 @@ type Props = {
   message?: string;
 };
 
-export function LoadingView({ message = 'Loading…' }: Props) {
+export function LoadingView({ message = 'Cargando…' }: Props) {
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
       <ActivityIndicator size="large" className="mb-4" />

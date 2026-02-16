@@ -34,7 +34,7 @@ export function ClosingPlayerView({
     return (
       <View className="mx-6 mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
         <Text className="text-sm text-sand-500 dark:text-sand-400">
-          You are not a participant in this session.
+          No eres participante en este juego.
         </Text>
       </View>
     );
@@ -53,12 +53,12 @@ export function ClosingPlayerView({
       {/* Stats card */}
       <View className="mb-3 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
         <Text className="mb-2 text-base font-semibold text-amber-800 dark:text-amber-200">
-          Your Session
+          Tu Juego
         </Text>
         <View className="flex-row justify-between">
-          <StatItem label="Starting" value={`$${(participant.startingStackCents / 100).toLocaleString()} MXN`} />
-          <StatItem label="Rebuys" value={`$${(approvedRebuysTotal / 100).toLocaleString()} MXN`} />
-          <StatItem label="Total In" value={`$${(totalIn / 100).toLocaleString()} MXN`} />
+          <StatItem label="Inicio" value={`$${(participant.startingStackCents / 100).toLocaleString()} MXN`} />
+          <StatItem label="Ribeyes 🥩" value={`$${(approvedRebuysTotal / 100).toLocaleString()} MXN`} />
+          <StatItem label="Total Invertido" value={`$${(totalIn / 100).toLocaleString()} MXN`} />
         </View>
       </View>
 
@@ -98,17 +98,17 @@ function PendingBadge({ submission }: { submission: EndingSubmission }) {
     <View className="rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-base font-semibold text-sand-950 dark:text-sand-50">
-          Submitted: ${(submission.endingStackCents / 100).toLocaleString()} MXN
+          Enviado: ${(submission.endingStackCents / 100).toLocaleString()} MXN
         </Text>
         <View className="rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900/40">
           <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
-            Pending validation
+            Pendiente de validación
           </Text>
         </View>
       </View>
       {submission.note && (
         <Text className="text-sm text-sand-500 dark:text-sand-400">
-          Note: {submission.note}
+          Nota: {submission.note}
         </Text>
       )}
     </View>
@@ -124,17 +124,17 @@ function ValidatedBadge({ submission }: { submission: EndingSubmission }) {
     <View className="rounded-xl border border-felt-300 bg-felt-50 p-4 dark:border-felt-700 dark:bg-felt-900/30">
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-base font-semibold text-sand-950 dark:text-sand-50">
-          Ending: ${(submission.endingStackCents / 100).toLocaleString()} MXN
+          Final: ${(submission.endingStackCents / 100).toLocaleString()} MXN
         </Text>
         <View className="rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900/40">
           <Text className="text-xs font-semibold text-felt-700 dark:text-felt-300">
-            Validated
+            Validado
           </Text>
         </View>
       </View>
       {submission.note && (
         <Text className="text-sm text-sand-500 dark:text-sand-400">
-          Note: {submission.note}
+          Nota: {submission.note}
         </Text>
       )}
     </View>
@@ -188,7 +188,7 @@ function SubmissionForm({
 
     const libStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (libStatus.status !== 'granted') {
-      Alert.alert('Permission needed', 'Camera or photo library access is required for proof photos.');
+      Alert.alert('Permiso necesario', 'Se necesita acceso a la cámara o galería para fotos de comprobante.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -203,11 +203,11 @@ function SubmissionForm({
   const handleSubmit = useCallback(async () => {
     const cents = Math.round(Number(endingStack) * 100);
     if (isNaN(cents) || cents < 0) {
-      Alert.alert('Invalid', 'Please enter a valid ending stack amount');
+      Alert.alert('Inválido', 'Por favor ingresa un monto de stack final válido');
       return;
     }
     if (!photoUri) {
-      Alert.alert('Required', 'Please attach a proof photo of your chip count');
+      Alert.alert('Requerido', 'Por favor adjunta una foto de comprobante de tu conteo de fichas');
       return;
     }
     setLoading(true);
@@ -222,7 +222,7 @@ function SubmissionForm({
       setPhotoUri(null);
       setNote('');
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to submit ending stack');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo enviar el stack final');
     } finally {
       setLoading(false);
     }
@@ -237,7 +237,7 @@ function SubmissionForm({
           <View className="mb-1 flex-row items-center gap-2">
             <View className="rounded-full bg-red-100 px-2 py-0.5 dark:bg-red-900/40">
               <Text className="text-[10px] font-semibold text-red-700 dark:text-red-300">
-                Rejected
+                Rechazado
               </Text>
             </View>
           </View>
@@ -250,17 +250,17 @@ function SubmissionForm({
       )}
 
       <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-        {rejectedSubmission ? 'Resubmit Ending Stack' : 'Submit Ending Stack'}
+        {rejectedSubmission ? 'Reenviar Stack Final' : 'Enviar Stack Final'}
       </Text>
 
       {/* Ending stack input */}
       <View className="mb-3">
         <Text className="mb-1 text-xs text-sand-500 dark:text-sand-400">
-          Ending Stack (MXN)
+          Stack Final (MXN)
         </Text>
         <TextInput
           className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-          placeholder="e.g. 850"
+          placeholder="ej. 850"
           placeholderTextColor="#94a3b8"
           keyboardType="numeric"
           value={endingStack}
@@ -271,7 +271,7 @@ function SubmissionForm({
       {/* Photo picker */}
       <View className="mb-3">
         <Text className="mb-1 text-xs text-sand-500 dark:text-sand-400">
-          Proof Photo (required)
+          Foto de Comprobante (requerida)
         </Text>
         {photoUri ? (
           <View className="flex-row items-end gap-3">
@@ -281,7 +281,7 @@ function SubmissionForm({
               resizeMode="cover"
             />
             <Pressable onPress={() => setPhotoUri(null)}>
-              <Text className="text-xs text-red-500">Remove</Text>
+              <Text className="text-xs text-red-500">Eliminar</Text>
             </Pressable>
           </View>
         ) : (
@@ -290,7 +290,7 @@ function SubmissionForm({
             onPress={handlePickImage}
           >
             <Text className="text-sm text-sand-500 dark:text-sand-400">
-              Take or pick a photo
+              Tomar o elegir una foto
             </Text>
           </Pressable>
         )}
@@ -299,11 +299,11 @@ function SubmissionForm({
       {/* Optional note */}
       <View className="mb-3">
         <Text className="mb-1 text-xs text-sand-500 dark:text-sand-400">
-          Note (optional)
+          Nota (opcional)
         </Text>
         <TextInput
           className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-          placeholder="Any comments about the count"
+          placeholder="Comentarios sobre el conteo"
           placeholderTextColor="#94a3b8"
           value={note}
           onChangeText={setNote}
@@ -314,7 +314,7 @@ function SubmissionForm({
       {eligibleOthers.length > 0 && (
         <View className="mb-3">
           <Text className="mb-1 text-xs text-sand-500 dark:text-sand-400">
-            Submitting for
+            Enviando por
           </Text>
           <View className="flex-row flex-wrap gap-2">
             <Pressable
@@ -330,7 +330,7 @@ function SubmissionForm({
                   ? 'text-amber-700 dark:text-amber-300'
                   : 'text-sand-700 dark:text-sand-300'
               }`}>
-                Myself
+                Yo mismo
               </Text>
             </Pressable>
             {eligibleOthers.map((p) => {
@@ -372,7 +372,7 @@ function SubmissionForm({
         disabled={!canSubmit || loading}
       >
         <Text className="text-base font-semibold text-white">
-          {loading ? 'Submitting...' : rejectedSubmission ? 'Resubmit' : 'Submit'}
+          {loading ? 'Enviando...' : rejectedSubmission ? 'Reenviar' : 'Enviar'}
         </Text>
       </Pressable>
     </View>

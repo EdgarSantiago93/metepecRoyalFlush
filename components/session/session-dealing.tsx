@@ -47,13 +47,13 @@ export function SessionDealing({ session, season, members, participants, users }
 
   const disabledReason = useMemo(() => {
     if (checkedIn.length < 2) {
-      return `Need at least 2 checked-in players (${checkedIn.length} now)`;
+      return `Se necesitan al menos 2 jugadores con check in (${checkedIn.length} ahora)`;
     }
     if (disputed.length > 0) {
-      return `${disputed.length} dispute${disputed.length > 1 ? 's' : ''} need${disputed.length === 1 ? 's' : ''} to be resolved`;
+      return `${disputed.length} disputa${disputed.length > 1 ? 's' : ''} necesita${disputed.length === 1 ? '' : 'n'} resolverse`;
     }
     if (unconfirmed.length > 0) {
-      return `Waiting for ${unconfirmed.length} more confirmation${unconfirmed.length > 1 ? 's' : ''}`;
+      return `Esperando ${unconfirmed.length} confirmación${unconfirmed.length > 1 ? 'es' : ''} más`;
     }
     return null;
   }, [checkedIn.length, disputed.length, unconfirmed.length]);
@@ -73,7 +73,7 @@ export function SessionDealing({ session, season, members, participants, users }
       await appState.moveToInProgress();
       setShowStartModal(false);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to start session');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo iniciar el juego');
     } finally {
       setStarting(false);
     }
@@ -87,7 +87,7 @@ export function SessionDealing({ session, season, members, participants, users }
     >
       {/* Banner */}
       <View className="bg-gold-500 px-6 pb-5 pt-16 dark:bg-gold-700">
-        <Text className="text-xl font-bold text-white">Dealing in Progress</Text>
+        <Text className="text-xl font-bold text-white">Repartiendo</Text>
         {host && (
           <Text className="mt-1 text-sm text-gold-100">
             Host: {host.displayName}
@@ -120,7 +120,7 @@ export function SessionDealing({ session, season, members, participants, users }
                   canStart ? 'text-white' : 'text-sand-500 dark:text-sand-400'
                 }`}
               >
-                Move to In Progress
+                Comenzar Juego
               </Text>
             </Pressable>
 
@@ -134,17 +134,16 @@ export function SessionDealing({ session, season, members, participants, users }
 
         {!canManage && (
           <Text className="mx-6 mt-2 text-center text-sm text-sand-500 dark:text-sand-400">
-            Waiting for the treasurer to start the session.
+            Esperando a que el tesorero inicie el juego.
           </Text>
         )}
       </View>
 
       <ConfirmationModal
         visible={showStartModal}
-        title="Start Session"
-        message={`Move this session to in progress? ${confirmed.length} player${confirmed.length !== 1 ? 's' : ''} confirmed and ready to play.`}
-        confirmLabel="Start"
-        cancelLabel="Cancel"
+        title="Iniciar Juego"
+        message={`¿Iniciar el juego? ${confirmed.length} jugador${confirmed.length !== 1 ? 'es' : ''} confirmado${confirmed.length !== 1 ? 's' : ''} y listo${confirmed.length !== 1 ? 's' : ''} para jugar.`}
+        confirmLabel="Iniciar"
         onConfirm={handleStart}
         onCancel={() => setShowStartModal(false)}
         loading={starting}

@@ -9,7 +9,7 @@ export function ErrorView({ message, onRetry }: Props) {
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
       <Text className="mb-2 text-lg font-bold text-red-600 dark:text-red-400">
-        Something went wrong
+        Algo salió mal
       </Text>
       <Text className="mb-6 text-center text-base text-sand-500 dark:text-sand-400">
         {message}
@@ -19,7 +19,7 @@ export function ErrorView({ message, onRetry }: Props) {
           className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={onRetry}
         >
-          <Text className="text-base font-semibold text-white">Retry</Text>
+          <Text className="text-base font-semibold text-white">Reintentar</Text>
         </Pressable>
       )}
     </View>

@@ -114,7 +114,7 @@ export function SessionFinalize({
         balanceCheck.isBalanced ? undefined : overrideNote.trim(),
       );
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to finalize session');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo finalizar el juego');
     } finally {
       setFinalizing(false);
     }
@@ -129,7 +129,7 @@ export function SessionFinalize({
     >
       {/* Banner */}
       <View className="bg-amber-600 px-6 pb-5 pt-16 dark:bg-amber-800">
-        <Text className="text-xl font-bold text-white">Balance Check</Text>
+        <Text className="text-xl font-bold text-white">Verificación de Balance</Text>
         {host && (
           <Text className="mt-1 text-sm text-amber-100">
             Host: {host.displayName}
@@ -151,7 +151,7 @@ export function SessionFinalize({
         >
           <View className="flex-row items-center justify-between">
             <Text className="text-base font-semibold text-sand-950 dark:text-sand-50">
-              Sum of PnL
+              Suma de PnL
             </Text>
             <Text
               className={`text-lg font-bold ${
@@ -164,44 +164,44 @@ export function SessionFinalize({
             >
               {allValidated
                 ? `${formatMxn(balanceCheck.sumPnlCents)} MXN`
-                : 'Awaiting submissions'}
+                : 'Esperando envíos'}
             </Text>
           </View>
           {allValidated && balanceCheck.isBalanced && (
             <Text className="mt-1 text-sm text-felt-600 dark:text-felt-400">
-              Session is balanced. Ready to finalize.
+              El juego está balanceado. Listo para finalizar.
             </Text>
           )}
           {allValidated && !balanceCheck.isBalanced && (
             <Text className="mt-1 text-sm text-red-600 dark:text-red-400">
-              Session is NOT balanced. Override with resolution note required.
+              El juego NO está balanceado. Se requiere anulación con nota de resolución.
             </Text>
           )}
           {!allValidated && (
             <Text className="mt-1 text-sm text-sand-500 dark:text-sand-400">
-              All submissions must be validated before finalizing.
+              Todos los envíos deben ser validados antes de finalizar.
             </Text>
           )}
         </View>
 
         {/* PnL Table */}
         <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-          Participant PnL
+          PnL por Participante
         </Text>
 
         {/* Table header */}
         <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 px-3 py-2 dark:border-sand-700 dark:bg-sand-800">
           <Text className="flex-1 text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Name
+            Nombre
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Start
+            Inicio
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Rebuys
+            Ribeyes 🥩
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Ending
+            Final
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
             PnL
@@ -285,20 +285,20 @@ export function SessionFinalize({
                 onPress={() => setShowOverride(true)}
               >
                 <Text className="text-sm font-semibold text-red-600 dark:text-red-400">
-                  Override Balance Check
+                  Anular Verificación de Balance
                 </Text>
               </Pressable>
             ) : (
               <View className="rounded-xl border border-red-300 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/30">
                 <Text className="mb-2 text-sm font-semibold text-red-700 dark:text-red-300">
-                  Resolution Note (required)
+                  Nota de Resolución (requerida)
                 </Text>
                 <Text className="mb-3 text-xs text-red-600/80 dark:text-red-400/80">
-                  Explain why the session does not balance and how the mismatch was resolved.
+                  Explica por qué el juego no está balanceado y cómo se resolvió la diferencia.
                 </Text>
                 <TextInput
                   className="mb-3 rounded-lg border border-red-200 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-red-800 dark:bg-sand-800 dark:text-sand-50"
-                  placeholder="e.g., $50 MXN counting error, split evenly..."
+                  placeholder="ej. Error de conteo de $50 MXN, dividido equitativamente..."
                   placeholderTextColor="#94a3b8"
                   value={overrideNote}
                   onChangeText={setOverrideNote}
@@ -313,7 +313,7 @@ export function SessionFinalize({
                     setOverrideNote('');
                   }}
                 >
-                  <Text className="text-sm text-sand-600 dark:text-sand-400">Cancel Override</Text>
+                  <Text className="text-sm text-sand-600 dark:text-sand-400">Cancelar Anulación</Text>
                 </Pressable>
               </View>
             )}
@@ -339,7 +339,7 @@ export function SessionFinalize({
                   canFinalize ? 'text-white' : 'text-sand-500 dark:text-sand-400'
                 }`}
               >
-                Finalize Session
+                Finalizar Juego
               </Text>
             )}
           </Pressable>
@@ -347,7 +347,7 @@ export function SessionFinalize({
 
         {!canManage && (
           <Text className="mt-6 text-center text-sm text-sand-500 dark:text-sand-400">
-            Only the treasurer or admin can finalize the session.
+            Solo el tesorero o admin puede finalizar el juego.
           </Text>
         )}
       </View>

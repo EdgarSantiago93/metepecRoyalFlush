@@ -7,22 +7,22 @@ const VARIANT_STYLES: Record<Variant, { bg: string; text: string; label: string 
   not_submitted: {
     bg: 'bg-sand-200 dark:bg-sand-700',
     text: 'text-sand-600 dark:text-sand-300',
-    label: 'Not submitted',
+    label: 'Sin enviar',
   },
   pending: {
     bg: 'bg-gold-100 dark:bg-gold-900',
     text: 'text-gold-700 dark:text-gold-300',
-    label: 'Pending',
+    label: 'Pendiente',
   },
   approved: {
     bg: 'bg-felt-100 dark:bg-felt-900/40',
     text: 'text-felt-700 dark:text-felt-300',
-    label: 'Approved',
+    label: 'Aprobado',
   },
   rejected: {
     bg: 'bg-red-100 dark:bg-red-900/40',
     text: 'text-red-700 dark:text-red-300',
-    label: 'Rejected',
+    label: 'Rechazado',
   },
 };
 
