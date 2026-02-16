@@ -18,7 +18,7 @@ export default function VerifyScreen() {
         await verifyMagicLink(email, 'mock-code');
         router.replace('/');
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Verification failed');
+        setError(e instanceof Error ? e.message : 'Verificación fallida');
       } finally {
         setVerifying(false);
       }
@@ -30,10 +30,10 @@ export default function VerifyScreen() {
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-8 dark:bg-sand-900">
       <Text className="mb-2 text-2xl font-bold text-sand-950 dark:text-sand-50">
-        Check your email
+        Revisa tu correo
       </Text>
       <Text className="mb-8 text-center text-base text-sand-500 dark:text-sand-400">
-        We sent a login link to{'\n'}
+        Enviamos un enlace de acceso a{'\n'}
         <Text className="font-semibold text-sand-700 dark:text-sand-300">
           {email}
         </Text>
@@ -43,7 +43,7 @@ export default function VerifyScreen() {
         <View className="items-center">
           <ActivityIndicator size="large" className="mb-4" />
           <Text className="text-sm text-sand-400">
-            {verifying ? 'Verifying...' : 'Waiting for verification...'}
+            {verifying ? 'Verificando...' : 'Esperando verificación...'}
           </Text>
         </View>
       )}
@@ -55,7 +55,7 @@ export default function VerifyScreen() {
             className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
             onPress={() => router.back()}
           >
-            <Text className="font-semibold text-white">Try again</Text>
+            <Text className="font-semibold text-white">Intentar de nuevo</Text>
           </Pressable>
         </View>
       )}

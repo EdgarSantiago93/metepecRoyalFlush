@@ -34,7 +34,7 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
       <View className="border-b border-sand-200 px-6 pb-4 pt-16 dark:border-sand-700">
         <Text className="text-2xl font-bold text-sand-950 dark:text-sand-50">
-          Create Season
+          Crear Temporada
         </Text>
       </View>
 
@@ -42,11 +42,11 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
         {/* Season Name */}
         <View className="mb-6">
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Season Name (optional)
+            Nombre de la Temporada (opcional)
           </Text>
           <TextInput
             className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-            placeholder="e.g. Season Feb 2026"
+            placeholder="ej. Temporada Feb 2026"
             placeholderTextColor="#b5ac9e"
             value={seasonName}
             onChangeText={setSeasonName}
@@ -57,10 +57,10 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
         {/* Treasurer Picker */}
         <View className="mb-6">
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Treasurer (required)
+            Tesorero (requerido)
           </Text>
           <Text className="mb-3 text-sm text-sand-500 dark:text-sand-400">
-            Select who will manage deposits and session approvals.
+            Selecciona quién administrará depósitos y aprobaciones de juegos.
           </Text>
 
           {users.map((user) => {
@@ -130,7 +130,7 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
           disabled={submitting}
         >
           <Text className="text-base font-semibold text-sand-700 dark:text-sand-300">
-            Cancel
+            Cancelar
           </Text>
         </Pressable>
         <Pressable
@@ -150,7 +150,7 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
                 selectedTreasurer ? 'text-white' : 'text-sand-500 dark:text-sand-400'
               }`}
             >
-              Create
+              Crear
             </Text>
           )}
         </Pressable>

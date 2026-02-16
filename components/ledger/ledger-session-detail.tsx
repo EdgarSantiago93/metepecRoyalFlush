@@ -86,7 +86,7 @@ export function LedgerSessionDetail({
     >
       {/* Banner */}
       <View className="bg-felt-600 px-6 pb-5 pt-4 dark:bg-felt-800">
-        <Text className="text-xl font-bold text-white">Session Detail</Text>
+        <Text className="text-xl font-bold text-white">Detalle del Juego</Text>
         {host && (
           <Text className="mt-1 text-sm text-felt-100">
             Host: {host.displayName}
@@ -94,7 +94,7 @@ export function LedgerSessionDetail({
           </Text>
         )}
         <View className="mt-2 self-start rounded-full bg-white/20 px-3 py-1">
-          <Text className="text-xs font-semibold text-white">Finalized</Text>
+          <Text className="text-xs font-semibold text-white">Finalizado</Text>
         </View>
       </View>
 
@@ -102,37 +102,37 @@ export function LedgerSessionDetail({
         {/* Session info card */}
         <View className="mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
           {session.scheduledFor && (
-            <InfoRow label="Date" value={new Date(session.scheduledFor).toLocaleDateString()} />
+            <InfoRow label="Fecha" value={new Date(session.scheduledFor).toLocaleDateString('es-MX')} />
           )}
-          {session.location && <InfoRow label="Location" value={session.location} />}
-          {finalizedBy && <InfoRow label="Finalized by" value={finalizedBy.displayName} />}
+          {session.location && <InfoRow label="Ubicación" value={session.location} />}
+          {finalizedBy && <InfoRow label="Finalizado por" value={finalizedBy.displayName} />}
           {session.finalizedAt && (
             <InfoRow
-              label="Finalized at"
-              value={new Date(session.finalizedAt).toLocaleString()}
+              label="Finalizado el"
+              value={new Date(session.finalizedAt).toLocaleString('es-MX')}
             />
           )}
-          <InfoRow label="Players" value={String(participants.length)} />
+          <InfoRow label="Jugadores" value={String(participants.length)} />
         </View>
 
         {/* PnL Table */}
         <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-          Results
+          Resultados
         </Text>
 
         {/* Table header */}
         <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 px-3 py-2 dark:border-sand-700 dark:bg-sand-800">
           <Text className="flex-1 text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Name
+            Nombre
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Start
+            Inicio
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Rebuys
+            Ribeyes 🥩
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-            Ending
+            Final
           </Text>
           <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
             PnL
@@ -194,7 +194,7 @@ export function LedgerSessionDetail({
         {/* Sum PnL */}
         <View className="mt-2 flex-row items-center rounded-lg border border-sand-200 bg-sand-100 px-3 py-2.5 dark:border-sand-700 dark:bg-sand-800">
           <Text className="flex-1 text-sm font-bold text-sand-950 dark:text-sand-50">
-            Total PnL
+            PnL Total
           </Text>
           <Text
             className={`text-sm font-bold ${
@@ -212,7 +212,7 @@ export function LedgerSessionDetail({
         {finalizeNote && (
           <View className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
             <Text className="mb-1 text-sm font-semibold text-amber-800 dark:text-amber-200">
-              Resolution Note
+              Nota de Resolución
             </Text>
             <Text className="text-sm text-amber-700 dark:text-amber-300">
               {finalizeNote.note}
@@ -224,18 +224,18 @@ export function LedgerSessionDetail({
         {approvedRebuys.length > 0 && (
           <View className="mt-6">
             <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-              Rebuys ({approvedRebuys.length})
+              Ribeyes 🥩 ({approvedRebuys.length})
             </Text>
             {approvedRebuys.map((inj) => {
               const participant = participants.find((p) => p.id === inj.participantId);
               const user = users.find((u) => u.id === participant?.userId);
               const name = user?.displayName ?? participant?.guestName ?? 'Unknown';
               const amount = formatMxn(inj.amountCents);
-              const time = new Date(inj.reviewedAt!).toLocaleTimeString([], {
+              const time = new Date(inj.reviewedAt!).toLocaleTimeString('es-MX', {
                 hour: '2-digit',
                 minute: '2-digit',
               });
-              const typeLabel = inj.type === 'rebuy_500' ? 'Full Rebuy' : inj.type === 'half_250' ? 'Half Rebuy' : 'Guest Buy-in';
+              const typeLabel = inj.type === 'rebuy_500' ? 'Ribeye 🥩 Completo' : inj.type === 'half_250' ? 'Medio Ribeye 🥩' : 'Buy-in de Invitado';
 
               return (
                 <View
@@ -262,7 +262,7 @@ export function LedgerSessionDetail({
         {/* Ending submissions with photos */}
         <View className="mt-6">
           <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-            Ending Submissions
+            Envíos de Stack Final
           </Text>
           {participants.map((p) => {
             const user = users.find((u) => u.id === p.userId);
@@ -279,7 +279,7 @@ export function LedgerSessionDetail({
                     {name}
                   </Text>
                   <Text className="text-xs text-sand-500 dark:text-sand-400">
-                    {submission ? 'Validated' : 'No submission'}
+                    {submission ? 'Validado' : 'Sin envío'}
                   </Text>
                 </View>
                 <Text className="text-sm font-bold text-sand-950 dark:text-sand-50">

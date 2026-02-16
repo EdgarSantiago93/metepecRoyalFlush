@@ -28,7 +28,7 @@ export default function SeasonSettingsScreen() {
       await appState.updateTreasurer(selectedTreasurer);
       router.back();
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to update treasurer');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo actualizar el tesorero');
     } finally {
       setSaving(false);
     }
@@ -38,16 +38,16 @@ export default function SeasonSettingsScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
         <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
-          Admin Only
+          Solo Admin
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
-          Only admins can change season settings.
+          Solo los admins pueden cambiar ajustes de temporada.
         </Text>
         <Pressable
           className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={() => router.back()}
         >
-          <Text className="text-base font-semibold text-white">Go Back</Text>
+          <Text className="text-base font-semibold text-white">Regresar</Text>
         </Pressable>
       </View>
     );
@@ -57,16 +57,16 @@ export default function SeasonSettingsScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
         <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
-          Not Available
+          No Disponible
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
-          Settings can only be changed during season setup.
+          Los ajustes solo se pueden cambiar durante la configuración de la temporada.
         </Text>
         <Pressable
           className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={() => router.back()}
         >
-          <Text className="text-base font-semibold text-white">Go Back</Text>
+          <Text className="text-base font-semibold text-white">Regresar</Text>
         </Pressable>
       </View>
     );
@@ -76,10 +76,10 @@ export default function SeasonSettingsScreen() {
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
       <ScrollView className="flex-1 px-6" contentContainerClassName="py-6">
         <Text className="mb-1 text-lg font-bold text-sand-950 dark:text-sand-50">
-          Change Treasurer
+          Cambiar Tesorero
         </Text>
         <Text className="mb-4 text-sm text-sand-500 dark:text-sand-400">
-          Select who will manage deposits and session approvals for this season.
+          Selecciona quién administrará depósitos y aprobaciones de juegos esta temporada.
         </Text>
 
         {users.map((user) => {
@@ -126,7 +126,7 @@ export default function SeasonSettingsScreen() {
                   )}
                   {isCurrent && (
                     <Text className="text-xs text-felt-600 dark:text-felt-400">
-                      Current treasurer
+                      Tesorero actual
                     </Text>
                   )}
                 </View>
@@ -164,7 +164,7 @@ export default function SeasonSettingsScreen() {
                 hasChanged ? 'text-white' : 'text-sand-500 dark:text-sand-400'
               }`}
             >
-              Save Changes
+              Guardar Cambios
             </Text>
           )}
         </Pressable>

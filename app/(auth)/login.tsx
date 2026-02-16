@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -20,7 +21,7 @@ export default function LoginScreen() {
   async function handleSend() {
     const trimmed = email.trim().toLowerCase();
     if (!trimmed) {
-      setError('Please enter your email');
+      setError('Por favor ingresa tu correo');
       return;
     }
 
@@ -30,7 +31,7 @@ export default function LoginScreen() {
       await sendMagicLink(trimmed);
       router.push({ pathname: '/(auth)/verify', params: { email: trimmed } });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong');
+      setError(e instanceof Error ? e.message : 'Algo salió mal');
     } finally {
       setLoading(false);
     }
@@ -42,17 +43,22 @@ export default function LoginScreen() {
       className="flex-1 bg-sand-50 dark:bg-sand-900"
     >
       <View className="flex-1 items-center justify-center px-8">
+        <Image
+          source={require('@/assets/images/mrf_1.png')}
+          style={{ width: 120, height: 120, marginBottom: 24 }}
+          contentFit="contain"
+        />
         <Text className="mb-2 text-3xl font-bold text-sand-950 dark:text-sand-50">
           Metepec Royal Flush
         </Text>
         <Text className="mb-8 text-base text-sand-500 dark:text-sand-400">
-          Sign in with your poker email
+          Inicia sesión con tu correo de poker
         </Text>
 
         <TextInput
           testID="login-email-input"
           className="mb-4 w-full rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-          placeholder="you@poker.local"
+          placeholder="tu@poker.local"
           placeholderTextColor="#b5ac9e"
           value={email}
           onChangeText={setEmail}
@@ -79,7 +85,7 @@ export default function LoginScreen() {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text className="text-base font-semibold text-white">
-              Send login link
+              Enviar enlace de acceso
             </Text>
           )}
         </Pressable>

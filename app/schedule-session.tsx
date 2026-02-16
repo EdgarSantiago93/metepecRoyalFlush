@@ -83,7 +83,7 @@ export default function ScheduleSessionScreen() {
       }
       router.back();
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to save session');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo guardar el juego');
     }
   };
 
@@ -92,7 +92,7 @@ export default function ScheduleSessionScreen() {
       hostOrder={hostOrder}
       users={users}
       initialValues={initialValues}
-      submitLabel={isEdit ? 'Save Changes' : 'Schedule Session'}
+      submitLabel={isEdit ? 'Guardar Cambios' : 'Programar Juego'}
       onSubmit={handleSubmit}
       onCancel={() => router.back()}
     />

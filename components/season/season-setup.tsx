@@ -60,23 +60,23 @@ export function SeasonSetup({ season, members, users }: Props) {
       <ScrollView className="flex-1" contentContainerClassName="px-6 pb-12 pt-16">
         {/* Header */}
         <Text className="mb-1 text-2xl font-bold text-sand-950 dark:text-sand-50">
-          {season.name ?? 'New Season'}
+          {season.name ?? 'Nueva Temporada'}
         </Text>
         <View className="mb-4 flex-row items-center gap-2">
           <View className="rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
-            <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">Setup</Text>
+            <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">Configuración</Text>
           </View>
           <Text className="text-sm text-sand-500 dark:text-sand-400">
-            Treasurer: {treasurer?.displayName ?? 'Unknown'}
+            Tesorero: {treasurer?.displayName ?? 'Unknown'}
           </Text>
         </View>
 
         {/* Summary card */}
         <View className="mb-6 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
           <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-sm text-sand-500 dark:text-sand-400">Approved</Text>
+            <Text className="text-sm text-sand-500 dark:text-sand-400">Aprobados</Text>
             <Text className="text-sm font-medium text-sand-950 dark:text-sand-50">
-              {approvedCount} of {members.length}
+              {approvedCount} de {members.length}
             </Text>
           </View>
           <View className="h-2 overflow-hidden rounded-full bg-sand-200 dark:bg-sand-700">
@@ -108,13 +108,13 @@ export function SeasonSetup({ season, members, users }: Props) {
                     canStart ? 'text-white' : 'text-sand-500 dark:text-sand-400'
                   }`}
                 >
-                  Start Season
+                  Iniciar Temporada
                 </Text>
               )}
             </Pressable>
             {!canStart && (
               <Text className="mt-2 text-center text-xs text-sand-500 dark:text-sand-400">
-                Need at least 2 approved members to start
+                Se necesitan al menos 2 miembros aprobados para iniciar
               </Text>
             )}
           </View>
@@ -125,14 +125,14 @@ export function SeasonSetup({ season, members, users }: Props) {
           {needsDeposit && (
             <ActionButton
               testID="btn-upload-deposit"
-              label="Upload Deposit Proof"
+              label="Subir Comprobante de Depósito"
               onPress={() => router.push('/deposit-upload')}
             />
           )}
           {isTreasurer && (
             <ActionButton
               testID="btn-review-deposits"
-              label="Review Deposits"
+              label="Revisar Depósitos"
               onPress={() => router.push('/deposit-approvals')}
               variant="gold"
             />
@@ -141,12 +141,12 @@ export function SeasonSetup({ season, members, users }: Props) {
             <>
               <ActionButton
                 testID="btn-edit-host-order"
-                label="Edit Host Order"
+                label="Editar Orden de Host"
                 onPress={() => router.push('/host-order')}
               />
               <ActionButton
                 testID="btn-season-settings"
-                label="Season Settings"
+                label="Ajustes de Temporada"
                 onPress={() => router.push('/season-settings')}
                 variant="outline"
               />
@@ -154,61 +154,59 @@ export function SeasonSetup({ season, members, users }: Props) {
           )}
         </View>
 
-        {/* Deposit Status List */}
-        <View className="mb-6">
-          <Text className="mb-3 text-lg font-bold text-sand-950 dark:text-sand-50">
-            Deposit Status
-          </Text>
-          <View className="rounded-xl border border-sand-200 bg-sand-100 dark:border-sand-700 dark:bg-sand-800">
-            {members.map((member, i) => (
-              <View
-                key={member.id}
-                className={i < members.length - 1 ? 'border-b border-sand-200 px-4 dark:border-sand-700' : 'px-4'}
-              >
-                <MemberRow
-                  name={getUserName(member.userId)}
-                  right={<StatusBadge variant={member.approvalStatus} />}
-                  onPress={
-                    member.userId === currentUser?.id && needsDeposit
-                      ? () => router.push('/deposit-upload')
-                      : undefined
-                  }
-                />
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Host Order Preview */}
+        {/* Miembros — merged deposit status + host order */}
         <View className="mb-6">
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-sand-950 dark:text-sand-50">Host Order</Text>
+            <Text className="text-lg font-bold text-sand-950 dark:text-sand-50">Miembros</Text>
             {isAdmin && (
               <Pressable onPress={() => router.push('/host-order')}>
                 <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
-                  Edit
+                  Editar
                 </Text>
               </Pressable>
             )}
           </View>
           <View className="rounded-xl border border-sand-200 bg-sand-100 dark:border-sand-700 dark:bg-sand-800">
-            {hostOrder.map((entry, i) => (
-              <View
-                key={entry.id}
-                className={i < hostOrder.length - 1 ? 'border-b border-sand-200 px-4 dark:border-sand-700' : 'px-4'}
-              >
-                <MemberRow
-                  name={getUserName(entry.userId)}
-                  right={
-                    <View className="h-7 w-7 items-center justify-center rounded-full bg-sand-200 dark:bg-sand-600">
-                      <Text className="text-xs font-bold text-sand-600 dark:text-sand-300">
-                        {i + 1}
-                      </Text>
-                    </View>
-                  }
-                />
-              </View>
-            ))}
+            {(() => {
+              // Sort members by host order position, unordered members go last
+              const sorted = [...members].sort((a, b) => {
+                const posA = hostOrder.findIndex((h) => h.userId === a.userId);
+                const posB = hostOrder.findIndex((h) => h.userId === b.userId);
+                const orderA = posA >= 0 ? posA : Infinity;
+                const orderB = posB >= 0 ? posB : Infinity;
+                return orderA - orderB;
+              });
+              return sorted.map((member, i) => {
+                const hostPos = hostOrder.findIndex((h) => h.userId === member.userId);
+                return (
+                  <View
+                    key={member.id}
+                    className={i < sorted.length - 1 ? 'border-b border-sand-200 px-4 dark:border-sand-700' : 'px-4'}
+                  >
+                    <MemberRow
+                      name={getUserName(member.userId)}
+                      right={
+                        <View className="flex-row items-center gap-2">
+                          {hostPos >= 0 && (
+                            <View className="h-6 w-6 items-center justify-center rounded-full bg-sand-200 dark:bg-sand-600">
+                              <Text className="text-[10px] font-bold text-sand-600 dark:text-sand-300">
+                                {hostPos + 1}
+                              </Text>
+                            </View>
+                          )}
+                          <StatusBadge variant={member.approvalStatus} />
+                        </View>
+                      }
+                      onPress={
+                        member.userId === currentUser?.id && needsDeposit
+                          ? () => router.push('/deposit-upload')
+                          : undefined
+                      }
+                    />
+                  </View>
+                );
+              });
+            })()}
           </View>
         </View>
       </ScrollView>

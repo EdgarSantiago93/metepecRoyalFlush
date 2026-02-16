@@ -185,7 +185,7 @@ export default function HostOrderScreen() {
       router.back();
     } catch (e) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to save host order');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo guardar el orden de host');
     } finally {
       setSaving(false);
     }
@@ -203,7 +203,7 @@ export default function HostOrderScreen() {
     return (
       <ScrollView className="flex-1 bg-sand-50 dark:bg-sand-900" contentContainerClassName="px-6 py-4">
         <Text className="mb-4 text-lg font-bold text-sand-950 dark:text-sand-50">
-          Host Order
+          Orden de Host
         </Text>
         {items.map((item, i) => (
           <View
@@ -238,7 +238,7 @@ export default function HostOrderScreen() {
           onPress={handleRandomize}
         >
           <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Randomize
+            Aleatorizar
           </Text>
         </Pressable>
         <Pressable
@@ -251,13 +251,13 @@ export default function HostOrderScreen() {
           {saving ? (
             <ActivityIndicator color="white" size="small" />
           ) : (
-            <Text className="text-sm font-semibold text-white">Save Order</Text>
+            <Text className="text-sm font-semibold text-white">Guardar Orden</Text>
           )}
         </Pressable>
       </View>
 
       <Text className="px-6 pb-2 text-xs text-sand-500 dark:text-sand-400">
-        Long press and drag to reorder hosts
+        Mantén presionado y arrastra para reordenar hosts
       </Text>
 
       {/* Draggable host list */}

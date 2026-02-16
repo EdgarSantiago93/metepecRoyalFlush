@@ -40,7 +40,7 @@ export default function ProfileScreen() {
           onPress={logout}
         >
           <Text className="text-base font-semibold text-red-600 dark:text-red-400">
-            Sign out
+            Cerrar sesión
           </Text>
         </Pressable>
       </View>

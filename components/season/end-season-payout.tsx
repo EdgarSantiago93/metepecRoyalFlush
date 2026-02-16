@@ -39,7 +39,7 @@ export function EndSeasonPayout() {
     } catch (e) {
       setLoading(false);
       setShowConfirm(false);
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to end season');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo terminar la temporada');
     }
   };
 
@@ -50,10 +50,10 @@ export function EndSeasonPayout() {
     >
       {/* Header */}
       <Text className="mb-1 text-xl font-bold text-sand-950 dark:text-sand-50">
-        Payout Report
+        Reporte de Pagos
       </Text>
       <Text className="mb-6 text-sm text-sand-500 dark:text-sand-400">
-        Final balances for all approved members. Ending the season is permanent.
+        Balances finales de todos los miembros aprobados. Terminar la temporada es permanente.
       </Text>
 
       {/* Payout Table */}
@@ -61,7 +61,7 @@ export function EndSeasonPayout() {
         {/* Table Header */}
         <View className="flex-row items-center border-b border-sand-200 px-4 py-3 dark:border-sand-700">
           <Text className="flex-1 text-xs font-semibold uppercase tracking-wide text-sand-500 dark:text-sand-400">
-            Player
+            Jugador
           </Text>
           <Text className="text-xs font-semibold uppercase tracking-wide text-sand-500 dark:text-sand-400">
             Balance (MXN)
@@ -95,15 +95,15 @@ export function EndSeasonPayout() {
           className="items-center rounded-lg bg-red-600 py-3 active:bg-red-700"
           onPress={() => setShowConfirm(true)}
         >
-          <Text className="text-sm font-semibold text-white">End Season</Text>
+          <Text className="text-sm font-semibold text-white">Terminar Temporada</Text>
         </Pressable>
       )}
 
       <ConfirmationModal
         visible={showConfirm}
-        title="End Season"
-        message="This will permanently end the current season. All balances will be finalized and no more sessions can be played. This action cannot be undone."
-        confirmLabel="End Season"
+        title="Terminar Temporada"
+        message="Esto terminará permanentemente la temporada actual. Todos los balances serán finalizados y no se podrán jugar más juegos. Esta acción no se puede deshacer."
+        confirmLabel="Terminar Temporada"
         variant="destructive"
         onConfirm={handleEndSeason}
         onCancel={() => setShowConfirm(false)}

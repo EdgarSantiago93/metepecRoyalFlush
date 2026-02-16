@@ -96,7 +96,7 @@ export function SessionClosing({
     >
       {/* Banner */}
       <View className="bg-amber-600 px-6 pb-5 pt-16 dark:bg-amber-800">
-        <Text className="text-xl font-bold text-white">Session Closing</Text>
+        <Text className="text-xl font-bold text-white">Juego Cerrando</Text>
         {host && (
           <Text className="mt-1 text-sm text-amber-100">
             Host: {host.displayName}
@@ -105,7 +105,7 @@ export function SessionClosing({
         )}
         <View className="mt-2 self-start rounded-full bg-white/20 px-3 py-1">
           <Text className="text-xs font-semibold text-white">
-            {validatedCount} of {participants.length} validated
+            {validatedCount} de {participants.length} validados
           </Text>
         </View>
       </View>
@@ -146,7 +146,7 @@ export function SessionClosing({
               onPress={() => setShowFinalize(true)}
             >
               <Text className="text-base font-semibold text-white">
-                Review & Finalize
+                Revisar y Finalizar
               </Text>
             </Pressable>
           </View>
@@ -156,11 +156,11 @@ export function SessionClosing({
           <View className="mx-6 mt-2">
             <View className="items-center rounded-lg bg-sand-300 py-3.5 dark:bg-sand-700">
               <Text className="text-base font-semibold text-sand-500 dark:text-sand-400">
-                Review & Finalize
+                Revisar y Finalizar
               </Text>
             </View>
             <Text className="mt-2 text-center text-xs text-sand-400 dark:text-sand-500">
-              All submissions must be validated first
+              Todos los envíos deben ser validados primero
             </Text>
           </View>
         )}

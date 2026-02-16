@@ -15,7 +15,7 @@ export function InProgressPlayerView({ participant, injections }: Props) {
     return (
       <View className="mx-6 mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
         <Text className="text-sm text-sand-500 dark:text-sand-400">
-          You are not a participant in this session.
+          No eres participante en este juego.
         </Text>
       </View>
     );
@@ -35,13 +35,13 @@ export function InProgressPlayerView({ participant, injections }: Props) {
       {/* Stats card */}
       <View className="mb-3 rounded-xl border border-felt-300 bg-felt-50 p-4 dark:border-felt-700 dark:bg-felt-900/30">
         <Text className="mb-2 text-base font-semibold text-felt-800 dark:text-felt-200">
-          Your Session
+          Tu Juego
         </Text>
         <View className="flex-row justify-between">
-          <StatItem label="Starting" value={`${formattedStack} MXN`} />
-          <StatItem label="Rebuys" value={`${formattedApproved} MXN`} />
+          <StatItem label="Inicio" value={`${formattedStack} MXN`} />
+          <StatItem label="Ribeyes 🥩" value={`${formattedApproved} MXN`} />
           {pendingCount > 0 && (
-            <StatItem label="Pending" value={`${pendingCount}`} accent />
+            <StatItem label="Pendiente" value={`${pendingCount}`} accent />
           )}
         </View>
       </View>
@@ -93,7 +93,7 @@ function RebuyActions() {
     // Fall back to media library
     const libStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (libStatus.status !== 'granted') {
-      Alert.alert('Permission needed', 'Camera or photo library access is required to attach proof.');
+      Alert.alert('Permiso necesario', 'Se necesita acceso a la cámara o galería para adjuntar comprobante.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -121,7 +121,7 @@ function RebuyActions() {
       setShowModal(false);
       setProofUri(null);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to request rebuy');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo solicitar el ribeye 🥩');
     } finally {
       setLoading(false);
     }
@@ -136,22 +136,21 @@ function RebuyActions() {
           className="flex-1 items-center rounded-lg bg-gold-500 py-3 active:bg-gold-600"
           onPress={() => handleRequest('rebuy_500')}
         >
-          <Text className="text-sm font-semibold text-white">Rebuy $500</Text>
+          <Text className="text-sm font-semibold text-white">Ribeye 🥩 $500</Text>
         </Pressable>
         <Pressable
           className="flex-1 items-center rounded-lg border border-gold-500 py-3 active:bg-gold-50 dark:active:bg-gold-900/30"
           onPress={() => handleRequest('half_250')}
         >
-          <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">Rebuy $250</Text>
+          <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">Ribeye 🥩 $250</Text>
         </Pressable>
       </View>
 
       <ConfirmationModal
         visible={showModal}
-        title={`Request ${amount} MXN Rebuy`}
-        message="The treasurer will need to approve this rebuy request."
-        confirmLabel="Request"
-        cancelLabel="Cancel"
+        title={`Solicitar Ribeye 🥩 de ${amount} MXN`}
+        message="El tesorero necesitará aprobar esta solicitud de ribeye 🥩."
+        confirmLabel="Solicitar"
         onConfirm={handleConfirm}
         onCancel={() => {
           setShowModal(false);
@@ -167,7 +166,7 @@ function RebuyActions() {
               resizeMode="cover"
             />
             <Pressable onPress={() => setProofUri(null)}>
-              <Text className="text-xs text-red-500">Remove photo</Text>
+              <Text className="text-xs text-red-500">Eliminar foto</Text>
             </Pressable>
           </View>
         ) : (
@@ -176,7 +175,7 @@ function RebuyActions() {
             onPress={handlePickImage}
           >
             <Text className="text-sm text-sand-500 dark:text-sand-400">
-              Attach proof photo (optional)
+              Adjuntar foto de comprobante (opcional)
             </Text>
           </Pressable>
         )}

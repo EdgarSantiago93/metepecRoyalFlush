@@ -65,7 +65,7 @@ export default function DepositUploadScreen() {
       await appState.refresh();
       router.back();
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to submit deposit');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo enviar el depósito');
     } finally {
       setSubmitting(false);
     }
@@ -87,16 +87,16 @@ export default function DepositUploadScreen() {
           <Text className="text-3xl">✓</Text>
         </View>
         <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
-          Deposit Approved
+          Depósito Aprobado
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
-          Your deposit has been approved by the treasurer. You&apos;re all set for this season.
+          Tu depósito fue aprobado por el tesorero. Estás listo para esta temporada.
         </Text>
         <Pressable
           className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={() => router.back()}
         >
-          <Text className="text-base font-semibold text-white">Back to Dashboard</Text>
+          <Text className="text-base font-semibold text-white">Regresar al Inicio</Text>
         </Pressable>
       </View>
     );
@@ -109,10 +109,10 @@ export default function DepositUploadScreen() {
         <ScrollView className="flex-1" contentContainerClassName="items-center px-6 py-8">
           <StatusBadge variant="pending" />
           <Text className="mt-4 mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
-            Awaiting Review
+            En Revisión
           </Text>
           <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
-            Your deposit proof is being reviewed by the treasurer.
+            Tu comprobante de depósito está siendo revisado por el tesorero.
           </Text>
           {existingSubmission.photoUrl && (
             <View className="mb-4 w-full overflow-hidden rounded-xl border border-sand-200 dark:border-sand-700">
@@ -125,14 +125,14 @@ export default function DepositUploadScreen() {
           )}
           {existingSubmission.note && (
             <Text className="mb-4 text-sm text-sand-500 dark:text-sand-400">
-              Note: {existingSubmission.note}
+              Nota: {existingSubmission.note}
             </Text>
           )}
           <Pressable
             className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
             onPress={() => router.back()}
           >
-            <Text className="text-base font-semibold text-white">Back to Dashboard</Text>
+            <Text className="text-base font-semibold text-white">Regresar al Inicio</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -148,7 +148,7 @@ export default function DepositUploadScreen() {
         {showRejectionNote && (
           <View className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
             <Text className="mb-1 text-sm font-semibold text-red-700 dark:text-red-300">
-              Deposit Rejected
+              Depósito Rechazado
             </Text>
             <Text className="text-sm text-red-600 dark:text-red-400">
               {currentMember.rejectionNote}
@@ -157,10 +157,10 @@ export default function DepositUploadScreen() {
         )}
 
         <Text className="mb-1 text-lg font-bold text-sand-950 dark:text-sand-50">
-          Upload Deposit Proof
+          Subir Comprobante de Depósito
         </Text>
         <Text className="mb-6 text-sm text-sand-500 dark:text-sand-400">
-          Take a photo or choose from your library to submit your deposit proof.
+          Toma una foto o elige de tu galería para enviar tu comprobante de depósito.
         </Text>
 
         {/* Photo picker */}
@@ -170,7 +170,7 @@ export default function DepositUploadScreen() {
               <Image source={{ uri: photoUri }} style={{ width: '100%', height: 200 }} contentFit="cover" />
             </View>
             <Text className="mt-2 text-center text-xs text-sand-500 dark:text-sand-400">
-              Tap to remove
+              Toca para eliminar
             </Text>
           </Pressable>
         ) : (
@@ -180,7 +180,7 @@ export default function DepositUploadScreen() {
               onPress={() => pickImage('camera')}
             >
               <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                Camera
+                Cámara
               </Text>
             </Pressable>
             <Pressable
@@ -188,7 +188,7 @@ export default function DepositUploadScreen() {
               onPress={() => pickImage('library')}
             >
               <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                Library
+                Galería
               </Text>
             </Pressable>
           </View>
@@ -196,11 +196,11 @@ export default function DepositUploadScreen() {
 
         {/* Optional note */}
         <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-          Note (optional)
+          Nota (opcional)
         </Text>
         <TextInput
           className="mb-6 rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-          placeholder="e.g. SPEI transfer"
+          placeholder="ej. Transferencia SPEI"
           placeholderTextColor="#b5ac9e"
           value={note}
           onChangeText={setNote}
@@ -225,7 +225,7 @@ export default function DepositUploadScreen() {
                 photoUri ? 'text-white' : 'text-sand-500 dark:text-sand-400'
               }`}
             >
-              Submit Deposit Proof
+              Enviar Comprobante de Depósito
             </Text>
           )}
         </Pressable>

@@ -41,11 +41,11 @@ export function SeasonActive({ season, members, session, users }: Props) {
     >
       {/* Header */}
       <Text className="mb-1 text-2xl font-bold text-sand-950 dark:text-sand-50">
-        {season.name ?? 'Current Season'}
+        {season.name ?? 'Temporada Actual'}
       </Text>
       <View className="mt-1 mb-6 self-start rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900">
         <Text className="text-xs font-semibold text-felt-700 dark:text-felt-300">
-          Active
+          Activa
         </Text>
       </View>
 
@@ -53,7 +53,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
       {currentMember && (
         <View className="mb-4 rounded-xl border border-gold-200 bg-gold-50 p-5 dark:border-gold-800 dark:bg-gold-900/30">
           <Text className="mb-1 text-sm font-medium text-gold-700 dark:text-gold-300">
-            Your Balance
+            Tu Balance
           </Text>
           <Text className="text-3xl font-bold text-gold-800 dark:text-gold-200">
             ${(currentMember.currentBalanceCents / 100).toLocaleString()} MXN
@@ -63,26 +63,26 @@ export function SeasonActive({ season, members, session, users }: Props) {
 
       {/* Summary */}
       <View className="mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-        <InfoRow label="Treasurer" value={treasurer?.displayName ?? 'Unknown'} />
-        <InfoRow label="Members" value={`${approvedCount} approved`} />
+        <InfoRow label="Tesorero" value={treasurer?.displayName ?? 'Unknown'} />
+        <InfoRow label="Miembros" value={`${approvedCount} aprobados`} />
       </View>
 
       {/* Session Status Card */}
       <View className="mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
         <Text className="mb-3 text-sm font-semibold text-sand-700 dark:text-sand-300">
-          Session
+          Juego
         </Text>
         {!session && (
           <>
             <Text className="mb-3 text-sm text-sand-500 dark:text-sand-400">
-              No session scheduled
+              Sin juego programado
             </Text>
             {canManage && (
               <Pressable
                 className="items-center rounded-lg bg-gold-500 py-2.5 active:bg-gold-600"
                 onPress={() => router.push('/schedule-session' as never)}
               >
-                <Text className="text-sm font-semibold text-white">Schedule Session</Text>
+                <Text className="text-sm font-semibold text-white">Programar Juego</Text>
               </Pressable>
             )}
           </>
@@ -97,7 +97,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
               }}
             >
               <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                View Session
+                Ver Juego
               </Text>
             </Pressable>
           </>
@@ -108,7 +108,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
       {hostOrder.length > 0 && (
         <View className="mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
           <Text className="mb-3 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Host Rotation
+            Rotación de Host
           </Text>
           {hostOrder.map((ho, index) => {
             const user = userMap.get(ho.userId);
@@ -138,7 +138,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
             onPress={() => router.push('/host-order' as never)}
           >
             <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-              Edit Host Order
+              Editar Orden de Host
             </Text>
           </Pressable>
         </View>
@@ -151,7 +151,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
           <View className="mt-4">
             {sessionActive && (
               <Text className="mb-2 text-xs text-sand-500 dark:text-sand-400">
-                Cannot end season while a session is active
+                No se puede terminar la temporada mientras un juego está activo
               </Text>
             )}
             <Pressable
@@ -163,7 +163,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
               onPress={() => router.push('/end-season' as never)}
               disabled={!!sessionActive}
             >
-              <Text className="text-sm font-semibold text-white">End Season</Text>
+              <Text className="text-sm font-semibold text-white">Terminar Temporada</Text>
             </Pressable>
           </View>
         );
@@ -180,11 +180,11 @@ function SessionStatusRow({ session, users }: { session: Session; users: User[] 
   const host = users.find((u) => u.id === session.hostUserId);
 
   const stateLabel: Record<string, string> = {
-    scheduled: 'Scheduled',
-    dealing: 'Dealing',
-    in_progress: 'In Progress',
-    closing: 'Closing',
-    finalized: 'Finalized',
+    scheduled: 'Programado',
+    dealing: 'Repartiendo',
+    in_progress: 'En Juego',
+    closing: 'Cerrando',
+    finalized: 'Finalizado',
   };
 
   const stateBg: Record<string, string> = {
@@ -213,8 +213,8 @@ function SessionStatusRow({ session, users }: { session: Session; users: User[] 
         </View>
       </View>
       <InfoRow label="Host" value={host?.displayName ?? 'Unknown'} />
-      {session.scheduledFor && <InfoRow label="When" value={session.scheduledFor} />}
-      {session.location && <InfoRow label="Location" value={session.location} />}
+      {session.scheduledFor && <InfoRow label="Cuándo" value={session.scheduledFor} />}
+      {session.location && <InfoRow label="Ubicación" value={session.location} />}
     </View>
   );
 }

@@ -104,23 +104,23 @@ export function LedgerPlayerDetail({ player, member, sessions, sessionDetails, u
       <View className="mt-4 px-6">
         {/* Stats cards */}
         <View className="mb-4 flex-row gap-3">
-          <StatCard label="Current Balance" value={formatMxn(member.currentBalanceCents)} valueClass={balanceColor} />
-          <StatCard label="Total PnL" value={formatPnl(totalPnl)} valueClass={totalPnlColor} />
+          <StatCard label="Balance Actual" value={formatMxn(member.currentBalanceCents)} valueClass={balanceColor} />
+          <StatCard label="PnL Total" value={formatPnl(totalPnl)} valueClass={totalPnlColor} />
         </View>
         <View className="mb-6 flex-row gap-3">
-          <StatCard label="Sessions Played" value={String(sessionsPlayed)} />
-          <StatCard label="Total Rebuys" value={`${totalRebuys} (${formatMxn(totalRebuysCents)})`} />
+          <StatCard label="Juegos Jugados" value={String(sessionsPlayed)} />
+          <StatCard label="Ribeyes 🥩 Totales" value={`${totalRebuys} (${formatMxn(totalRebuysCents)})`} />
         </View>
 
         {/* Session history table */}
         <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-          Session History
+          Historial de Juegos
         </Text>
 
         {sessionRows.length === 0 ? (
           <View className="rounded-xl border border-sand-200 bg-sand-100 p-6 dark:border-sand-700 dark:bg-sand-800">
             <Text className="text-center text-sm text-sand-500 dark:text-sand-400">
-              No finalized sessions yet
+              Sin juegos finalizados
             </Text>
           </View>
         ) : (
@@ -128,16 +128,16 @@ export function LedgerPlayerDetail({ player, member, sessions, sessionDetails, u
             {/* Table header */}
             <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 px-3 py-2 dark:border-sand-700 dark:bg-sand-800">
               <Text className="flex-1 text-xs font-semibold text-sand-600 dark:text-sand-400">
-                Session
+                Juego
               </Text>
               <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-                Start
+                Inicio
               </Text>
               <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-                End
+                Final
               </Text>
               <Text className="w-14 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-                Rebuys
+                Ribeyes 🥩
               </Text>
               <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
                 PnL
@@ -175,7 +175,7 @@ export function LedgerPlayerDetail({ player, member, sessions, sessionDetails, u
                       {row.hostName}
                     </Text>
                     <Text className="text-[10px] text-sand-400 dark:text-sand-500">
-                      {new Date(row.date).toLocaleDateString('en-US', {
+                      {new Date(row.date).toLocaleDateString('es-MX', {
                         month: 'short',
                         day: 'numeric',
                       })}

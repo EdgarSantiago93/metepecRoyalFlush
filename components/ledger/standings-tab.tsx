@@ -156,7 +156,7 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
         <View className="mx-6 mb-3 flex-row items-center rounded-lg border border-gold-300 bg-gold-50 px-3 py-2.5 dark:border-gold-700 dark:bg-gold-900/30">
           <View className="mr-2 h-2 w-2 rounded-full bg-gold-500" />
           <Text className="flex-1 text-sm font-medium text-gold-800 dark:text-gold-200">
-            Session in progress
+            Juego en curso
           </Text>
           <Text className="text-xs text-gold-600 dark:text-gold-400">
             Host: {users.find((u) => u.id === liveSession.hostUserId)?.displayName ?? 'Unknown'}
@@ -170,7 +170,7 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
           {/* Table header */}
           <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 dark:border-sand-700 dark:bg-sand-800">
             <SortableHeader
-              label="Player"
+              label="Jugador"
               sortKey="name"
               currentSort={sortKey}
               currentDir={sortDir}
@@ -188,7 +188,7 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
               align="right"
             />
             <SortableHeader
-              label="Games"
+              label="Juegos"
               sortKey="sessions"
               currentSort={sortKey}
               currentDir={sortDir}
@@ -197,7 +197,7 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
               align="center"
             />
             <SortableHeader
-              label="Rebuys"
+              label="Ribeyes 🥩"
               sortKey="rebuys"
               currentSort={sortKey}
               currentDir={sortDir}
