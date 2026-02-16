@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import type { Season, SeasonMember, Session, User } from '@/types';
 import { api } from '@/services/api/client';
 import { StandingsTab } from './standings-tab';
@@ -15,7 +16,8 @@ type Props = {
 };
 
 export function LedgerContent({ season, members, users, session }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('standings');
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<Tab>('timeline');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,33 +52,39 @@ export function LedgerContent({ season, members, users, session }: Props) {
       {/* Tab bar */}
       <View className="mx-6 mb-3 flex-row rounded-lg border border-sand-200 bg-sand-100 p-1 dark:border-sand-700 dark:bg-sand-800">
         <TabButton
-          label="Standings"
-          isActive={activeTab === 'standings'}
-          onPress={() => setActiveTab('standings')}
-        />
-        <TabButton
           label="Timeline"
           isActive={activeTab === 'timeline'}
           onPress={() => setActiveTab('timeline')}
         />
+        <TabButton
+          label="Standings"
+          isActive={activeTab === 'standings'}
+          onPress={() => setActiveTab('standings')}
+        />
       </View>
 
       {/* Tab content */}
-      {activeTab === 'standings' ? (
-        <StandingsTab
-          members={members}
-          users={users}
-          sessions={sessions}
-          session={session}
-          loading={loading}
-        />
-      ) : (
+      {activeTab === 'timeline' ? (
         <TimelineTab
           sessions={sessions}
           users={users}
           members={members}
           session={session}
           loading={loading}
+          onNavigateToSession={(sessionId) =>
+            router.push({ pathname: '/ledger-session-detail', params: { sessionId } })
+          }
+        />
+      ) : (
+        <StandingsTab
+          members={members}
+          users={users}
+          sessions={sessions}
+          session={session}
+          loading={loading}
+          onNavigateToPlayer={(userId) =>
+            router.push({ pathname: '/ledger-player-detail', params: { userId } })
+          }
         />
       )}
     </View>

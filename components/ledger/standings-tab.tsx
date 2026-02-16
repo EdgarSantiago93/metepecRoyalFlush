@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import type { SeasonMember, Session, SessionInjection, User } from '@/types';
 import { api } from '@/services/api/client';
 
@@ -22,10 +21,10 @@ type Props = {
   sessions: Session[];
   session: Session | null;
   loading: boolean;
+  onNavigateToPlayer: (userId: string) => void;
 };
 
-export function StandingsTab({ members, users, sessions, session, loading }: Props) {
-  const router = useRouter();
+export function StandingsTab({ members, users, sessions, session, loading, onNavigateToPlayer }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('balance');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [rows, setRows] = useState<StandingRow[]>([]);
@@ -237,12 +236,7 @@ export function StandingsTab({ members, users, sessions, session, loading }: Pro
                   className={`flex-row items-center border border-t-0 border-sand-200 bg-sand-50 active:bg-sand-100 dark:border-sand-700 dark:bg-sand-800/50 dark:active:bg-sand-700 ${
                     isLast ? 'rounded-b-lg' : ''
                   }`}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/ledger-player-detail',
-                      params: { userId: row.userId },
-                    })
-                  }
+                  onPress={() => onNavigateToPlayer(row.userId)}
                 >
                   <View style={{ width: 140 }} className="px-3 py-3">
                     <Text

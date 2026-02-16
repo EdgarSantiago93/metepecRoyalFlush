@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import type { SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
 import type { EndingSubmission } from '@/types/models/session';
 import { api } from '@/services/api/client';
@@ -24,10 +23,10 @@ type Props = {
   members: SeasonMember[];
   session: Session | null;
   loading: boolean;
+  onNavigateToSession: (sessionId: string) => void;
 };
 
-export function TimelineTab({ sessions, users, members, session, loading }: Props) {
-  const router = useRouter();
+export function TimelineTab({ sessions, users, members, session, loading, onNavigateToSession }: Props) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [computingEvents, setComputingEvents] = useState(true);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -150,12 +149,7 @@ export function TimelineTab({ sessions, users, members, session, loading }: Prop
         return (
           <Pressable
             className="mb-2 rounded-xl border border-sand-200 bg-sand-50 p-3 active:bg-sand-100 dark:border-sand-700 dark:bg-sand-800/50 dark:active:bg-sand-700"
-            onPress={() =>
-              router.push({
-                pathname: '/ledger-session-detail',
-                params: { sessionId: item.sessionId },
-              })
-            }
+            onPress={() => onNavigateToSession(item.sessionId)}
           >
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
