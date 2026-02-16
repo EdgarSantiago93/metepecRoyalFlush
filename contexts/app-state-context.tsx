@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
 import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
@@ -10,12 +10,12 @@ import { applyPreset, type PresetKey } from '@/data/seed-seasons';
 // ---------------------------------------------------------------------------
 
 export type AppState =
-  | { status: 'loading' }
-  | { status: 'error'; message: string }
-  | { status: 'no_season'; users: User[] }
-  | { status: 'season_setup'; season: Season; members: SeasonMember[]; users: User[] }
-  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; endingSubmissions: EndingSubmission[]; finalizeNote: SessionFinalizeNote | null; users: User[] }
-  | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[] };
+  | { status: 'loading'; _devPresetKey?: PresetKey | null }
+  | { status: 'error'; message: string; _devPresetKey?: PresetKey | null }
+  | { status: 'no_season'; users: User[]; _devPresetKey?: PresetKey | null }
+  | { status: 'season_setup'; season: Season; members: SeasonMember[]; users: User[]; _devPresetKey?: PresetKey | null }
+  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; endingSubmissions: EndingSubmission[]; finalizeNote: SessionFinalizeNote | null; users: User[]; _devPresetKey?: PresetKey | null }
+  | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[]; _devPresetKey?: PresetKey | null };
 
 export type AppStateContextValue = AppState & {
   createSeason: (req: CreateSeasonRequest) => Promise<void>;
@@ -38,6 +38,7 @@ export type AppStateContextValue = AppState & {
   reviewEndingSubmission: (submissionId: string, action: 'validate' | 'reject', note?: string) => Promise<void>;
   refreshEndingSubmissions: () => Promise<void>;
   finalizeSession: (overrideNote?: string) => Promise<void>;
+  endSeason: () => Promise<void>;
   refresh: () => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
@@ -50,9 +51,11 @@ export const AppStateContext = createContext<AppStateContextValue | null>(null);
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>({ status: 'loading' });
+  const devPresetKeyRef = useRef<PresetKey | null>(null);
 
   const load = useCallback(async () => {
-    setState({ status: 'loading' });
+    const _devPresetKey = devPresetKeyRef.current;
+    setState({ status: 'loading', _devPresetKey });
     try {
       const [seasonRes, sessionRes, usersRes] = await Promise.all([
         api.getActiveSeason(),
@@ -65,9 +68,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       const { users } = usersRes;
 
       if (!season) {
-        setState({ status: 'no_season', users });
+        setState({ status: 'no_season', users, _devPresetKey });
       } else if (season.status === 'setup') {
-        setState({ status: 'season_setup', season, members, users });
+        setState({ status: 'season_setup', season, members, users, _devPresetKey });
       } else if (season.status === 'active') {
         // Fetch participants when session is in dealing, in_progress, closing, or finalized state
         let participants: SessionParticipant[] = [];
@@ -90,14 +93,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           const noteRes = await api.getSessionFinalizeNote(session.id);
           finalizeNote = noteRes.finalizeNote;
         }
-        setState({ status: 'season_active', season, members, session, participants, injections, endingSubmissions, finalizeNote, users });
+        setState({ status: 'season_active', season, members, session, participants, injections, endingSubmissions, finalizeNote, users, _devPresetKey });
       } else {
-        setState({ status: 'season_ended', season, members, users });
+        setState({ status: 'season_ended', season, members, users, _devPresetKey });
       }
     } catch (err) {
       setState({
         status: 'error',
         message: err instanceof Error ? err.message : 'Failed to load app state',
+        _devPresetKey,
       });
     }
   }, []);
@@ -335,8 +339,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [state, load],
   );
 
+  const endSeason = useCallback(async () => {
+    if (state.status !== 'season_active') return;
+    await api.endSeason({ seasonId: state.season.id });
+    await load();
+  }, [state, load]);
+
   const _devSetPreset = useCallback(
     async (key: PresetKey) => {
+      devPresetKeyRef.current = key;
       applyPreset(key);
       await load();
     },
@@ -366,10 +377,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       reviewEndingSubmission,
       refreshEndingSubmissions,
       finalizeSession,
+      endSeason,
       refresh: load,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, load, _devSetPreset],
+    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

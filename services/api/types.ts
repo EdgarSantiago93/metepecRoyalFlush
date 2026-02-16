@@ -254,6 +254,13 @@ export type GetSessionFinalizeNoteResponse = {
 };
 
 // ---------------------------------------------------------------------------
+// End Season
+// ---------------------------------------------------------------------------
+
+export type EndSeasonRequest = { seasonId: string };
+export type EndSeasonResponse = { season: Season };
+
+// ---------------------------------------------------------------------------
 // Ledger (Phase 7)
 // ---------------------------------------------------------------------------
 
@@ -303,6 +310,8 @@ export type ApiClient = {
   reviewEndingSubmission: (req: ReviewEndingSubmissionRequest) => Promise<ReviewEndingSubmissionResponse>;
   finalizeSession: (req: FinalizeSessionRequest) => Promise<FinalizeSessionResponse>;
   getSessionFinalizeNote: (sessionId: string) => Promise<GetSessionFinalizeNoteResponse>;
+  // End Season
+  endSeason: (req: EndSeasonRequest) => Promise<EndSeasonResponse>;
   // Ledger
   getSeasonSessions: (seasonId: string) => Promise<GetSeasonSessionsResponse>;
   getSessionDetail: (sessionId: string) => Promise<GetSessionDetailResponse>;
