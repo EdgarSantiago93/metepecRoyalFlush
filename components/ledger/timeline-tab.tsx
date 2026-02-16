@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import type { SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
 import type { EndingSubmission } from '@/types/models/session';
 import { api } from '@/services/api/client';
@@ -12,10 +12,15 @@ type TimelineEvent =
   | { type: 'session_finalized'; sessionId: string; hostName: string; date: string; location: string | null; playerCount: number; timestamp: string }
   | { type: 'buy_in'; playerName: string; amountCents: number; sessionId: string; timestamp: string }
   | { type: 'rebuy'; playerName: string; amountCents: number; sessionId: string; timestamp: string; rebuyType: string }
-  | { type: 'pnl_report'; playerName: string; pnlCents: number; sessionId: string; timestamp: string }
-  | { type: 'session_in_progress'; sessionId: string; hostName: string; startedAt: string; location: string | null; timestamp: string };
+  | { type: 'pnl_report'; playerName: string; pnlCents: number; sessionId: string; timestamp: string };
+
+type MonthGroup = {
+  label: string;
+  events: TimelineEvent[];
+};
 
 const PAGE_SIZE = 20;
+const NODE_CENTER_Y = 22;
 
 type Props = {
   sessions: Session[];
@@ -37,7 +42,6 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
       const allEvents: TimelineEvent[] = [];
       const finalizedSessions = sessions.filter((s) => s.state === 'finalized');
 
-      // Fetch details for all finalized sessions
       const details = await Promise.all(
         finalizedSessions.map((s) => api.getSessionDetail(s.id)),
       );
@@ -45,7 +49,6 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
       for (const detail of details) {
         const hostName = users.find((u) => u.id === detail.session.hostUserId)?.displayName ?? 'Unknown';
 
-        // Session finalized event
         allEvents.push({
           type: 'session_finalized',
           sessionId: detail.session.id,
@@ -56,7 +59,6 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
           timestamp: detail.session.finalizedAt ?? detail.session.startedAt ?? detail.session.scheduledAt,
         });
 
-        // Buy-in events (each participant checking in)
         for (const p of detail.participants) {
           const playerName = getUserName(p, users);
           allEvents.push({
@@ -68,7 +70,6 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
           });
         }
 
-        // Rebuy events (approved only)
         const approvedRebuys = detail.injections.filter(
           (inj: SessionInjection) => inj.status === 'approved',
         );
@@ -85,7 +86,6 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
           });
         }
 
-        // PnL report events (per participant)
         for (const p of detail.participants) {
           const playerName = getUserName(p, users);
           const approvedInjections = detail.injections
@@ -107,7 +107,6 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
         }
       }
 
-      // Sort all events newest first
       allEvents.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setEvents(allEvents);
     } finally {
@@ -121,7 +120,6 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
     }
   }, [loading, buildEvents]);
 
-  // Check for in-progress session
   const liveSession = session && session.state !== 'finalized' && session.state !== 'scheduled'
     ? session
     : null;
@@ -129,9 +127,24 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
   const visibleEvents = useMemo(() => events.slice(0, visibleCount), [events, visibleCount]);
   const hasMore = visibleCount < events.length;
 
-  const formatMxn = (cents: number) => `$${(cents / 100).toLocaleString()}`;
-  const formatPnl = (cents: number) =>
-    `${cents >= 0 ? '+' : ''}$${(cents / 100).toLocaleString()}`;
+  const monthGroups = useMemo(() => {
+    const groups: MonthGroup[] = [];
+    let currentLabel = '';
+
+    for (const event of visibleEvents) {
+      const d = new Date(event.timestamp);
+      const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      if (label !== currentLabel) {
+        groups.push({ label, events: [event] });
+        currentLabel = label;
+      } else {
+        groups[groups.length - 1].events.push(event);
+      }
+    }
+
+    return groups;
+  }, [visibleEvents]);
 
   if (loading || computingEvents) {
     return (
@@ -141,119 +154,27 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
     );
   }
 
-  const renderItem = ({ item }: { item: TimelineEvent }) => {
-    switch (item.type) {
-      case 'session_in_progress':
-        return null; // Handled by badge above
-      case 'session_finalized':
-        return (
-          <Pressable
-            className="mb-2 rounded-xl border border-sand-200 bg-sand-50 p-3 active:bg-sand-100 dark:border-sand-700 dark:bg-sand-800/50 dark:active:bg-sand-700"
-            onPress={() => onNavigateToSession(item.sessionId)}
-          >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-2 w-2 rounded-full bg-felt-500" />
-                  <Text className="text-sm font-semibold text-sand-950 dark:text-sand-50">
-                    Session Finalized
-                  </Text>
-                </View>
-                <Text className="mt-1 text-xs text-sand-500 dark:text-sand-400">
-                  Host: {item.hostName}
-                  {item.location ? ` \u2022 ${item.location}` : ''}
-                  {` \u2022 ${item.playerCount} players`}
-                </Text>
-              </View>
-              <Text className="text-xs text-sand-400 dark:text-sand-500">
-                {formatDate(item.date)}
-              </Text>
-            </View>
-          </Pressable>
-        );
-      case 'buy_in':
-        return (
-          <View className="mb-2 rounded-xl border border-sand-200 bg-sand-50 p-3 dark:border-sand-700 dark:bg-sand-800/50">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-2 w-2 rounded-full bg-gold-500" />
-                  <Text className="text-sm font-medium text-sand-950 dark:text-sand-50">
-                    {item.playerName} bought in
-                  </Text>
-                </View>
-              </View>
-              <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                {formatMxn(item.amountCents)}
-              </Text>
-            </View>
-            <Text className="ml-4 mt-0.5 text-xs text-sand-400 dark:text-sand-500">
-              {formatDate(item.timestamp)}
-            </Text>
-          </View>
-        );
-      case 'rebuy':
-        return (
-          <View className="mb-2 rounded-xl border border-sand-200 bg-sand-50 p-3 dark:border-sand-700 dark:bg-sand-800/50">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-2 w-2 rounded-full bg-gold-400" />
-                  <Text className="text-sm font-medium text-sand-950 dark:text-sand-50">
-                    {item.playerName} — {item.rebuyType}
-                  </Text>
-                </View>
-              </View>
-              <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
-                +{formatMxn(item.amountCents)}
-              </Text>
-            </View>
-            <Text className="ml-4 mt-0.5 text-xs text-sand-400 dark:text-sand-500">
-              {formatDate(item.timestamp)}
-            </Text>
-          </View>
-        );
-      case 'pnl_report': {
-        const pnlColor =
-          item.pnlCents > 0
-            ? 'text-felt-600 dark:text-felt-400'
-            : item.pnlCents < 0
-              ? 'text-red-600 dark:text-red-400'
-              : 'text-sand-600 dark:text-sand-300';
-        return (
-          <View className="mb-2 rounded-xl border border-sand-200 bg-sand-50 p-3 dark:border-sand-700 dark:bg-sand-800/50">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <View
-                    className={`h-2 w-2 rounded-full ${
-                      item.pnlCents >= 0 ? 'bg-felt-500' : 'bg-red-500'
-                    }`}
-                  />
-                  <Text className="text-sm font-medium text-sand-950 dark:text-sand-50">
-                    {item.playerName} PnL
-                  </Text>
-                </View>
-              </View>
-              <Text className={`text-sm font-bold ${pnlColor}`}>
-                {formatPnl(item.pnlCents)}
-              </Text>
-            </View>
-            <Text className="ml-4 mt-0.5 text-xs text-sand-400 dark:text-sand-500">
-              {formatDate(item.timestamp)}
-            </Text>
-          </View>
-        );
-      }
-    }
-  };
+  if (events.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-base text-sand-500 dark:text-sand-400">No events yet</Text>
+        <Text className="mt-1 text-sm text-sand-400 dark:text-sand-500">
+          Events will appear here after sessions are finalized.
+        </Text>
+      </View>
+    );
+  }
 
   return (
-    <View className="flex-1 px-6">
+    <ScrollView
+      className="flex-1"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 24 }}
+    >
       {/* In-progress session badge */}
       {liveSession && (
-        <View className="mb-3 flex-row items-center rounded-lg border border-gold-300 bg-gold-50 px-3 py-2.5 dark:border-gold-700 dark:bg-gold-900/30">
-          <View className="mr-2 h-2 w-2 rounded-full bg-gold-500" />
+        <View className="mx-4 mb-2 flex-row items-center rounded-lg border border-gold-300 bg-gold-50 px-3 py-2.5 dark:border-gold-700 dark:bg-gold-900/30">
+          <View className="mr-2 h-2.5 w-2.5 rounded-full bg-gold-500" />
           <Text className="flex-1 text-sm font-medium text-gold-800 dark:text-gold-200">
             Session in progress
           </Text>
@@ -263,38 +184,226 @@ export function TimelineTab({ sessions, users, members, session, loading, onNavi
         </View>
       )}
 
-      {events.length === 0 ? (
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-base text-sand-500 dark:text-sand-400">
-            No events yet
+      {monthGroups.map((group, gi) => (
+        <View key={group.label}>
+          {/* Month section header */}
+          <View className="border-b border-sand-200 bg-sand-100 px-4 py-2.5 dark:border-sand-700 dark:bg-sand-800/80">
+            <Text className="text-sm font-semibold text-sand-600 dark:text-sand-400">
+              {group.label}
+            </Text>
+          </View>
+
+          {/* Events in this month */}
+          {group.events.map((event, ei) => {
+            const isFirst = ei === 0;
+            const isLast = ei === group.events.length - 1;
+
+            return (
+              <View key={`${gi}-${ei}`} className="flex-row pl-2 pr-4">
+                {/* Date column */}
+                <View style={{ width: 52 }} className="items-end pt-3">
+                  <Text className="text-[11px] font-medium text-sand-500 dark:text-sand-400">
+                    {formatShortDate(event.timestamp)}
+                  </Text>
+                </View>
+
+                {/* Timeline spine */}
+                <View style={{ width: 32 }} className="items-center self-stretch">
+                  {/* Top line segment — connects from previous node center to this node center */}
+                  {!isFirst && (
+                    <View
+                      className="absolute bg-gold-400/40 dark:bg-gold-600/40"
+                      style={{ left: 15, top: 0, width: 2, height: NODE_CENTER_Y }}
+                    />
+                  )}
+                  {/* Bottom line segment — connects from this node center to bottom of row */}
+                  {!isLast && (
+                    <View
+                      className="absolute bg-gold-400/40 dark:bg-gold-600/40"
+                      style={{ left: 15, top: NODE_CENTER_Y, width: 2, bottom: 0 }}
+                    />
+                  )}
+                  {/* Node container — fixed size for consistent alignment */}
+                  <View
+                    style={{ marginTop: 12, width: 20, height: 20 }}
+                    className="items-center justify-center"
+                  >
+                    <NodeIndicator
+                      type={event.type}
+                      pnlCents={event.type === 'pnl_report' ? event.pnlCents : 0}
+                    />
+                  </View>
+                </View>
+
+                {/* Content */}
+                <View
+                  className={`flex-1 py-3 ${
+                    !isLast ? 'border-b border-sand-200/60 dark:border-sand-700/60' : ''
+                  }`}
+                >
+                  <EventContent
+                    event={event}
+                    onNavigateToSession={onNavigateToSession}
+                  />
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      ))}
+
+      {/* Load more */}
+      {hasMore && (
+        <Pressable
+          className="mx-4 mt-4 items-center rounded-lg border border-sand-200 bg-sand-100 py-3 active:bg-sand-200 dark:border-sand-700 dark:bg-sand-800 dark:active:bg-sand-700"
+          onPress={() => setVisibleCount((c) => c + PAGE_SIZE)}
+        >
+          <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
+            Load more events
           </Text>
-          <Text className="mt-1 text-sm text-sand-400 dark:text-sand-500">
-            Events will appear here after sessions are finalized.
+        </Pressable>
+      )}
+    </ScrollView>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Node indicators — shape + color encode event type at a glance
+// ---------------------------------------------------------------------------
+
+function NodeIndicator({ type, pnlCents = 0 }: { type: TimelineEvent['type']; pnlCents?: number }) {
+  switch (type) {
+    case 'session_finalized':
+      // Checkmark circle — completed session milestone
+      return (
+        <View className="h-5 w-5 items-center justify-center rounded-full bg-felt-500">
+          <Text style={{ fontSize: 11, lineHeight: 13 }} className="font-bold text-white">
+            {'\u2713'}
           </Text>
         </View>
-      ) : (
-        <FlatList
-          data={visibleEvents}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => `${item.type}-${index}`}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 16 }}
-          ListFooterComponent={
-            hasMore ? (
-              <Pressable
-                className="mb-4 items-center rounded-lg border border-sand-200 bg-sand-100 py-3 active:bg-sand-200 dark:border-sand-700 dark:bg-sand-800 dark:active:bg-sand-700"
-                onPress={() => setVisibleCount((c) => c + PAGE_SIZE)}
-              >
-                <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
-                  Load more events
-                </Text>
-              </Pressable>
-            ) : null
-          }
+      );
+    case 'buy_in':
+      // Filled diamond — money entering the game
+      return (
+        <View
+          style={{ width: 10, height: 10, transform: [{ rotate: '45deg' }] }}
+          className="bg-gold-500"
         />
-      )}
-    </View>
-  );
+      );
+    case 'rebuy':
+      // Open circle — additional injection
+      return (
+        <View className="h-4 w-4 rounded-full border-2 border-gold-500 bg-sand-50 dark:bg-sand-900" />
+      );
+    case 'pnl_report':
+      // Small filled circle — result outcome (green = profit, red = loss)
+      return (
+        <View
+          className={`h-3 w-3 rounded-full ${
+            pnlCents > 0 ? 'bg-felt-500' : pnlCents < 0 ? 'bg-red-500' : 'bg-sand-400'
+          }`}
+        />
+      );
+    default:
+      return <View className="h-3 w-3 rounded-full bg-sand-400" />;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Event content — right side of the spine
+// ---------------------------------------------------------------------------
+
+function EventContent({
+  event,
+  onNavigateToSession,
+}: {
+  event: TimelineEvent;
+  onNavigateToSession: (sessionId: string) => void;
+}) {
+  const formatMxn = (cents: number) => `$${(Math.abs(cents) / 100).toLocaleString()}`;
+
+  switch (event.type) {
+    case 'session_finalized':
+      return (
+        <Pressable
+          className="active:opacity-70"
+          onPress={() => onNavigateToSession(event.sessionId)}
+        >
+          <View className="flex-row items-start justify-between">
+            <Text className="flex-1 text-sm font-bold text-sand-950 dark:text-sand-50">
+              Session Finalized
+            </Text>
+            <Text className="text-[11px] font-medium text-felt-600 dark:text-felt-400">
+              Balanced
+            </Text>
+          </View>
+          <Text className="mt-0.5 text-xs text-sand-500 dark:text-sand-400">
+            Host: {event.hostName}
+            {event.location ? ` \u2022 ${event.location}` : ''}
+          </Text>
+          <Text className="mt-0.5 text-[11px] text-sand-400 dark:text-sand-500">
+            {event.playerCount} players
+          </Text>
+        </Pressable>
+      );
+
+    case 'buy_in':
+      return (
+        <View className="flex-row items-start justify-between">
+          <Text className="flex-1 text-sm font-medium text-sand-950 dark:text-sand-50">
+            {event.playerName} bought in
+          </Text>
+          <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
+            {formatMxn(event.amountCents)}
+          </Text>
+        </View>
+      );
+
+    case 'rebuy':
+      return (
+        <>
+          <View className="flex-row items-start justify-between">
+            <Text className="flex-1 text-sm font-medium text-sand-950 dark:text-sand-50">
+              {event.playerName}
+            </Text>
+            <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
+              +{formatMxn(event.amountCents)}
+            </Text>
+          </View>
+          <Text className="mt-0.5 text-xs text-sand-500 dark:text-sand-400">
+            {event.rebuyType}
+          </Text>
+        </>
+      );
+
+    case 'pnl_report': {
+      const pnlColor =
+        event.pnlCents > 0
+          ? 'text-felt-600 dark:text-felt-400'
+          : event.pnlCents < 0
+            ? 'text-red-600 dark:text-red-400'
+            : 'text-sand-600 dark:text-sand-300';
+      const sign = event.pnlCents >= 0 ? '+' : '-';
+      return (
+        <>
+          <View className="flex-row items-start justify-between">
+            <Text className="flex-1 text-sm font-medium text-sand-950 dark:text-sand-50">
+              {event.playerName}
+            </Text>
+            <Text className={`text-sm font-bold ${pnlColor}`}>
+              {sign}{formatMxn(event.pnlCents)}
+            </Text>
+          </View>
+          <Text className="mt-0.5 text-xs text-sand-500 dark:text-sand-400">
+            Session result
+          </Text>
+        </>
+      );
+    }
+
+    default:
+      return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -309,7 +418,7 @@ function getUserName(participant: SessionParticipant, users: User[]): string {
   return participant.guestName ?? 'Guest';
 }
 
-function formatDate(isoString: string): string {
+function formatShortDate(isoString: string): string {
   const d = new Date(isoString);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
 }
