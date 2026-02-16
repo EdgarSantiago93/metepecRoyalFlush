@@ -253,6 +253,22 @@ export type GetSessionFinalizeNoteResponse = {
   finalizeNote: SessionFinalizeNote | null;
 };
 
+// ---------------------------------------------------------------------------
+// Ledger (Phase 7)
+// ---------------------------------------------------------------------------
+
+export type GetSeasonSessionsResponse = {
+  sessions: Session[];
+};
+
+export type GetSessionDetailResponse = {
+  session: Session;
+  participants: SessionParticipant[];
+  injections: SessionInjection[];
+  endingSubmissions: EndingSubmission[];
+  finalizeNote: SessionFinalizeNote | null;
+};
+
 /** Mock-swappable API client interface. */
 export type ApiClient = {
   sendMagicLink: (email: string) => Promise<SendMagicLinkResponse>;
@@ -287,4 +303,7 @@ export type ApiClient = {
   reviewEndingSubmission: (req: ReviewEndingSubmissionRequest) => Promise<ReviewEndingSubmissionResponse>;
   finalizeSession: (req: FinalizeSessionRequest) => Promise<FinalizeSessionResponse>;
   getSessionFinalizeNote: (sessionId: string) => Promise<GetSessionFinalizeNoteResponse>;
+  // Ledger
+  getSeasonSessions: (seasonId: string) => Promise<GetSeasonSessionsResponse>;
+  getSessionDetail: (sessionId: string) => Promise<GetSessionDetailResponse>;
 };

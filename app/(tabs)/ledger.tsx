@@ -22,6 +22,7 @@ export default function LedgerScreen() {
           season={appState.season}
           members={appState.members}
           users={appState.users}
+          session={appState.status === 'season_active' ? appState.session : null}
         />
       );
   }
