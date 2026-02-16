@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
-import type { SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
-import type { EndingSubmission } from '@/types/models/session';
+import { PulsingDot } from '@/components/ui/pulsing-dot';
 import { useAppState } from '@/hooks/use-app-state';
 import { api } from '@/services/api/client';
+import type { SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission } from '@/types/models/session';
+import { Image } from 'expo-image';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 // ---------------------------------------------------------------------------
 // Timeline event types (historical — finalized sessions)
@@ -220,6 +222,11 @@ export function TimelineTab({ sessions, users, members, session, loading, onRelo
         contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
       >
+         <Image
+          source={require('@/assets/images/nodata.png')}
+          style={{ width: 200, height: 200, marginBottom: 12 }}
+          contentFit="contain"
+        />
         <Text className="text-base text-sand-500 dark:text-sand-400">Sin eventos</Text>
         <Text className="mt-1 text-sm text-sand-400 dark:text-sand-500">
           Los eventos aparecerán aquí cuando un juego comience.
@@ -530,31 +537,6 @@ function LiveSessionSection({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Pulsing dot animation
-// ---------------------------------------------------------------------------
-
-function PulsingDot() {
-  const opacity = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.3, duration: 800, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: true }),
-      ]),
-    );
-    animation.start();
-    return () => animation.stop();
-  }, [opacity]);
-
-  return (
-    <Animated.View
-      style={{ opacity }}
-      className="h-2.5 w-2.5 rounded-full bg-gold-500"
-    />
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Live node indicators

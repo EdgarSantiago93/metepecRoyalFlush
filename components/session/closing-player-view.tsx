@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Pressable, Text, View } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import * as ImagePicker from 'expo-image-picker';
 import type { EndingSubmission, SessionInjection, SessionParticipant, User } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
@@ -258,10 +259,9 @@ function SubmissionForm({
         <Text className="mb-1 text-xs text-sand-500 dark:text-sand-400">
           Stack Final (MXN)
         </Text>
-        <TextInput
-          className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+        <AppTextInput
+          size="sm"
           placeholder="ej. 850"
-          placeholderTextColor="#94a3b8"
           keyboardType="numeric"
           value={endingStack}
           onChangeText={setEndingStack}
@@ -301,10 +301,9 @@ function SubmissionForm({
         <Text className="mb-1 text-xs text-sand-500 dark:text-sand-400">
           Nota (opcional)
         </Text>
-        <TextInput
-          className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+        <AppTextInput
+          size="sm"
           placeholder="Comentarios sobre el conteo"
-          placeholderTextColor="#94a3b8"
           value={note}
           onChangeText={setNote}
         />

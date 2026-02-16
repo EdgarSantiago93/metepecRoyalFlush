@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import type { EndingSubmission, Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
 import type { ParticipantSessionResult, SessionBalanceCheck } from '@/types/derived';
 import { useAuth } from '@/hooks/use-auth';
@@ -129,7 +130,7 @@ export function SessionFinalize({
     >
       {/* Banner */}
       <View className="bg-amber-600 px-6 pb-5 pt-16 dark:bg-amber-800">
-        <Text className="text-xl font-bold text-white">Verificación de Balance</Text>
+        <Text className="text-xl font-heading text-white">Verificación de Balance</Text>
         {host && (
           <Text className="mt-1 text-sm text-amber-100">
             Host: {host.displayName}
@@ -296,10 +297,10 @@ export function SessionFinalize({
                 <Text className="mb-3 text-xs text-red-600/80 dark:text-red-400/80">
                   Explica por qué el juego no está balanceado y cómo se resolvió la diferencia.
                 </Text>
-                <TextInput
-                  className="mb-3 rounded-lg border border-red-200 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-red-800 dark:bg-sand-800 dark:text-sand-50"
+                <AppTextInput
+                  size="sm"
+                  className="mb-3 border-red-200 dark:border-red-800"
                   placeholder="ej. Error de conteo de $50 MXN, dividido equitativamente..."
-                  placeholderTextColor="#94a3b8"
                   value={overrideNote}
                   onChangeText={setOverrideNote}
                   multiline

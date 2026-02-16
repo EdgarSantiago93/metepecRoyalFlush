@@ -93,7 +93,7 @@ export function LedgerPlayerDetail({ player, member, sessions, sessionDetails, u
     >
       {/* Player header */}
       <View className="bg-sand-100 px-6 pb-5 pt-4 dark:bg-sand-800">
-        <Text className="text-xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="text-xl font-heading text-sand-950 dark:text-sand-50">
           {player.displayName}
         </Text>
         <Text className="mt-1 text-sm text-sand-500 dark:text-sand-400">

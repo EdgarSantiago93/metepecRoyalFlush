@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import type { SessionParticipant } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
@@ -143,10 +144,9 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
         </View>
       ) : (
         <View className="gap-3">
-          <TextInput
-            className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+          <AppTextInput
+            size="sm"
             placeholder="Describe the issue (e.g. wrong amount)"
-            placeholderTextColor="#94a3b8"
             value={disputeNote}
             onChangeText={setDisputeNote}
             multiline

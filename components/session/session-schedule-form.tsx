@@ -4,9 +4,9 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import type { SeasonHostOrder, User } from '@/types';
 
 type InitialValues = {
@@ -133,10 +133,8 @@ export function SessionScheduleForm({
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
             Fecha / Hora (opcional)
           </Text>
-          <TextInput
-            className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+          <AppTextInput
             placeholder='ej. "Sábado 8pm"'
-            placeholderTextColor="#b5ac9e"
             value={scheduledFor}
             onChangeText={setScheduledFor}
             editable={!submitting}
@@ -148,10 +146,8 @@ export function SessionScheduleForm({
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
             Ubicación (opcional)
           </Text>
-          <TextInput
-            className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+          <AppTextInput
             placeholder="ej. Casa de Miguel"
-            placeholderTextColor="#b5ac9e"
             value={location}
             onChangeText={setLocation}
             editable={!submitting}

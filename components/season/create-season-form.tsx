@@ -4,9 +4,9 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import type { User } from '@/types';
 
 type Props = {
@@ -33,7 +33,7 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
   return (
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
       <View className="border-b border-sand-200 px-6 pb-4 pt-16 dark:border-sand-700">
-        <Text className="text-2xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="text-2xl font-heading text-sand-950 dark:text-sand-50">
           Crear Temporada
         </Text>
       </View>
@@ -44,10 +44,8 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
             Nombre de la Temporada (opcional)
           </Text>
-          <TextInput
-            className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+          <AppTextInput
             placeholder="ej. Temporada Feb 2026"
-            placeholderTextColor="#b5ac9e"
             value={seasonName}
             onChangeText={setSeasonName}
             editable={!submitting}

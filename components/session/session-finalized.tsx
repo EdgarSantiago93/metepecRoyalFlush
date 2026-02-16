@@ -95,7 +95,7 @@ export function SessionFinalized({
     >
       {/* Banner */}
       <View className="bg-felt-600 px-6 pb-5 pt-16 dark:bg-felt-800">
-        <Text className="text-xl font-bold text-white">Resumen del Juego</Text>
+        <Text className="text-xl font-heading text-white">Resumen del Juego</Text>
         {host && (
           <Text className="mt-1 text-sm text-felt-100">
             Host: {host.displayName}

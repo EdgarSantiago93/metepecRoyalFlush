@@ -40,7 +40,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
       contentContainerClassName="px-6 pt-16 pb-8"
     >
       {/* Header */}
-      <Text className="mb-1 text-2xl font-bold text-sand-950 dark:text-sand-50">
+      <Text className="mb-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
         {season.name ?? 'Temporada Actual'}
       </Text>
       <View className="mt-1 mb-6 self-start rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900">

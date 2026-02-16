@@ -30,7 +30,7 @@ export function SeasonEnded({ season, users, onCreateSeason }: Props) {
 
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
-      <Text className="mb-2 text-2xl font-bold text-sand-950 dark:text-sand-50">
+      <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
         Temporada Finalizada
       </Text>
       <Text className="mb-1 text-base text-sand-500 dark:text-sand-400">

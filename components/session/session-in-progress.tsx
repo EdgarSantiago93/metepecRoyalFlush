@@ -77,7 +77,7 @@ export function SessionInProgress({ session, season, members, participants, inje
     >
       {/* Banner */}
       <View className="bg-felt-600 px-6 pb-5 pt-16 dark:bg-felt-800">
-        <Text className="text-xl font-bold text-white">Juego En Curso</Text>
+        <Text className="text-xl font-heading text-white">Juego En Curso</Text>
         {host && (
           <Text className="mt-1 text-sm text-felt-100">
             Host: {host.displayName}

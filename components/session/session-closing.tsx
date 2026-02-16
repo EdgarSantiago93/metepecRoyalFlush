@@ -96,7 +96,7 @@ export function SessionClosing({
     >
       {/* Banner */}
       <View className="bg-amber-600 px-6 pb-5 pt-16 dark:bg-amber-800">
-        <Text className="text-xl font-bold text-white">Juego Cerrando</Text>
+        <Text className="text-xl font-heading text-white">Juego Cerrando</Text>
         {host && (
           <Text className="mt-1 text-sm text-amber-100">
             Host: {host.displayName}

@@ -86,7 +86,7 @@ export function LedgerSessionDetail({
     >
       {/* Banner */}
       <View className="bg-felt-600 px-6 pb-5 pt-4 dark:bg-felt-800">
-        <Text className="text-xl font-bold text-white">Detalle del Juego</Text>
+        <Text className="text-xl font-heading text-white">Detalle del Juego</Text>
         {host && (
           <Text className="mt-1 text-sm text-felt-100">
             Host: {host.displayName}

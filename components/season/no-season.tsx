@@ -1,5 +1,6 @@
 import { useAuth } from '@/hooks/use-auth';
 import type { User } from '@/types';
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { CreateSeasonForm } from './create-season-form';
@@ -29,7 +30,12 @@ export function NoSeason({ users, onCreateSeason }: Props) {
 
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
-      <Text className="mb-2 text-2xl font-bold text-sand-950 dark:text-sand-50">
+       <Image
+          source={require('@/assets/images/noseason.png')}
+          style={{ width: 200, height: 200, marginBottom: 24 }}
+          contentFit="contain"
+        />
+      <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
         No hay temporada activa
       </Text>
       <Text className="mb-8 text-center text-base text-sand-500 dark:text-sand-400">

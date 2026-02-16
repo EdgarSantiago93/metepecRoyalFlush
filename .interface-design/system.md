@@ -76,7 +76,25 @@ Borders only — low-opacity warm borders (`sand-200` light, `sand-700` dark). N
 
 ## Typography
 
-System fonts (configured in `constants/theme.ts`). Hierarchy via weight/size only.
+### Headings — Merriweather (Google Fonts)
+Warm serif for page titles. Signals trust and tradition — fits a group with established rules and money on the line.
+
+| Class | Font | Usage |
+|-------|------|-------|
+| `font-heading` | Merriweather 700 Bold | Page titles (`text-2xl`, `text-xl`) |
+| `font-heading-regular` | Merriweather 400 Regular | Taglines, decorative text |
+
+### Body — Inter (Google Fonts)
+Clean geometric sans for everything else. Readable at small sizes, works for data tables, labels, buttons.
+
+| Class | Font | Usage |
+|-------|------|-------|
+| `font-sans` | Inter 400 Regular | Default body text |
+| `font-sans-medium` | Inter 500 Medium | Emphasized body, labels |
+| `font-sans-semibold` | Inter 600 SemiBold | Buttons, section headers |
+| `font-sans-bold` | Inter 700 Bold | Bold body text, table values |
+
+Fonts loaded via `@expo-google-fonts` in `app/_layout.tsx` with splash screen held until ready.
 
 ## Tab Bar
 

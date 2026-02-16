@@ -84,6 +84,32 @@ Since this is a React Native / Expo app, UI verification uses the Expo dev serve
    - Clean up: `browser_close`
 4. For native-only features, describe manual test steps for iOS Simulator / Android Emulator
 
+### Maestro E2E Testing (for UI changes)
+
+After verification passes and before creating the PR, **ask the USER** whether Maestro E2E tests should be run for the changes made.
+
+If the answer is **yes**, follow this workflow:
+
+1. **Identify what changed visually** — list every screen, component, or flow affected by the change (e.g. new button, changed text, new screen, reordered elements).
+2. **Determine which existing Maestro flows cover the affected areas** — check `.maestro/` for existing YAML flows that navigate to or interact with the changed screens.
+3. **Write or update Maestro flows as needed:**
+   - If an existing flow covers the area, add `takeScreenshot` steps at the points where the change is visible.
+   - If no existing flow covers the area, create a new `.maestro/<feature-or-screen>.yaml` flow that navigates to the changed screen and captures screenshots.
+   - Follow existing conventions: use `appId: com.edgarsant93.metepecroyalflush`, `testId` selectors, `extendedWaitUntil` for async screens.
+4. **Run the Maestro tests:**
+   - Ensure the dev build is running on a simulator/emulator.
+   - Run individual flows: `maestro test .maestro/<flow-name>.yaml`
+   - Or run all flows: `maestro test .maestro/`
+5. **Collect screenshots:**
+   - Maestro saves screenshots to `~/.maestro/tests/` by default.
+   - Copy relevant screenshots to `.github/pr-screenshots/` with descriptive names: `<feature>-<state>.png`
+   - Examples: `season-setup-dashboard.png`, `login-screen-new-button.png`
+6. **Add screenshots to the PR:**
+   - Commit all screenshots in `.github/pr-screenshots/` on the branch.
+   - Embed them in the PR body under a **Screenshots** section so reviewers can see the visual changes.
+
+**Key rule:** Only capture screenshots for the changes you made. If you added a button, screenshot the screen with the button. If you changed text, screenshot where the text appears. Don't screenshot unrelated screens.
+
 ### Documentation
 
 Before creating the PR, document the feature/change:
