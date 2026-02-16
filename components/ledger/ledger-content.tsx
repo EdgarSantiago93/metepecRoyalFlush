@@ -103,9 +103,20 @@ function TabButton({
     <Pressable
       className={`flex-1 items-center rounded-md px-3 py-2 ${
         isActive
-          ? 'bg-white shadow-sm dark:bg-sand-700'
+          ? 'bg-white dark:bg-sand-700'
           : 'bg-transparent'
       }`}
+      style={
+        isActive
+          ? {
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 1,
+            }
+          : undefined
+      }
       onPress={onPress}
     >
       <Text
