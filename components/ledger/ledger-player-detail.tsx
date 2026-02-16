@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import type { SeasonMember, Session, SessionInjection, User } from '@/types';
 import type { EndingSubmission } from '@/types/models/session';
 import type { GetSessionDetailResponse } from '@/services/api/types';
@@ -25,7 +25,6 @@ type Props = {
 };
 
 export function LedgerPlayerDetail({ player, member, sessions, sessionDetails, users }: Props) {
-  const router = useRouter();
   const formatMxn = (cents: number) => `$${(cents / 100).toLocaleString()}`;
   const formatPnl = (cents: number) =>
     `${cents >= 0 ? '+' : ''}$${(cents / 100).toLocaleString()}`;

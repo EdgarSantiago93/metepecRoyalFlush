@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import type { EndingSubmission, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { ParticipantSessionResult } from '@/types/derived';
 
@@ -58,7 +58,6 @@ export function LedgerSessionDetail({
   finalizeNote,
   users,
 }: Props) {
-  const router = useRouter();
   const host = users.find((u) => u.id === session.hostUserId);
   const finalizedBy = users.find((u) => u.id === session.finalizedByUserId);
 

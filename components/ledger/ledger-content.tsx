@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import type { Season, SeasonMember, Session, User } from '@/types';
 import { api } from '@/services/api/client';
 import { StandingsTab } from './standings-tab';
@@ -16,7 +16,6 @@ type Props = {
 };
 
 export function LedgerContent({ season, members, users, session }: Props) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('timeline');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
