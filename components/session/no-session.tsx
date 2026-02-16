@@ -1,7 +1,8 @@
-import { Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import type { Season, SeasonMember, User } from '@/types';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 
 type Props = {
   season: Season;
@@ -19,7 +20,12 @@ export function NoSession({ season, users }: Props) {
 
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
-      <Text className="mb-2 text-2xl font-bold text-sand-950 dark:text-sand-50">
+        <Image
+          source={require('@/assets/images/nogame.png')}
+          style={{ width: 200, height: 200, marginBottom: 24 }}
+          contentFit="contain"
+        />
+      <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
         Sin Juego Programado
       </Text>
       {canSchedule ? (

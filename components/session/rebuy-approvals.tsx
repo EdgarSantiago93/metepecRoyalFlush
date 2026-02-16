@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { Alert, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Pressable, Text, View } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import type { SessionInjection, SessionParticipant, User } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
 
@@ -152,10 +153,9 @@ function PendingInjectionCard({
         </View>
       ) : (
         <View className="gap-3">
-          <TextInput
-            className="rounded-lg border border-sand-300 bg-white px-3 py-2.5 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+          <AppTextInput
+            size="sm"
             placeholder="Razón del rechazo (requerida)"
-            placeholderTextColor="#94a3b8"
             value={rejectNote}
             onChangeText={setRejectNote}
             autoFocus

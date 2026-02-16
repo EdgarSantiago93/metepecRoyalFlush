@@ -49,7 +49,7 @@ export function EndSeasonPayout() {
       contentContainerClassName="px-6 pt-6 pb-8"
     >
       {/* Header */}
-      <Text className="mb-1 text-xl font-bold text-sand-950 dark:text-sand-50">
+      <Text className="mb-1 text-xl font-heading text-sand-950 dark:text-sand-50">
         Reporte de Pagos
       </Text>
       <Text className="mb-6 text-sm text-sand-500 dark:text-sand-400">

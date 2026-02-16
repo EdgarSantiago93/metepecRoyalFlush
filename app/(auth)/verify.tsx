@@ -29,7 +29,7 @@ export default function VerifyScreen() {
 
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-8 dark:bg-sand-900">
-      <Text className="mb-2 text-2xl font-bold text-sand-950 dark:text-sand-50">
+      <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
         Revisa tu correo
       </Text>
       <Text className="mb-8 text-center text-base text-sand-500 dark:text-sand-400">

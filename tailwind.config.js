@@ -7,6 +7,14 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter_400Regular'],
+        'sans-medium': ['Inter_500Medium'],
+        'sans-semibold': ['Inter_600SemiBold'],
+        'sans-bold': ['Inter_700Bold'],
+        heading: ['Merriweather_700Bold'],
+        'heading-regular': ['Merriweather_400Regular'],
+      },
       colors: {
         felt: {
           50: '#eef7f1',

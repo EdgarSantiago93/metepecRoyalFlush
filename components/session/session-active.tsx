@@ -116,7 +116,7 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
       className="flex-1 bg-sand-50 dark:bg-sand-900"
       contentContainerClassName="px-6 pt-16 pb-8"
     >
-      <Text className="mb-1 text-2xl font-bold text-sand-950 dark:text-sand-50">
+      <Text className="mb-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
         Session Scheduled
       </Text>
 

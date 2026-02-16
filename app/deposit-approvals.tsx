@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
@@ -88,7 +89,7 @@ export default function DepositApprovalsScreen() {
   if (!isTreasurer) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
-        <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
           Sin Autorización
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
@@ -214,8 +215,8 @@ export default function DepositApprovalsScreen() {
                               <Text className="text-sm font-semibold text-white">Rechazar</Text>
                             </Pressable>
                           </View>
-                          <TextInput
-                            className="rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm text-sand-950 dark:border-sand-600 dark:bg-sand-900 dark:text-sand-50"
+                          <AppTextInput
+                            size="sm"
                             placeholder="Nota de rechazo (requerida para rechazar)"
                             placeholderTextColor="#b5ac9e"
                             value={rejectNote}

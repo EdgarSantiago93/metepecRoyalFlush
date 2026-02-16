@@ -87,7 +87,7 @@ export function SessionDealing({ session, season, members, participants, users }
     >
       {/* Banner */}
       <View className="bg-gold-500 px-6 pb-5 pt-16 dark:bg-gold-700">
-        <Text className="text-xl font-bold text-white">Repartiendo</Text>
+        <Text className="text-xl font-heading text-white">Repartiendo</Text>
         {host && (
           <Text className="mt-1 text-sm text-gold-100">
             Host: {host.displayName}

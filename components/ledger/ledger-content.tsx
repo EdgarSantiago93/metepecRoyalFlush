@@ -40,7 +40,7 @@ export function LedgerContent({ season, members, users, session }: Props) {
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
       {/* Header */}
       <View className="px-6 pb-3 pt-16">
-        <Text className="mb-0.5 text-2xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="mb-0.5 text-2xl font-heading text-sand-950 dark:text-sand-50">
           Registro
         </Text>
         <Text className="text-sm text-sand-500 dark:text-sand-400">

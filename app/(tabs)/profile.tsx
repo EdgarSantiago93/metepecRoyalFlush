@@ -19,7 +19,7 @@ export default function ProfileScreen() {
             {user.displayName.charAt(0)}
           </Text>
         </View>
-        <Text className="text-2xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="text-2xl font-heading text-sand-950 dark:text-sand-50">
           {user.displayName}
         </Text>
         <Text className="mt-1 text-base text-sand-500 dark:text-sand-400">

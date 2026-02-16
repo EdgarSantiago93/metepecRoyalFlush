@@ -1,22 +1,52 @@
+import { AppTextInput } from '@/components/ui/app-text-input';
+import { ChipRain } from '@/components/ui/chip-rain';
 import { useAuth } from '@/hooks/use-auth';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   Text,
-  TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+
+const LOGO_SMALL = 160;
+const LOGO_LARGE = 280;
+const TIMING = { duration: 500, easing: Easing.bezier(0.4, 0, 0.2, 1) };
 
 export default function LoginScreen() {
   const { sendMagicLink } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const progress = useSharedValue(0);
+
+  const logoStyle = useAnimatedStyle(() => {
+    const size = interpolate(progress.value, [0, 1], [LOGO_SMALL, LOGO_LARGE]);
+    return { width: size, height: size };
+  });
+
+  const formStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 0.4], [1, 0]),
+    transform: [{ translateY: interpolate(progress.value, [0, 1], [0, 60]) }],
+  }));
+
+  const spinnerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0.3, 0.7], [0, 1]),
+  }));
 
   async function handleSend() {
     const trimmed = email.trim().toLowerCase();
@@ -27,69 +57,85 @@ export default function LoginScreen() {
 
     setError(null);
     setLoading(true);
+    progress.value = withTiming(1, TIMING);
+
     try {
       await sendMagicLink(trimmed);
       router.push({ pathname: '/(auth)/verify', params: { email: trimmed } });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Algo salió mal');
-    } finally {
       setLoading(false);
+      progress.value = withTiming(0, TIMING);
     }
   }
-
+  
   return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-sand-50 dark:bg-sand-900"
+      className="flex-1 bg-felt-700 dark:bg-felt-800"
+    
     >
-      <View className="flex-1 items-center justify-center px-8">
-        <Image
-          source={require('@/assets/images/mrf_1_sm.png')}
-          style={{ width: 240, height: 240, marginBottom: 24 }}
-          contentFit="contain"
-        />
-        <Text className="mb-2 text-3xl font-bold text-sand-950 dark:text-sand-50">
-          Metepec Royal Flush
-        </Text>
-        <Text className="mb-8 text-base text-sand-500 dark:text-sand-400">
-          Inicia sesión con tu correo de poker
-        </Text>
+      {/* Green table — logo centered */}
+      <View className="flex-1 items-center justify-center">
+        <ChipRain />
+        <Animated.View style={logoStyle}>
+          <Image
+            source={require('@/assets/images/mrf_1_sm.png')}
+            style={{ width: '100%', height: '100%' }}
+            contentFit="contain"
+          />
+        </Animated.View>
 
-        <TextInput
-          testID="login-email-input"
-          className="mb-4 w-full rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
-          placeholder="tu@poker.local"
-          placeholderTextColor="#b5ac9e"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          autoCorrect={false}
-          editable={!loading}
-          onSubmitEditing={handleSend}
-          returnKeyType="go"
-        />
-
-        {error && (
-          <Text className="mb-4 text-sm text-red-500">{error}</Text>
-        )}
-
-        <Pressable
-          testID="login-send-button"
-          className="w-full items-center rounded-lg bg-gold-500 px-4 py-3 active:bg-gold-600"
-          onPress={handleSend}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text className="text-base font-semibold text-white">
-              Enviar enlace de acceso
-            </Text>
-          )}
-        </Pressable>
+        {/* Spinner — fades in as form fades out */}
+        <Animated.View style={[spinnerStyle, { marginTop: 24, height: 36 }]}>
+          {loading && <ActivityIndicator size="large" color="#c49a3c" />}
+        </Animated.View>
       </View>
+
+      {/* Form card — slides down on submit */}
+      <Animated.View
+        style={formStyle}
+        pointerEvents={loading ? 'none' : 'auto'}
+      >
+        <View className="rounded-3xl bg-sand-50 px-8 pb-12 pt-8 dark:bg-sand-900">
+          <Text className="mb-6 text-center font-heading text-2xl text-sand-500 dark:text-sand-400">
+            Tu mesa te espera
+          </Text>
+
+          <AppTextInput
+            testID="login-email-input"
+            className="mb-4 w-full text-[15px]"
+            placeholder="tu@poker.local"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect={false}
+            editable={!loading}
+            onSubmitEditing={handleSend}
+            returnKeyType="go"
+            
+          />
+
+          {error && (
+            <Text className="mb-4 text-center text-sm text-red-500">{error}</Text>
+          )}
+
+          <Pressable
+            testID="login-send-button"
+            className="w-full items-center rounded-lg bg-gold-500 px-4 py-3.5 active:bg-gold-600"
+            onPress={handleSend}
+            disabled={loading}
+          >
+            <Text className="font-sans-semibold text-base text-white">
+              Entrar
+            </Text>
+          </Pressable>
+        </View>
+      </Animated.View>
     </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }

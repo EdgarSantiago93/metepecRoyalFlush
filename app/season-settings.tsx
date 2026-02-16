@@ -37,7 +37,7 @@ export default function SeasonSettingsScreen() {
   if (!isAdmin) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
-        <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
           Solo Admin
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
@@ -56,7 +56,7 @@ export default function SeasonSettingsScreen() {
   if (season?.status !== 'setup') {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
-        <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
           No Disponible
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">

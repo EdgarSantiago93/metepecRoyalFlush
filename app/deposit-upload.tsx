@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -86,7 +87,7 @@ export default function DepositUploadScreen() {
         <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-felt-100 dark:bg-felt-900/40">
           <Text className="text-3xl">✓</Text>
         </View>
-        <Text className="mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
+        <Text className="mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
           Depósito Aprobado
         </Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
@@ -108,7 +109,7 @@ export default function DepositUploadScreen() {
       <View className="flex-1 bg-sand-50 dark:bg-sand-900">
         <ScrollView className="flex-1" contentContainerClassName="items-center px-6 py-8">
           <StatusBadge variant="pending" />
-          <Text className="mt-4 mb-2 text-xl font-bold text-sand-950 dark:text-sand-50">
+          <Text className="mt-4 mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
             En Revisión
           </Text>
           <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
@@ -198,10 +199,9 @@ export default function DepositUploadScreen() {
         <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
           Nota (opcional)
         </Text>
-        <TextInput
-          className="mb-6 rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-base text-sand-950 dark:border-sand-600 dark:bg-sand-800 dark:text-sand-50"
+        <AppTextInput
+          className="mb-6"
           placeholder="ej. Transferencia SPEI"
-          placeholderTextColor="#b5ac9e"
           value={note}
           onChangeText={setNote}
           editable={!submitting}
