@@ -1,3 +1,6 @@
+import { useAuth } from '@/hooks/use-auth';
+import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,9 +11,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginScreen() {
   const { sendMagicLink } = useAuth();
@@ -44,8 +44,8 @@ export default function LoginScreen() {
     >
       <View className="flex-1 items-center justify-center px-8">
         <Image
-          source={require('@/assets/images/mrf_1.png')}
-          style={{ width: 120, height: 120, marginBottom: 24 }}
+          source={require('@/assets/images/mrf_1_sm.png')}
+          style={{ width: 240, height: 240, marginBottom: 24 }}
           contentFit="contain"
         />
         <Text className="mb-2 text-3xl font-bold text-sand-950 dark:text-sand-50">
