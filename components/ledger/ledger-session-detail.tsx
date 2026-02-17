@@ -210,11 +210,11 @@ export function LedgerSessionDetail({
 
         {/* Override / resolution note */}
         {finalizeNote && (
-          <View className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
-            <Text className="mb-1 text-sm font-semibold text-amber-800 dark:text-amber-200">
+          <View className="mt-4 rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
+            <Text className="mb-1 text-sm font-semibold text-gold-800 dark:text-gold-200">
               Nota de Resolución
             </Text>
-            <Text className="text-sm text-amber-700 dark:text-amber-300">
+            <Text className="text-sm text-gold-700 dark:text-gold-300">
               {finalizeNote.note}
             </Text>
           </View>

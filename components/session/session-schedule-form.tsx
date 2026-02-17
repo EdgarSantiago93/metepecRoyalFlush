@@ -1,12 +1,8 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { Loader } from '@/components/ui/loader';
 import type { SeasonHostOrder, User } from '@/types';
 
 type InitialValues = {
@@ -24,6 +20,12 @@ type Props = {
   onCancel: () => void;
 };
 
+function parseInitialDate(value?: string | null): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
 export function SessionScheduleForm({
   hostOrder,
   users,
@@ -35,7 +37,10 @@ export function SessionScheduleForm({
   const [selectedHost, setSelectedHost] = useState<string | null>(
     initialValues?.hostUserId ?? null,
   );
-  const [scheduledFor, setScheduledFor] = useState(initialValues?.scheduledFor ?? '');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(
+    parseInitialDate(initialValues?.scheduledFor),
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [location, setLocation] = useState(initialValues?.location ?? '');
   const [submitting, setSubmitting] = useState(false);
 
@@ -48,7 +53,7 @@ export function SessionScheduleForm({
     try {
       await onSubmit({
         hostUserId: selectedHost,
-        scheduledFor: scheduledFor.trim() || undefined,
+        scheduledFor: selectedDate ? selectedDate.toISOString() : undefined,
         location: location.trim() || undefined,
       });
     } finally {
@@ -56,9 +61,89 @@ export function SessionScheduleForm({
     }
   };
 
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('es-MX', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
   return (
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
       <ScrollView className="flex-1 px-6" contentContainerClassName="py-6">
+        {/* Date/Time */}
+        <View className="mb-6">
+          <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
+            Fecha / Hora (opcional)
+          </Text>
+          {selectedDate ? (
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1 rounded-xl border border-sand-200 bg-sand-100 px-4 py-3 dark:border-sand-700 dark:bg-sand-800">
+                <Text className="text-sm text-sand-950 dark:text-sand-50">
+                  {formatDate(selectedDate)}
+                </Text>
+              </View>
+              <Pressable
+                className="rounded-full border border-sand-300 px-3 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+                onPress={() => setShowDatePicker(!showDatePicker)}
+              >
+                <Text className="text-xs font-semibold text-gold-600 dark:text-gold-400">Cambiar</Text>
+              </Pressable>
+              <Pressable
+                className="rounded-full border border-sand-300 px-3 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+                onPress={() => { setSelectedDate(null); setShowDatePicker(false); }}
+              >
+                <Text className="text-xs font-semibold text-red-500">Quitar</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              className="items-center rounded-xl border border-dashed border-sand-300 py-4 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+              onPress={() => {
+                setSelectedDate(new Date());
+                setShowDatePicker(true);
+              }}
+            >
+              <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
+                Seleccionar fecha y hora
+              </Text>
+            </Pressable>
+          )}
+
+          {showDatePicker && (
+            <View className="mt-3 overflow-hidden rounded-xl border border-sand-200 bg-sand-100 dark:border-sand-700 dark:bg-sand-800">
+              <DateTimePicker
+                value={selectedDate ?? new Date()}
+                mode="datetime"
+                display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                onChange={(_event, date) => {
+                  if (Platform.OS === 'android') setShowDatePicker(false);
+                  if (date) setSelectedDate(date);
+                }}
+                minimumDate={new Date()}
+                locale="es-MX"
+                themeVariant="light"
+              />
+            </View>
+          )}
+        </View>
+
+        {/* Location */}
+        <View className="mb-6">
+          <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
+            Ubicación (opcional)
+          </Text>
+          <AppTextInput
+            placeholder="ej. Casa de Miguel"
+            value={location}
+            onChangeText={setLocation}
+            editable={!submitting}
+          />
+        </View>
+
         {/* Host picker */}
         <View className="mb-6">
           <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
@@ -127,38 +212,12 @@ export function SessionScheduleForm({
             );
           })}
         </View>
-
-        {/* Date/Time */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Fecha / Hora (opcional)
-          </Text>
-          <AppTextInput
-            placeholder='ej. "Sábado 8pm"'
-            value={scheduledFor}
-            onChangeText={setScheduledFor}
-            editable={!submitting}
-          />
-        </View>
-
-        {/* Location */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Ubicación (opcional)
-          </Text>
-          <AppTextInput
-            placeholder="ej. Casa de Miguel"
-            value={location}
-            onChangeText={setLocation}
-            editable={!submitting}
-          />
-        </View>
       </ScrollView>
 
       {/* Bottom Actions */}
       <View className="flex-row gap-3 border-t border-sand-200 px-6 py-4 dark:border-sand-700">
         <Pressable
-          className="flex-1 items-center rounded-lg border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+          className="flex-1 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
           onPress={onCancel}
           disabled={submitting}
         >
@@ -167,7 +226,7 @@ export function SessionScheduleForm({
           </Text>
         </Pressable>
         <Pressable
-          className={`flex-1 items-center rounded-lg py-3 ${
+          className={`flex-1 items-center rounded-full py-3.5 ${
             selectedHost && !submitting
               ? 'bg-gold-500 active:bg-gold-600'
               : 'bg-sand-300 dark:bg-sand-700'
@@ -176,7 +235,7 @@ export function SessionScheduleForm({
           disabled={!selectedHost || submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="white" />
+            <Loader size={40} />
           ) : (
             <Text
               className={`text-base font-semibold ${

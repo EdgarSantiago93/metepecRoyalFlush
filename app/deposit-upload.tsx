@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { AppTextInput } from '@/components/ui/app-text-input';
-import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
-import { api } from '@/services/api/client';
+import { Loader } from '@/components/ui/loader';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
+import { api } from '@/services/api/client';
 import type { SeasonDepositSubmission } from '@/types';
+import { pickMedia } from '@/utils/media-picker';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 export default function DepositUploadScreen() {
   const auth = useAuth();
@@ -37,20 +38,9 @@ export default function DepositUploadScreen() {
     });
   }, [season, currentUser?.id]);
 
-  const pickImage = useCallback(async (source: 'camera' | 'library') => {
-    const options: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ['images'],
-      quality: 0.8,
-    };
-
-    const result =
-      source === 'camera'
-        ? await ImagePicker.launchCameraAsync(options)
-        : await ImagePicker.launchImageLibraryAsync(options);
-
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-    }
+  const handlePickImage = useCallback(async () => {
+    const uri = await pickMedia({ quality: 0.8 });
+    if (uri) setPhotoUri(uri);
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -75,7 +65,7 @@ export default function DepositUploadScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }
@@ -94,7 +84,7 @@ export default function DepositUploadScreen() {
           Tu depósito fue aprobado por el tesorero. Estás listo para esta temporada.
         </Text>
         <Pressable
-          className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
+          className="rounded-full bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={() => router.back()}
         >
           <Text className="text-base font-semibold text-white">Regresar al Inicio</Text>
@@ -130,7 +120,7 @@ export default function DepositUploadScreen() {
             </Text>
           )}
           <Pressable
-            className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
+            className="rounded-full bg-gold-500 px-6 py-3 active:bg-gold-600"
             onPress={() => router.back()}
           >
             <Text className="text-base font-semibold text-white">Regresar al Inicio</Text>
@@ -175,24 +165,18 @@ export default function DepositUploadScreen() {
             </Text>
           </Pressable>
         ) : (
-          <View className="mb-4 flex-row gap-3">
-            <Pressable
-              className="flex-1 items-center rounded-lg border border-sand-300 py-4 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
-              onPress={() => pickImage('camera')}
-            >
-              <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                Cámara
-              </Text>
-            </Pressable>
-            <Pressable
-              className="flex-1 items-center rounded-lg border border-sand-300 py-4 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
-              onPress={() => pickImage('library')}
-            >
-              <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                Galería
-              </Text>
-            </Pressable>
-          </View>
+          <Pressable
+            className="mb-4 items-center rounded-xl border border-dashed border-sand-300 py-8 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+            onPress={handlePickImage}
+          >
+            <Text className="mb-1 text-2xl">📷</Text>
+            <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
+              Tomar o elegir foto
+            </Text>
+            <Text className="mt-1 text-xs text-sand-400 dark:text-sand-500">
+              Cámara o galería
+            </Text>
+          </Pressable>
         )}
 
         {/* Optional note */}
@@ -209,7 +193,7 @@ export default function DepositUploadScreen() {
 
         {/* Submit */}
         <Pressable
-          className={`items-center rounded-lg py-3.5 ${
+          className={`items-center rounded-full py-3.5 ${
             photoUri && !submitting
               ? 'bg-gold-500 active:bg-gold-600'
               : 'bg-sand-300 dark:bg-sand-700'
@@ -218,7 +202,7 @@ export default function DepositUploadScreen() {
           disabled={!photoUri || submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="white" />
+            <Loader size={80} />
           ) : (
             <Text
               className={`text-base font-semibold ${

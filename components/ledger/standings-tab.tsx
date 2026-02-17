@@ -1,8 +1,9 @@
+import { Loader } from '@/components/ui/loader';
 import { PulsingDot } from '@/components/ui/pulsing-dot';
 import { api } from '@/services/api/client';
 import type { SeasonMember, Session, SessionInjection, User } from '@/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 type SortKey = 'name' | 'balance' | 'sessions' | 'rebuys' | 'pnl';
 type SortDir = 'asc' | 'desc';
@@ -140,7 +141,7 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
   if (loading || computingRows) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }
@@ -259,7 +260,7 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
                       {row.sessionsPlayed}
                     </Text>
                   </View>
-                  <View style={{ width: 80 }} className="items-center px-3 py-3">
+                  <View style={{ width: 95 }} className="items-center px-3 py-3">
                     <Text className="text-sm text-sand-600 dark:text-sand-300">
                       {row.totalRebuys}
                     </Text>
