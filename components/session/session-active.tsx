@@ -1,16 +1,17 @@
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
-import { IconCalendar } from '@tabler/icons-react-native';
-import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
-import { SessionDealing } from './session-dealing';
-import { SessionInProgress } from './session-in-progress';
-import { SessionClosing } from './session-closing';
-import { SessionFinalized } from './session-finalized';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
+import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
+import { IconCalendar } from '@tabler/icons-react-native';
+import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SessionClosing } from './session-closing';
+import { SessionDealing } from './session-dealing';
+import { SessionFinalized } from './session-finalized';
+import { SessionInProgress } from './session-in-progress';
 
 type Props = {
   session: Session;
@@ -169,7 +170,7 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
               disabled={starting}
             >
               {starting ? (
-                <ActivityIndicator color="white" />
+                <ButtonActivityIndicator />
               ) : (
                 <Text className="text-base font-semibold text-white">Iniciar Juego</Text>
               )}

@@ -1,5 +1,6 @@
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import type React from 'react';
-import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
 
 type Props = {
   visible: boolean;
@@ -66,7 +67,7 @@ export function ConfirmationModal({
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="white" size="small" />
+                <ButtonActivityIndicator />
               ) : (
                 <Text className="text-sm font-semibold text-white">{confirmLabel}</Text>
               )}

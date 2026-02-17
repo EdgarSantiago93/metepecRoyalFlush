@@ -1,13 +1,13 @@
+import { AppTextInput } from '@/components/ui/app-text-input';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import type { SeasonHostOrder, User } from '@/types';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   Text,
-  View,
+  View
 } from 'react-native';
-import { AppTextInput } from '@/components/ui/app-text-input';
-import type { SeasonHostOrder, User } from '@/types';
 
 type InitialValues = {
   hostUserId: string;
@@ -176,7 +176,7 @@ export function SessionScheduleForm({
           disabled={!selectedHost || submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="white" />
+            <ButtonActivityIndicator />
           ) : (
             <Text
               className={`text-base font-semibold ${

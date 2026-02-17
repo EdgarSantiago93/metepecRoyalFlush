@@ -1,3 +1,4 @@
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { MemberRow } from '@/components/ui/member-row';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
@@ -7,7 +8,7 @@ import type { Season, SeasonHostOrder, SeasonMember, User } from '@/types';
 import { IconClipboardCheck, IconUsers } from '@tabler/icons-react-native';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
@@ -118,7 +119,7 @@ export function SeasonSetup({ season, members, users }: Props) {
               disabled={!canStart || starting}
             >
               {starting ? (
-                <ActivityIndicator color="white" />
+                <ButtonActivityIndicator />
               ) : (
                 <Text
                   className={`text-base font-semibold ${

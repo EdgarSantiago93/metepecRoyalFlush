@@ -1,8 +1,8 @@
+import { AppTextInput } from '@/components/ui/app-text-input';
+import { useAppState } from '@/hooks/use-app-state';
+import type { SessionInjection, SessionParticipant, User } from '@/types';
 import { useCallback, useState } from 'react';
 import { Alert, Image, Pressable, Text, View } from 'react-native';
-import { AppTextInput } from '@/components/ui/app-text-input';
-import type { SessionInjection, SessionParticipant, User } from '@/types';
-import { useAppState } from '@/hooks/use-app-state';
 
 type Props = {
   injections: SessionInjection[];
@@ -23,9 +23,10 @@ export function RebuyApprovals({ injections, participants, users }: Props) {
     );
   }
 
+  console.log('pending', JSON.stringify(pending, null, 2));
   return (
     <View className="gap-3">
-      {pending.map((inj) => (
+      {pending.slice(0, 1).map((inj) => (
         <PendingInjectionCard
           key={inj.id}
           injection={inj}
@@ -33,6 +34,7 @@ export function RebuyApprovals({ injections, participants, users }: Props) {
           users={users}
         />
       ))}
+    
     </View>
   );
 }

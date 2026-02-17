@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { MemberRow } from '@/components/ui/member-row';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
+import { api } from '@/services/api/client';
+import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
-import { api } from '@/services/api/client';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { MemberRow } from '@/components/ui/member-row';
-import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
-
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 type FilterTab = 'all' | ApprovalStatus;
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
@@ -202,7 +202,7 @@ export default function DepositApprovalsScreen() {
                               disabled={acting}
                             >
                               {acting ? (
-                                <ActivityIndicator color="white" size="small" />
+                               <ButtonActivityIndicator />
                               ) : (
                                 <Text className="text-sm font-semibold text-white">Aprobar</Text>
                               )}

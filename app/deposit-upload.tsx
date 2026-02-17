@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { AppTextInput } from '@/components/ui/app-text-input';
-import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/hooks/use-auth';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { api } from '@/services/api/client';
-import { StatusBadge } from '@/components/ui/status-badge';
 import type { SeasonDepositSubmission } from '@/types';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 export default function DepositUploadScreen() {
   const auth = useAuth();
@@ -218,7 +215,7 @@ export default function DepositUploadScreen() {
           disabled={!photoUri || submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="white" />
+            <ButtonActivityIndicator />
           ) : (
             <Text
               className={`text-base font-semibold ${
