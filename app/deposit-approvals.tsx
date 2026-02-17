@@ -2,12 +2,12 @@ import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
 import { MemberRow } from '@/components/ui/member-row';
+import { PressablePhoto } from '@/components/ui/photo-viewer';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
 import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
@@ -182,11 +182,11 @@ export default function DepositApprovalsScreen() {
                   {submission ? (
                     <>
                       {submission.photoUrl && (
-                        <View className="mb-3 overflow-hidden rounded-lg border border-sand-200 dark:border-sand-700">
-                          <Image
-                            source={{ uri: submission.photoUrl }}
-                            style={{ width: '100%', height: 180 }}
-                            contentFit="cover"
+                        <View className="mb-3">
+                          <PressablePhoto
+                            uri={submission.photoUrl}
+                            height={180}
+                            className="overflow-hidden rounded-lg border border-sand-200 dark:border-sand-700"
                           />
                         </View>
                       )}

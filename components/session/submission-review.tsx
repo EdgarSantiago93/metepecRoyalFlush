@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
-import { Alert, Image, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { PhotoThumbnail } from '@/components/ui/photo-viewer';
 import type { EndingSubmission, SessionInjection, SessionParticipant, User } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
 
@@ -118,11 +119,9 @@ function PendingSubmissionCard({
       </Text>
 
       {/* Photo thumbnail */}
-      <Image
-        source={{ uri: submission.photoUrl }}
-        className="mb-3 h-20 w-20 rounded-lg"
-        resizeMode="cover"
-      />
+      <View className="mb-3">
+        <PhotoThumbnail uri={submission.photoUrl} label="Ver foto de fichas" />
+      </View>
 
       {/* Submitter note */}
       {submission.note && (

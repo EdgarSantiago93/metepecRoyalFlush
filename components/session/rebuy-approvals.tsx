@@ -1,8 +1,9 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { PhotoThumbnail } from '@/components/ui/photo-viewer';
 import { useAppState } from '@/hooks/use-app-state';
 import type { SessionInjection, SessionParticipant, User } from '@/types';
 import { useCallback, useState } from 'react';
-import { Alert, Image, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 type Props = {
   injections: SessionInjection[];
@@ -114,11 +115,9 @@ function PendingInjectionCard({
       </Text>
 
       {injection.proofPhotoUrl && (
-        <Image
-          source={{ uri: injection.proofPhotoUrl }}
-          className="mb-3 h-20 w-20 rounded-lg"
-          resizeMode="cover"
-        />
+        <View className="mb-3">
+          <PhotoThumbnail uri={injection.proofPhotoUrl} label="Ver comprobante" />
+        </View>
       )}
 
       {!showRejectInput ? (

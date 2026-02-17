@@ -1,9 +1,10 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { PhotoThumbnail } from '@/components/ui/photo-viewer';
 import { useAppState } from '@/hooks/use-app-state';
 import type { EndingSubmission, SessionInjection, SessionParticipant, User } from '@/types';
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 type Props = {
   participant: SessionParticipant | null;
@@ -274,12 +275,8 @@ function SubmissionForm({
           Foto de Comprobante (requerida)
         </Text>
         {photoUri ? (
-          <View className="flex-row items-end gap-3">
-            <Image
-              source={{ uri: photoUri }}
-              className="h-24 w-24 rounded-lg"
-              resizeMode="cover"
-            />
+          <View className="flex-row items-center gap-3">
+            <PhotoThumbnail uri={photoUri} size={48} />
             <Pressable onPress={() => setPhotoUri(null)}>
               <Text className="text-xs text-red-500">Eliminar</Text>
             </Pressable>
