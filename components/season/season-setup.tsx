@@ -153,7 +153,7 @@ export function SeasonSetup({ season, members, users }: Props) {
                 onPress={() => router.push('/deposit-upload')}
               />
             )}
-            {isTreasurer && (
+            {(isTreasurer || isAdmin) && (
               <ActionButton
                 testID="btn-review-deposits"
                 label="Revisar Depósitos"

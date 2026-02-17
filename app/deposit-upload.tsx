@@ -1,6 +1,7 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
+import { PressablePhoto } from '@/components/ui/photo-viewer';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
@@ -107,11 +108,11 @@ export default function DepositUploadScreen() {
             Tu comprobante de depósito está siendo revisado por el tesorero.
           </Text>
           {existingSubmission.photoUrl && (
-            <View className="mb-4 w-full overflow-hidden rounded-xl border border-sand-200 dark:border-sand-700">
-              <Image
-                source={{ uri: existingSubmission.photoUrl }}
-                style={{ width: '100%', height: 200 }}
-                contentFit="cover"
+            <View className="mb-4 w-full">
+              <PressablePhoto
+                uri={existingSubmission.photoUrl}
+                height={200}
+                className="overflow-hidden rounded-xl border border-sand-200 dark:border-sand-700"
               />
             </View>
           )}

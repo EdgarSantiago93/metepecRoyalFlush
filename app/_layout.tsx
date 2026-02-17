@@ -70,7 +70,7 @@ function RootNavigation() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen name="deposit-upload" options={{ title: 'Subir Depósito', presentation: 'formSheet' }} />
+          <Stack.Screen name="deposit-upload" options={{ title: 'Subir Depósito', presentation: 'modal' }} />
           <Stack.Screen name="deposit-approvals" options={{ title: 'Aprobar Depósitos' }} />
           <Stack.Screen name="host-order" options={{ title: 'Orden de Host' }} />
           <Stack.Screen name="season-settings" options={{ title: 'Opciones de Temporada' }} />

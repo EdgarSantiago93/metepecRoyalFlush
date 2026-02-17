@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
-import { Alert, Image, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import type { SessionInjection, SessionParticipant } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { PhotoThumbnail } from '@/components/ui/photo-viewer';
 import { pickMedia } from '@/utils/media-picker';
 
 type Props = {
@@ -140,11 +141,7 @@ function RebuyActions() {
       >
         {proofUri ? (
           <View className="items-center gap-2">
-            <Image
-              source={{ uri: proofUri }}
-              className="h-24 w-24 rounded-lg"
-              resizeMode="cover"
-            />
+            <PhotoThumbnail uri={proofUri} size={48} />
             <Pressable onPress={() => setProofUri(null)}>
               <Text className="text-xs text-red-500">Eliminar foto</Text>
             </Pressable>

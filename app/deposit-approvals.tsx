@@ -2,12 +2,12 @@ import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
 import { MemberRow } from '@/components/ui/member-row';
+import { PressablePhoto } from '@/components/ui/photo-viewer';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
 import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
@@ -38,6 +38,7 @@ export default function DepositApprovalsScreen() {
   const members = appState.status === 'season_setup' ? appState.members : [];
   const users = appState.status === 'season_setup' ? appState.users : [];
   const isTreasurer = currentUser?.id === season?.treasurerUserId;
+  const isAdmin = currentUser?.isAdmin === true;
 
   const loadSubmissions = useCallback(async () => {
     if (!season) return;
@@ -87,7 +88,7 @@ export default function DepositApprovalsScreen() {
     [acting, rejectNote, loadSubmissions, appState],
   );
 
-  if (!isTreasurer) {
+  if (!isTreasurer && !isAdmin) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
         <Text className="mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
@@ -182,11 +183,11 @@ export default function DepositApprovalsScreen() {
                   {submission ? (
                     <>
                       {submission.photoUrl && (
-                        <View className="mb-3 overflow-hidden rounded-lg border border-sand-200 dark:border-sand-700">
-                          <Image
-                            source={{ uri: submission.photoUrl }}
-                            style={{ width: '100%', height: 180 }}
-                            contentFit="cover"
+                        <View className="mb-3">
+                          <PressablePhoto
+                            uri={submission.photoUrl}
+                            height={180}
+                            className="overflow-hidden rounded-lg border border-sand-200 dark:border-sand-700"
                           />
                         </View>
                       )}
