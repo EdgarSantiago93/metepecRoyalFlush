@@ -1,9 +1,9 @@
-appId: com.edgarsant93.metepecroyalflush
+appId: com.junedevelopment.metepecroyalflush
 name: Login as Edgar (admin)
 ---
 # Launch dev build - clears state so we get a fresh login screen
 - launchApp:
-    appId: com.edgarsant93.metepecroyalflush
+    appId: com.junedevelopment.metepecroyalflush
     clearState: true
 
 # Wait for the login screen to appear
