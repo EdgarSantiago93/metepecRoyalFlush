@@ -95,7 +95,7 @@ If the answer is **yes**, follow this workflow:
 3. **Write or update Maestro flows as needed:**
    - If an existing flow covers the area, add `takeScreenshot` steps at the points where the change is visible.
    - If no existing flow covers the area, create a new `.maestro/<feature-or-screen>.yaml` flow that navigates to the changed screen and captures screenshots.
-   - Follow existing conventions: use `appId: com.edgarsant93.metepecroyalflush`, `testId` selectors, `extendedWaitUntil` for async screens.
+   - Follow existing conventions: use `appId: com.junedevelopment.metepecroyalflush`, `testId` selectors, `extendedWaitUntil` for async screens.
 4. **Run the Maestro tests:**
    - Ensure the dev build is running on a simulator/emulator.
    - Run individual flows: `maestro test .maestro/<flow-name>.yaml`

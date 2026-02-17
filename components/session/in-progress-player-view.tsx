@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
 import { Alert, Image, Pressable, Text, View } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import type { SessionInjection, SessionParticipant } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { pickMedia } from '@/utils/media-picker';
 
 type Props = {
   participant: SessionParticipant | null;
@@ -81,28 +81,8 @@ function RebuyActions() {
   const [loading, setLoading] = useState(false);
 
   const handlePickImage = useCallback(async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status === 'granted') {
-      const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
-      if (!result.canceled && result.assets[0]) {
-        setProofUri(result.assets[0].uri);
-      }
-      return;
-    }
-
-    // Fall back to media library
-    const libStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (libStatus.status !== 'granted') {
-      Alert.alert('Permiso necesario', 'Se necesita acceso a la cámara o galería para adjuntar comprobante.');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setProofUri(result.assets[0].uri);
-    }
+    const uri = await pickMedia({ quality: 0.7 });
+    if (uri) setProofUri(uri);
   }, []);
 
   const handleRequest = useCallback(
@@ -133,16 +113,16 @@ function RebuyActions() {
     <>
       <View className="flex-row gap-3">
         <Pressable
-          className="flex-1 items-center rounded-full bg-gold-500 py-3 active:bg-gold-600"
+          className="flex-1 items-center rounded-full bg-gold-500 py-4 active:bg-gold-600"
           onPress={() => handleRequest('rebuy_500')}
         >
-          <Text className="text-sm font-semibold text-white">Ribeye $500</Text>
+          <Text className="text-base font-semibold text-white">Ribeye $500</Text>
         </Pressable>
         <Pressable
-          className="flex-1 items-center rounded-full border border-gold-500 py-3 active:bg-gold-50 dark:active:bg-gold-900/30"
+          className="flex-1 items-center rounded-full border border-gold-500 py-4 active:bg-gold-50 dark:active:bg-gold-900/30"
           onPress={() => handleRequest('half_250')}
         >
-          <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">Ribeye $250</Text>
+          <Text className="text-base font-semibold text-gold-600 dark:text-gold-400">Ribeye $250</Text>
         </Pressable>
       </View>
 

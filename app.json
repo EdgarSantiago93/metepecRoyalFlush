@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Poker Ledger",
+    "name": "Metepec Royal Flush",
     "slug": "metepec-royal-flush",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.edgarsant93.metepecroyalflush"
+      "bundleIdentifier": "com.junedevelopment.metepecroyalflush"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +24,7 @@
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.edgarsant93.metepecroyalflush"
+      "package": "com.junedevelopment.metepecroyalflush"
     },
     "web": {
       "output": "static",
@@ -51,11 +51,19 @@
           "photosPermission": "Allow Metepec Royal Flush to access your photos for deposit proof uploads.",
           "cameraPermission": "Allow Metepec Royal Flush to use the camera for deposit proof photos."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "252e069a-017f-4b67-85ca-9a9263185ecf"
+      }
+    },
+    "owner": "junedevelopment"
   }
 }

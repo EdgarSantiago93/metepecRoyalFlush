@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, SeasonPayout, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
-import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
+import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, SendPayoutRequest, UpdateBankingInfoRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
 import { api } from '@/services/api/client';
 import { applyPreset, type PresetKey } from '@/data/seed-seasons';
 
@@ -15,7 +15,7 @@ export type AppState =
   | { status: 'no_season'; users: User[]; _devPresetKey?: PresetKey | null }
   | { status: 'season_setup'; season: Season; members: SeasonMember[]; users: User[]; _devPresetKey?: PresetKey | null }
   | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; endingSubmissions: EndingSubmission[]; finalizeNote: SessionFinalizeNote | null; users: User[]; _devPresetKey?: PresetKey | null }
-  | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[]; _devPresetKey?: PresetKey | null };
+  | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[]; payouts: SeasonPayout[]; _devPresetKey?: PresetKey | null };
 
 export type AppStateContextValue = AppState & {
   createSeason: (req: CreateSeasonRequest) => Promise<void>;
@@ -40,6 +40,12 @@ export type AppStateContextValue = AppState & {
   refreshEndingSubmissions: () => Promise<void>;
   finalizeSession: (overrideNote?: string) => Promise<void>;
   endSeason: () => Promise<void>;
+  sendPayout: (req: SendPayoutRequest) => Promise<void>;
+  confirmPayout: (payoutId: string) => Promise<void>;
+  disputePayout: (payoutId: string, note: string) => Promise<void>;
+  resolvePayout: (payoutId: string) => Promise<void>;
+  updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<void>;
+  refreshPayouts: () => Promise<void>;
   refresh: () => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
@@ -96,7 +102,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         }
         setState({ status: 'season_active', season, members, session, participants, injections, endingSubmissions, finalizeNote, users, _devPresetKey });
       } else {
-        setState({ status: 'season_ended', season, members, users, _devPresetKey });
+        const payoutsRes = await api.getPayouts(season.id);
+        setState({ status: 'season_ended', season, members, users, payouts: payoutsRes.payouts, _devPresetKey });
       }
     } catch (err) {
       setState({
@@ -368,6 +375,80 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     await load();
   }, [state, load]);
 
+  // ---------------------------------------------------------------------------
+  // Payout actions
+  // ---------------------------------------------------------------------------
+
+  const sendPayout = useCallback(
+    async (req: SendPayoutRequest) => {
+      if (state.status !== 'season_ended') return;
+      await api.sendPayout(req);
+      const { payouts } = await api.getPayouts(state.season.id);
+      setState((prev) => {
+        if (prev.status !== 'season_ended') return prev;
+        return { ...prev, payouts };
+      });
+    },
+    [state],
+  );
+
+  const confirmPayout = useCallback(
+    async (payoutId: string) => {
+      if (state.status !== 'season_ended') return;
+      await api.confirmPayout(payoutId);
+      const { payouts } = await api.getPayouts(state.season.id);
+      setState((prev) => {
+        if (prev.status !== 'season_ended') return prev;
+        return { ...prev, payouts };
+      });
+    },
+    [state],
+  );
+
+  const disputePayout = useCallback(
+    async (payoutId: string, note: string) => {
+      if (state.status !== 'season_ended') return;
+      await api.disputePayout({ payoutId, disputeNote: note });
+      const { payouts } = await api.getPayouts(state.season.id);
+      setState((prev) => {
+        if (prev.status !== 'season_ended') return prev;
+        return { ...prev, payouts };
+      });
+    },
+    [state],
+  );
+
+  const resolvePayout = useCallback(
+    async (payoutId: string) => {
+      if (state.status !== 'season_ended') return;
+      await api.resolvePayout(payoutId);
+      const { payouts } = await api.getPayouts(state.season.id);
+      setState((prev) => {
+        if (prev.status !== 'season_ended') return prev;
+        return { ...prev, payouts };
+      });
+    },
+    [state],
+  );
+
+  const updateBankingInfo = useCallback(
+    async (req: UpdateBankingInfoRequest) => {
+      await api.updateBankingInfo(req);
+      const usersRes = await api.getUsers();
+      setState((prev) => ({ ...prev, users: usersRes.users }));
+    },
+    [],
+  );
+
+  const refreshPayouts = useCallback(async () => {
+    if (state.status !== 'season_ended') return;
+    const { payouts } = await api.getPayouts(state.season.id);
+    setState((prev) => {
+      if (prev.status !== 'season_ended') return prev;
+      return { ...prev, payouts };
+    });
+  }, [state]);
+
   const _devSetPreset = useCallback(
     async (key: PresetKey) => {
       devPresetKeyRef.current = key;
@@ -402,10 +483,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       refreshEndingSubmissions,
       finalizeSession,
       endSeason,
+      sendPayout,
+      confirmPayout,
+      disputePayout,
+      resolvePayout,
+      updateBankingInfo,
+      refreshPayouts,
       refresh: load,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, addGuest, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, load, _devSetPreset],
+    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, addGuest, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, sendPayout, confirmPayout, disputePayout, resolvePayout, updateBankingInfo, refreshPayouts, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

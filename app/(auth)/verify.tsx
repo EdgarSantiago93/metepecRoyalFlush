@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Loader } from '@/components/ui/loader';
 import { useAuth } from '@/hooks/use-auth';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 export default function VerifyScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -22,7 +23,7 @@ export default function VerifyScreen() {
       } finally {
         setVerifying(false);
       }
-    }, 2000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [email, verifyMagicLink]);
@@ -41,7 +42,7 @@ export default function VerifyScreen() {
 
       {!error && (
         <View className="items-center">
-          <ActivityIndicator size="large" className="mb-4" />
+          <Loader size={80} />
           <Text className="text-sm text-sand-400">
             {verifying ? 'Verificando...' : 'Esperando verificación...'}
           </Text>

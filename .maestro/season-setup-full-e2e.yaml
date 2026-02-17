@@ -1,11 +1,11 @@
-appId: com.edgarsant93.metepecroyalflush
+appId: com.junedevelopment.metepecroyalflush
 name: Season Setup - Full E2E flow
 ---
 # Full flow: login as admin → switch preset → verify dashboard → navigate all screens
 
 # Step 1: Login as Edgar (admin)
 - launchApp:
-    appId: com.edgarsant93.metepecroyalflush
+    appId: com.junedevelopment.metepecroyalflush
     clearState: true
 - extendedWaitUntil:
     visible: "Metepec Royal Flush"

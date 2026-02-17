@@ -1,4 +1,5 @@
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { Loader } from '@/components/ui/loader';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
@@ -124,7 +125,7 @@ export default function HostOrderScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }

@@ -1,4 +1,5 @@
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { MemberRow } from '@/components/ui/member-row';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
@@ -24,6 +25,7 @@ export function SeasonSetup({ season, members, users }: Props) {
 
   const [hostOrder, setHostOrder] = useState<SeasonHostOrder[]>([]);
   const [starting, setStarting] = useState(false);
+  const [showStartModal, setShowStartModal] = useState(false);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
@@ -80,7 +82,7 @@ export function SeasonSetup({ season, members, users }: Props) {
         <View className="flex-row items-center gap-2">
           <View className="rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
             <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
-              Configuraciónss
+              Configuracións
             </Text>
           </View>
           <Text className="text-sm text-sand-500 dark:text-sand-400">
@@ -106,7 +108,7 @@ export function SeasonSetup({ season, members, users }: Props) {
           />
         </View>
 
-        {isTreasurer && (
+        {(isTreasurer || isAdmin) && (
           <View className="mt-6">
             <Pressable
               testID="btn-start-season"
@@ -115,7 +117,7 @@ export function SeasonSetup({ season, members, users }: Props) {
                   ? 'bg-felt-600 active:bg-felt-700'
                   : 'bg-sand-300 dark:bg-sand-700'
               }`}
-              onPress={handleStartSeason}
+              onPress={() => setShowStartModal(true)}
               disabled={!canStart || starting}
             >
               {starting ? (
@@ -233,6 +235,19 @@ export function SeasonSetup({ season, members, users }: Props) {
           });
         })()}
       </View>
+
+      <ConfirmationModal
+        visible={showStartModal}
+        title="Iniciar Temporada"
+        message={`¿Iniciar la temporada con ${approvedCount} miembro${approvedCount !== 1 ? 's' : ''} aprobado${approvedCount !== 1 ? 's' : ''}? Esta acción no se puede deshacer.`}
+        confirmLabel="Iniciar"
+        onConfirm={async () => {
+          await handleStartSeason();
+          setShowStartModal(false);
+        }}
+        onCancel={() => setShowStartModal(false)}
+        loading={starting}
+      />
     </ScrollView>
   );
 }

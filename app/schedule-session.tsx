@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { Alert, View } from 'react-native';
+import { Loader } from '@/components/ui/loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
@@ -50,7 +51,7 @@ export default function ScheduleSessionScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }

@@ -1,18 +1,18 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { ChipRain } from '@/components/ui/chip-rain';
+import { Loader } from '@/components/ui/loader';
 import { useAuth } from '@/hooks/use-auth';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   Text,
   TouchableWithoutFeedback,
-  View,
+  View
 } from 'react-native';
 import Animated, {
   Easing,
@@ -73,7 +73,7 @@ export default function LoginScreen() {
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-felt-700 dark:bg-felt-800"
+      className="flex-1 bg-felt-600 dark:bg-felt-800"
     
     >
       {/* Green table — logo centered */}
@@ -89,8 +89,10 @@ export default function LoginScreen() {
 
         {/* Spinner — fades in as form fades out */}
         <Animated.View style={[spinnerStyle, { marginTop: 24, height: 36 }]}>
-          {loading && <ActivityIndicator size="large" color="#c49a3c" />}
+          {loading && <Loader size={80} />}
+      
         </Animated.View>
+       
       </View>
 
       {/* Form card — slides down on submit */}
@@ -100,12 +102,12 @@ export default function LoginScreen() {
       >
         <View className="rounded-3xl bg-sand-50 px-8 pb-12 pt-8 dark:bg-sand-900">
           <Text className="mb-6 text-center font-heading text-2xl text-sand-500 dark:text-sand-400">
-            Tu mesa te espera
+          A darle
           </Text>
 
           <AppTextInput
             testID="login-email-input"
-            className="mb-4 w-full text-[15px]"
+            className="mb-4 w-full text-[14px]"
             placeholder="tu@poker.local"
             value={email}
             onChangeText={setEmail}

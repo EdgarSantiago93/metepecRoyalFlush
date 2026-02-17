@@ -1,5 +1,6 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { Loader } from '@/components/ui/loader';
 import { MemberRow } from '@/components/ui/member-row';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
@@ -9,7 +10,7 @@ import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 type FilterTab = 'all' | ApprovalStatus;
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
@@ -108,19 +109,20 @@ export default function DepositApprovalsScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
-        <ActivityIndicator size="large" />
+       <Loader size={80} />
       </View>
     );
   }
 
   return (
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
-      {/* Filter tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerClassName="px-4 py-3 gap-2"
-      >
+      {/* Filter tabs — fixed height row, does not expand */}
+      <View className="flex-none">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="flex-row flex-nowrap items-center gap-2 px-4 py-3"
+        >
         {FILTER_TABS.map((tab) => {
           const isActive = filter === tab.key;
           const count =
@@ -130,7 +132,7 @@ export default function DepositApprovalsScreen() {
           return (
             <Pressable
               key={tab.key}
-              className={`rounded-full px-4 py-2 ${
+              className={`flex-none rounded-full px-4 py-2 ${
                 isActive
                   ? 'bg-gold-500'
                   : 'bg-sand-200 dark:bg-sand-700'
@@ -147,7 +149,8 @@ export default function DepositApprovalsScreen() {
             </Pressable>
           );
         })}
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {/* Member list */}
       <ScrollView className="flex-1" contentContainerClassName="px-6 pb-8">
