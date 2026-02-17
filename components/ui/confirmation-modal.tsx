@@ -1,4 +1,4 @@
-import { Loader } from '@/components/ui/loader';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import type React from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 
@@ -67,7 +67,7 @@ export function ConfirmationModal({
               disabled={loading}
             >
               {loading ? (
-                <Loader size={40} />
+                <ButtonActivityIndicator />
               ) : (
                 <Text className="text-sm font-semibold text-white">{confirmLabel}</Text>
               )}

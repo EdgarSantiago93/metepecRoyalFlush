@@ -1,5 +1,5 @@
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
-import { Loader } from '@/components/ui/loader';
 import { MemberRow } from '@/components/ui/member-row';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
@@ -121,7 +121,7 @@ export function SeasonSetup({ season, members, users }: Props) {
               disabled={!canStart || starting}
             >
               {starting ? (
-                <Loader size={40} />
+                <ButtonActivityIndicator />
               ) : (
                 <Text
                   className={`text-base font-semibold ${

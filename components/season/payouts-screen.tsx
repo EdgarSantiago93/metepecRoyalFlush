@@ -1,4 +1,4 @@
-import { Loader } from '@/components/ui/loader';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { IconAlertTriangle, IconCash, IconCheck, IconClock, IconCopy } from '@tabler/icons-react-native';
@@ -196,7 +196,7 @@ export function PayoutsScreen() {
                       disabled={loading}
                     >
                       {loading ? (
-                        <Loader size={40} />
+                        <ButtonActivityIndicator />
                       ) : (
                         <Text className="text-sm font-semibold text-white">
                           Depósito Confirmado

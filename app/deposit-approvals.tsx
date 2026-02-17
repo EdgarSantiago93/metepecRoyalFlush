@@ -1,4 +1,5 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
 import { MemberRow } from '@/components/ui/member-row';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -10,7 +11,6 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
-
 type FilterTab = 'all' | ApprovalStatus;
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
@@ -205,7 +205,7 @@ export default function DepositApprovalsScreen() {
                               disabled={acting}
                             >
                               {acting ? (
-                               <Loader size={40} />
+                               <ButtonActivityIndicator />
                               ) : (
                                 <Text className="text-sm font-semibold text-white">Aprobar</Text>
                               )}

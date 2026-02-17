@@ -1,12 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { AppTextInput } from '@/components/ui/app-text-input';
-import { Loader } from '@/components/ui/loader';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
 import type { EndingSubmission, Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
 import type { ParticipantSessionResult, SessionBalanceCheck } from '@/types/derived';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
 import { IconChartBar, IconScale } from '@tabler/icons-react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
@@ -347,7 +347,7 @@ export function SessionFinalize({
             disabled={!canFinalize || finalizing}
           >
             {finalizing ? (
-              <Loader size={40} />
+              <ButtonActivityIndicator />
             ) : (
               <Text
                 className={`text-base font-semibold ${

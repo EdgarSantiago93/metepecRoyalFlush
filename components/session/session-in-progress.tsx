@@ -1,14 +1,14 @@
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
+import type { Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
+import { IconCards, IconChecklist, IconMeat, IconUsers } from '@tabler/icons-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } from 'react-native';
-import type { Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
-import { IconCards, IconChecklist, IconMeat, IconUsers } from '@tabler/icons-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { InProgressPlayerView } from './in-progress-player-view';
 import { InProgressRoster } from './in-progress-roster';
 import { RebuyApprovals } from './rebuy-approvals';
-import { ConfirmationModal } from '@/components/ui/confirmation-modal';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   session: Session;
@@ -129,8 +129,8 @@ export function SessionInProgress({ session, season, members, participants, inje
         <InProgressPlayerView participant={myParticipant} injections={injections} />
       </View>
 
-      {/* Treasurer: Pending rebuy approvals */}
-      {canManage && (
+    
+    {canManage && (
         <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
           <SectionTitle icon={<IconChecklist size={18} color={iconColor} />} label="Solicitudes de Ribeye" />
           <RebuyApprovals

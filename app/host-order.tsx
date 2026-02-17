@@ -1,3 +1,5 @@
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { Loader } from '@/components/ui/loader';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
@@ -5,7 +7,6 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Loader } from '@/components/ui/loader';
 import DraggableFlatList, {
   type RenderItemParams,
   ScaleDecorator,
@@ -179,7 +180,7 @@ export default function HostOrderScreen() {
           disabled={saving}
         >
           {saving ? (
-            <Loader size={40} />
+            <ButtonActivityIndicator />
           ) : (
             <Text className="text-sm font-semibold text-white">Guardar Orden</Text>
           )}

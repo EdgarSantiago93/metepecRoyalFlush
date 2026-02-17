@@ -1,9 +1,15 @@
-import { useState } from 'react';
-import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { AppTextInput } from '@/components/ui/app-text-input';
-import { Loader } from '@/components/ui/loader';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import type { SeasonHostOrder, User } from '@/types';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View
+} from 'react-native';
 
 type InitialValues = {
   hostUserId: string;
@@ -235,7 +241,7 @@ export function SessionScheduleForm({
           disabled={!selectedHost || submitting}
         >
           {submitting ? (
-            <Loader size={40} />
+            <ButtonActivityIndicator />
           ) : (
             <Text
               className={`text-base font-semibold ${

@@ -1,9 +1,9 @@
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
-import { Loader } from '@/components/ui/loader';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
 
 export default function SeasonSettingsScreen() {
   const auth = useAuth();
@@ -158,7 +158,7 @@ export default function SeasonSettingsScreen() {
           disabled={!hasChanged || saving}
         >
           {saving ? (
-            <Loader size={40} />
+            <ButtonActivityIndicator />
           ) : (
             <Text
               className={`text-base font-semibold ${

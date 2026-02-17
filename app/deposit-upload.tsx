@@ -1,4 +1,5 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
@@ -202,7 +203,7 @@ export default function DepositUploadScreen() {
           disabled={!photoUri || submitting}
         >
           {submitting ? (
-            <Loader size={80} />
+            <ButtonActivityIndicator />
           ) : (
             <Text
               className={`text-base font-semibold ${

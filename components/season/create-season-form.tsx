@@ -1,8 +1,13 @@
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
 import { AppTextInput } from '@/components/ui/app-text-input';
-import { Loader } from '@/components/ui/loader';
+import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import type { User } from '@/types';
+import { useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  View
+} from 'react-native';
 
 type Props = {
   users: User[];
@@ -136,7 +141,7 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
           disabled={!selectedTreasurer || submitting}
         >
           {submitting ? (
-            <Loader size={40} />
+            <ButtonActivityIndicator />
           ) : (
             <Text
               className={`text-base font-semibold ${
