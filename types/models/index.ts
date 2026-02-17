@@ -24,3 +24,5 @@ export type {
 } from './session';
 
 export type { NotificationType, Notification } from './notification';
+
+export type { PayoutStatus, SeasonPayout } from './payout';

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
@@ -10,6 +10,7 @@ import { SessionInProgress } from './session-in-progress';
 import { SessionClosing } from './session-closing';
 import { SessionFinalized } from './session-finalized';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { Loader } from '@/components/ui/loader';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
@@ -169,7 +170,7 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
               disabled={starting}
             >
               {starting ? (
-                <ActivityIndicator color="white" />
+                <Loader size={40} />
               ) : (
                 <Text className="text-base font-semibold text-white">Iniciar Juego</Text>
               )}

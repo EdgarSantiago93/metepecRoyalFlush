@@ -1,4 +1,4 @@
-import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionFinalizeNote, SessionInjection, SessionParticipant } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, SeasonPayout, Session, SessionFinalizeNote, SessionInjection, SessionParticipant } from '@/types';
 import { SEED_USERS } from './seed-users';
 
 // ---------------------------------------------------------------------------
@@ -17,6 +17,7 @@ export type MockStore = {
   sessionFinalizeNotes: SessionFinalizeNote[];
   /** Historical finalized sessions for ledger views. */
   finalizedSessions: Session[];
+  payouts: SeasonPayout[];
 };
 
 export const mockStore: MockStore = {
@@ -30,6 +31,7 @@ export const mockStore: MockStore = {
   endingSubmissions: [],
   sessionFinalizeNotes: [],
   finalizedSessions: [],
+  payouts: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -89,6 +91,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     endingSubmissions: [],
     sessionFinalizeNotes: [],
     finalizedSessions: [],
+    payouts: [],
   }),
 
   season_setup: () => {
@@ -113,6 +116,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -189,6 +193,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -214,6 +219,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -254,6 +260,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -344,6 +351,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -452,6 +460,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -624,6 +633,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -800,6 +810,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions,
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -1011,6 +1022,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions,
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -1051,6 +1063,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts: [],
     };
   },
 
@@ -1250,11 +1263,13 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       ],
       sessionFinalizeNotes: [],
       finalizedSessions: [session1, session2, session3],
+      payouts: [],
     };
   },
 
   season_ended: () => {
     const seasonId = '01SE0000000000000000000004';
+    const treasurer = SEED_USERS[1]; // Carlos
     // Varied balances so the payout report has meaningful data
     const balances = [75000, 80000, 30000, 95000, 115000, 25000, 80000, 50000, 50000, 50000];
     const members: SeasonMember[] = SEED_USERS.map((u, i) => ({
@@ -1264,17 +1279,71 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       approvalStatus: 'approved' as const,
       currentBalanceCents: balances[i] ?? 50000,
       approvedAt: NOW,
-      approvedByUserId: SEED_USERS[1].id,
+      approvedByUserId: treasurer.id,
       rejectionNote: null,
       createdAt: NOW,
     }));
+
+    // Seed payouts: mix of statuses for testing
+    const payouts: SeasonPayout[] = [
+      // Edgar ($750): confirmed
+      {
+        id: '01PY0000000000000000000001',
+        seasonId,
+        fromUserId: treasurer.id,
+        toUserId: SEED_USERS[0].id,
+        amountCents: 75000,
+        status: 'confirmed',
+        proofPhotoUrl: 'https://placeholder.mock/payout-edgar.jpg',
+        note: 'SPEI transfer',
+        confirmedAt: '2026-02-14T10:00:00.000Z',
+        disputedAt: null,
+        disputeNote: null,
+        resolvedAt: null,
+        createdAt: '2026-02-13T18:00:00.000Z',
+      },
+      // Miguel ($300): disputed
+      {
+        id: '01PY0000000000000000000003',
+        seasonId,
+        fromUserId: treasurer.id,
+        toUserId: SEED_USERS[2].id,
+        amountCents: 30000,
+        status: 'disputed',
+        proofPhotoUrl: 'https://placeholder.mock/payout-miguel.jpg',
+        note: null,
+        confirmedAt: null,
+        disputedAt: '2026-02-14T12:00:00.000Z',
+        disputeNote: 'No he recibido el dinero',
+        resolvedAt: null,
+        createdAt: '2026-02-13T18:15:00.000Z',
+      },
+      // Andres ($950): pending (sent, awaiting confirmation)
+      {
+        id: '01PY0000000000000000000004',
+        seasonId,
+        fromUserId: treasurer.id,
+        toUserId: SEED_USERS[3].id,
+        amountCents: 95000,
+        status: 'pending',
+        proofPhotoUrl: null,
+        note: 'Transfer pending',
+        confirmedAt: null,
+        disputedAt: null,
+        disputeNote: null,
+        resolvedAt: null,
+        createdAt: '2026-02-13T18:30:00.000Z',
+      },
+      // Remaining players (Jorge, Luis, Ricardo, Fernando, Daniel, Pablo) — no payouts yet
+    ];
+
     return {
       season: {
         id: seasonId,
         name: 'Season Jan 2026',
         status: 'ended',
         createdByUserId: SEED_USERS[0].id,
-        treasurerUserId: SEED_USERS[1].id,
+        treasurerUserId: treasurer.id,
         createdAt: '2026-01-01T00:00:00.000Z',
         startedAt: '2026-01-01T00:00:00.000Z',
         endedAt: NOW,
@@ -1288,6 +1357,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       endingSubmissions: [],
       sessionFinalizeNotes: [],
       finalizedSessions: [],
+      payouts,
     };
   },
 };
@@ -1304,4 +1374,5 @@ export function applyPreset(key: PresetKey): void {
   mockStore.endingSubmissions = data.endingSubmissions;
   mockStore.sessionFinalizeNotes = data.sessionFinalizeNotes;
   mockStore.finalizedSessions = data.finalizedSessions;
+  mockStore.payouts = data.payouts;
 }

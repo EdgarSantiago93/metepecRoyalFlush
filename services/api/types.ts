@@ -1,4 +1,4 @@
-import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission, Season, SeasonMember, SeasonDepositSubmission, SeasonHostOrder, SeasonPayout, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
 
 export type SendMagicLinkResponse = {
@@ -271,6 +271,54 @@ export type EndSeasonRequest = { seasonId: string };
 export type EndSeasonResponse = { season: Season };
 
 // ---------------------------------------------------------------------------
+// Payouts
+// ---------------------------------------------------------------------------
+
+export type GetPayoutsResponse = {
+  payouts: SeasonPayout[];
+};
+
+export type SendPayoutRequest = {
+  seasonId: string;
+  toUserId: string;
+  amountCents: number;
+  proofPhotoUrl?: string;
+  note?: string;
+};
+
+export type SendPayoutResponse = {
+  payout: SeasonPayout;
+};
+
+export type ConfirmPayoutResponse = {
+  payout: SeasonPayout;
+};
+
+export type DisputePayoutRequest = {
+  payoutId: string;
+  disputeNote: string;
+};
+
+export type DisputePayoutResponse = {
+  payout: SeasonPayout;
+};
+
+export type ResolvePayoutResponse = {
+  payout: SeasonPayout;
+};
+
+export type UpdateBankingInfoRequest = {
+  bankingNombre?: string | null;
+  bankingCuenta?: string | null;
+  bankingBanco?: string | null;
+  bankingClabe?: string | null;
+};
+
+export type UpdateBankingInfoResponse = {
+  user: User;
+};
+
+// ---------------------------------------------------------------------------
 // Ledger (Phase 7)
 // ---------------------------------------------------------------------------
 
@@ -323,6 +371,13 @@ export type ApiClient = {
   getSessionFinalizeNote: (sessionId: string) => Promise<GetSessionFinalizeNoteResponse>;
   // End Season
   endSeason: (req: EndSeasonRequest) => Promise<EndSeasonResponse>;
+  // Payouts
+  getPayouts: (seasonId: string) => Promise<GetPayoutsResponse>;
+  sendPayout: (req: SendPayoutRequest) => Promise<SendPayoutResponse>;
+  confirmPayout: (payoutId: string) => Promise<ConfirmPayoutResponse>;
+  disputePayout: (req: DisputePayoutRequest) => Promise<DisputePayoutResponse>;
+  resolvePayout: (payoutId: string) => Promise<ResolvePayoutResponse>;
+  updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<UpdateBankingInfoResponse>;
   // Ledger
   getSeasonSessions: (seasonId: string) => Promise<GetSeasonSessionsResponse>;
   getSessionDetail: (sessionId: string) => Promise<GetSessionDetailResponse>;

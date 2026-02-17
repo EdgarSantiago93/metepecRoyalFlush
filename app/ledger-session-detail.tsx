@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
+import { Loader } from '@/components/ui/loader';
 import { ErrorView } from '@/components/ui/error-view';
 import { LedgerSessionDetail } from '@/components/ledger/ledger-session-detail';
 import { api } from '@/services/api/client';
@@ -43,7 +44,7 @@ export default function LedgerSessionDetailScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }
