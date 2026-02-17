@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import type { Season, SeasonHostOrder, SeasonMember, User } from '@/types';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
-import { api } from '@/services/api/client';
-import { StatusBadge } from '@/components/ui/status-badge';
 import { MemberRow } from '@/components/ui/member-row';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
+import { api } from '@/services/api/client';
+import type { Season, SeasonHostOrder, SeasonMember, User } from '@/types';
+import { IconClipboardCheck, IconUsers } from '@tabler/icons-react-native';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   season: Season;
@@ -36,6 +38,14 @@ export function SeasonSetup({ season, members, users }: Props) {
     (currentMember.approvalStatus === 'not_submitted' ||
       currentMember.approvalStatus === 'rejected');
 
+  const hasActions = needsDeposit || isTreasurer || isAdmin;
+
+  const colorScheme = useColorScheme();
+  const iconColor = colorScheme === 'dark' ? '#b5ac9e' : '#918779'; // sand-400 / sand-500
+
+  const inset = useSafeAreaInsets();
+  const paddingTop = inset.top + 10;
+
   useEffect(() => {
     api.getHostOrder(season.id).then((res) => setHostOrder(res.hostOrder));
   }, [season.id]);
@@ -56,43 +66,50 @@ export function SeasonSetup({ season, members, users }: Props) {
     users.find((u) => u.id === userId)?.displayName ?? 'Unknown';
 
   return (
-    <View className="flex-1 bg-sand-50 dark:bg-sand-900">
-      <ScrollView className="flex-1" contentContainerClassName="px-6 pb-12 pt-16">
-        {/* Header */}
-        <Text className="mb-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
+    <ScrollView
+      className="flex-1 bg-sand-50 dark:bg-sand-900"
+      contentContainerClassName="pb-12"
+      style={{ paddingTop }}
+    >
+      {/* Header */}
+      <View className="px-6 pb-6">
+        <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
           {season.name ?? 'Nueva Temporada'}
         </Text>
-        <View className="mb-4 flex-row items-center gap-2">
+        <View className="flex-row items-center gap-2">
           <View className="rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
-            <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">Configuración</Text>
+            <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
+              Configuraciónss
+            </Text>
           </View>
           <Text className="text-sm text-sand-500 dark:text-sand-400">
             Tesorero: {treasurer?.displayName ?? 'Unknown'}
           </Text>
         </View>
+      </View>
 
-        {/* Summary card */}
-        <View className="mb-6 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-          <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-sm text-sand-500 dark:text-sand-400">Aprobados</Text>
-            <Text className="text-sm font-medium text-sand-950 dark:text-sand-50">
-              {approvedCount} de {members.length}
-            </Text>
-          </View>
-          <View className="h-2 overflow-hidden rounded-full bg-sand-200 dark:bg-sand-700">
-            <View
-              className="h-full rounded-full bg-felt-500"
-              style={{ width: `${members.length > 0 ? (approvedCount / members.length) * 100 : 0}%` }}
-            />
-          </View>
+      {/* Progress Hero — full-bleed felt strip */}
+      <View className="bg-felt-50 px-6 py-8 dark:bg-felt-900/20">
+        <View className="mb-2 flex-row items-center justify-between">
+          <Text className="text-sm font-sans-medium text-felt-700 dark:text-felt-300">
+            Aprobados
+          </Text>
+          <Text className="text-sm font-sans-semibold text-felt-800 dark:text-felt-200">
+            {approvedCount} de {members.length}
+          </Text>
+        </View>
+        <View className="h-2 overflow-hidden rounded-full bg-felt-200 dark:bg-felt-800">
+          <View
+            className="h-full rounded-full bg-felt-500"
+            style={{ width: `${members.length > 0 ? (approvedCount / members.length) * 100 : 0}%` }}
+          />
         </View>
 
-        {/* Start Season button (treasurer only) */}
         {isTreasurer && (
-          <View className="mb-6">
+          <View className="mt-6">
             <Pressable
               testID="btn-start-season"
-              className={`items-center rounded-lg py-3.5 ${
+              className={`items-center rounded-full py-3.5 ${
                 canStart && !starting
                   ? 'bg-felt-600 active:bg-felt-700'
                   : 'bg-sand-300 dark:bg-sand-700'
@@ -113,103 +130,123 @@ export function SeasonSetup({ season, members, users }: Props) {
               )}
             </Pressable>
             {!canStart && (
-              <Text className="mt-2 text-center text-xs text-sand-500 dark:text-sand-400">
-                Se necesitan al menos 2 miembros aprobados para iniciar
+              <Text className="mt-3 text-center text-xs text-felt-600 dark:text-felt-400">
+                Se necesitan al menos 2 miembros aprobados
               </Text>
             )}
           </View>
         )}
+      </View>
 
-        {/* Action buttons (role-based) */}
-        <View className="mb-6 gap-2">
-          {needsDeposit && (
-            <ActionButton
-              testID="btn-upload-deposit"
-              label="Subir Comprobante de Depósito"
-              onPress={() => router.push('/deposit-upload')}
-            />
-          )}
-          {isTreasurer && (
-            <ActionButton
-              testID="btn-review-deposits"
-              label="Revisar Depósitos"
-              onPress={() => router.push('/deposit-approvals')}
-              variant="gold"
-            />
-          )}
-          {isAdmin && (
-            <>
+      {/* Actions */}
+      {hasActions && (
+        <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+          <SectionTitle icon={<IconClipboardCheck size={18} color={iconColor} />} label="Acciones" />
+          <View className="gap-3">
+            {needsDeposit && (
               <ActionButton
-                testID="btn-edit-host-order"
-                label="Editar Orden de Host"
-                onPress={() => router.push('/host-order')}
+                testID="btn-upload-deposit"
+                label="Subir Comprobante de Depósito"
+                onPress={() => router.push('/deposit-upload')}
               />
+            )}
+            {isTreasurer && (
               <ActionButton
-                testID="btn-season-settings"
-                label="Ajustes de Temporada"
-                onPress={() => router.push('/season-settings')}
-                variant="outline"
+                testID="btn-review-deposits"
+                label="Revisar Depósitos"
+                onPress={() => router.push('/deposit-approvals')}
+                variant="gold"
               />
-            </>
-          )}
-        </View>
-
-        {/* Miembros — merged deposit status + host order */}
-        <View className="mb-6">
-          <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-sand-950 dark:text-sand-50">Miembros</Text>
+            )}
             {isAdmin && (
-              <Pressable onPress={() => router.push('/host-order')}>
-                <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
-                  Editar
-                </Text>
-              </Pressable>
+              <>
+                <ActionButton
+                  testID="btn-edit-host-order"
+                  label="Editar Orden de Host"
+                  onPress={() => router.push('/host-order')}
+                />
+                <ActionButton
+                  testID="btn-season-settings"
+                  label="Ajustes de Temporada"
+                  onPress={() => router.push('/season-settings')}
+                  variant="outline"
+                />
+              </>
             )}
           </View>
-          <View className="rounded-xl border border-sand-200 bg-sand-100 dark:border-sand-700 dark:bg-sand-800">
-            {(() => {
-              // Sort members by host order position, unordered members go last
-              const sorted = [...members].sort((a, b) => {
-                const posA = hostOrder.findIndex((h) => h.userId === a.userId);
-                const posB = hostOrder.findIndex((h) => h.userId === b.userId);
-                const orderA = posA >= 0 ? posA : Infinity;
-                const orderB = posB >= 0 ? posB : Infinity;
-                return orderA - orderB;
-              });
-              return sorted.map((member, i) => {
-                const hostPos = hostOrder.findIndex((h) => h.userId === member.userId);
-                return (
-                  <View
-                    key={member.id}
-                    className={i < sorted.length - 1 ? 'border-b border-sand-200 px-4 dark:border-sand-700' : 'px-4'}
-                  >
-                    <MemberRow
-                      name={getUserName(member.userId)}
-                      right={
-                        <View className="flex-row items-center gap-2">
-                          {hostPos >= 0 && (
-                            <View className="h-6 w-6 items-center justify-center rounded-full bg-sand-200 dark:bg-sand-600">
-                              <Text className="text-[10px] font-bold text-sand-600 dark:text-sand-300">
-                                {hostPos + 1}
-                              </Text>
-                            </View>
-                          )}
-                          <StatusBadge variant={member.approvalStatus} />
-                        </View>
-                      }
-                      onPress={
-                        member.userId === currentUser?.id && needsDeposit
-                          ? () => router.push('/deposit-upload')
-                          : undefined
-                      }
-                    />
-                  </View>
-                );
-              });
-            })()}
-          </View>
         </View>
-      </ScrollView>
+      )}
+
+      {/* Members */}
+      <View className="px-6 py-6">
+        <View className="mb-4 flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <IconUsers size={18} color={iconColor} />
+            <Text className="text-base font-sans-bold text-sand-950 dark:text-sand-50">
+              Miembros
+            </Text>
+          </View>
+          {isAdmin && (
+            <Pressable onPress={() => router.push('/host-order')}>
+              <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
+                Editar
+              </Text>
+            </Pressable>
+          )}
+        </View>
+        {(() => {
+          const sorted = [...members].sort((a, b) => {
+            const posA = hostOrder.findIndex((h) => h.userId === a.userId);
+            const posB = hostOrder.findIndex((h) => h.userId === b.userId);
+            return (posA >= 0 ? posA : Infinity) - (posB >= 0 ? posB : Infinity);
+          });
+          return sorted.map((member, i) => {
+            const hostPos = hostOrder.findIndex((h) => h.userId === member.userId);
+            return (
+              <View
+                key={member.id}
+                className={i < sorted.length - 1 ? 'border-b border-sand-200 dark:border-sand-700' : ''}
+              >
+                <MemberRow
+                  name={getUserName(member.userId)}
+                  right={
+                    <View className="flex-row items-center gap-2">
+                      {hostPos >= 0 && (
+                        <View className="h-6 w-6 items-center justify-center rounded-full bg-sand-200 dark:bg-sand-600">
+                          <Text className="text-[10px] font-bold text-sand-600 dark:text-sand-300">
+                            {hostPos + 1}
+                          </Text>
+                        </View>
+                      )}
+                      <StatusBadge variant={member.approvalStatus} />
+                    </View>
+                  }
+                  onPress={
+                    member.userId === currentUser?.id && needsDeposit
+                      ? () => router.push('/deposit-upload')
+                      : undefined
+                  }
+                />
+              </View>
+            );
+          });
+        })()}
+      </View>
+    </ScrollView>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shared
+// ---------------------------------------------------------------------------
+
+function SectionTitle({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <View className="mb-4 flex-row items-center gap-2">
+      {icon}
+      <Text className="text-base font-sans-bold text-sand-950 dark:text-sand-50">
+        {label}
+      </Text>
     </View>
   );
 }
@@ -238,8 +275,8 @@ function ActionButton({
       : 'text-white';
 
   return (
-    <Pressable testID={testID} className={`items-center rounded-lg py-3 ${bgClass}`} onPress={onPress}>
-      <Text className={`text-base font-semibold ${textClass}`}>{label}</Text>
+    <Pressable testID={testID} className={`items-center rounded-full py-3 ${bgClass}`} onPress={onPress}>
+      <Text className={`text-sm font-semibold ${textClass}`}>{label}</Text>
     </Pressable>
   );
 }

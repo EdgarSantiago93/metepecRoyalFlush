@@ -34,7 +34,7 @@ export function NoSession({ season, users }: Props) {
             Programa la próxima noche de juego para el grupo.
           </Text>
           <Pressable
-            className="rounded-lg bg-gold-500 px-8 py-3 active:bg-gold-600"
+            className="rounded-full bg-gold-500 px-8 py-3 active:bg-gold-600"
             onPress={() => router.push('/schedule-session' as never)}
           >
             <Text className="text-base font-semibold text-white">Programar Juego</Text>

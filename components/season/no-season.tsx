@@ -45,7 +45,7 @@ export function NoSeason({ users, onCreateSeason }: Props) {
       </Text>
       {isAdmin && (
         <Pressable
-          className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
+          className="rounded-full bg-gold-500 px-6 py-3 active:bg-gold-600"
           onPress={() => setShowForm(true)}
         >
           <Text className="text-base font-semibold text-white">Crear Temporada</Text>

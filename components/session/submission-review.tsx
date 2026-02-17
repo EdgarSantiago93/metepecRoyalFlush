@@ -16,25 +16,16 @@ export function SubmissionReview({ endingSubmissions, participants, injections, 
 
   if (pending.length === 0) {
     return (
-      <View className="mx-6 mb-4">
-        <Text className="mb-2 text-base font-semibold text-sand-950 dark:text-sand-50">
-          Submission Review
+      <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
+        <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
+          Sin envíos pendientes de revisión
         </Text>
-        <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-          <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
-            No pending submissions
-          </Text>
-        </View>
       </View>
     );
   }
 
   return (
-    <View className="mx-6 mb-4">
-      <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-        Submission Review ({pending.length} pending)
-      </Text>
-
+    <View className="gap-3">
       {pending.map((sub) => (
         <PendingSubmissionCard
           key={sub.id}
@@ -85,7 +76,7 @@ function PendingSubmissionCard({
     try {
       await appState.reviewEndingSubmission(submission.id, 'validate');
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to validate');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo validar');
     } finally {
       setValidating(false);
     }
@@ -93,14 +84,14 @@ function PendingSubmissionCard({
 
   const handleReject = useCallback(async () => {
     if (!rejectNote.trim()) {
-      Alert.alert('Required', 'Please provide a reason for rejection');
+      Alert.alert('Requerido', 'Por favor proporciona una razón para el rechazo');
       return;
     }
     setRejecting(true);
     try {
       await appState.reviewEndingSubmission(submission.id, 'reject', rejectNote.trim());
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to reject');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo rechazar');
     } finally {
       setRejecting(false);
     }
@@ -109,7 +100,7 @@ function PendingSubmissionCard({
   const busy = validating || rejecting;
 
   return (
-    <View className="mb-3 rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
+    <View className="rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-sm font-semibold text-sand-950 dark:text-sand-50">
           {playerName}
@@ -118,12 +109,12 @@ function PendingSubmissionCard({
 
       {/* Context line */}
       <Text className="mb-2 text-xs text-sand-500 dark:text-sand-400">
-        Start: ${(startingStack / 100).toLocaleString()} | Rebuys: ${(approvedRebuys / 100).toLocaleString()} | Total in: ${(totalIn / 100).toLocaleString()}
+        Inicio: ${(startingStack / 100).toLocaleString()} | Ribeyes: ${(approvedRebuys / 100).toLocaleString()} | Total: ${(totalIn / 100).toLocaleString()}
       </Text>
 
       {/* Submitted ending stack */}
       <Text className="mb-1 text-lg font-bold text-sand-950 dark:text-sand-50">
-        Ending: ${(submission.endingStackCents / 100).toLocaleString()} MXN
+        Final: ${(submission.endingStackCents / 100).toLocaleString()} MXN
       </Text>
 
       {/* Photo thumbnail */}
@@ -136,7 +127,7 @@ function PendingSubmissionCard({
       {/* Submitter note */}
       {submission.note && (
         <Text className="mb-3 text-sm text-sand-600 dark:text-sand-400">
-          Note: {submission.note}
+          Nota: {submission.note}
         </Text>
       )}
 
@@ -144,23 +135,23 @@ function PendingSubmissionCard({
       {!showRejectInput ? (
         <View className="flex-row gap-3">
           <Pressable
-            className="flex-1 items-center rounded-lg border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+            className="flex-1 items-center rounded-full border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
             onPress={() => setShowRejectInput(true)}
             disabled={busy}
           >
             <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-              Reject
+              Rechazar
             </Text>
           </Pressable>
           <Pressable
-            className={`flex-1 items-center rounded-lg py-2.5 ${
+            className={`flex-1 items-center rounded-full py-2.5 ${
               busy ? 'bg-felt-400 dark:bg-felt-800' : 'bg-felt-600 active:bg-felt-700'
             }`}
             onPress={handleValidate}
             disabled={busy}
           >
             <Text className="text-sm font-semibold text-white">
-              {validating ? 'Validating...' : 'Validate'}
+              {validating ? 'Validando...' : 'Validar'}
             </Text>
           </Pressable>
         </View>
@@ -168,14 +159,14 @@ function PendingSubmissionCard({
         <View className="gap-3">
           <AppTextInput
             size="sm"
-            placeholder="Reason for rejection (required)"
+            placeholder="Razón del rechazo (requerida)"
             value={rejectNote}
             onChangeText={setRejectNote}
             autoFocus
           />
           <View className="flex-row gap-3">
             <Pressable
-              className="flex-1 items-center rounded-lg border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+              className="flex-1 items-center rounded-full border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
               onPress={() => {
                 setShowRejectInput(false);
                 setRejectNote('');
@@ -183,18 +174,18 @@ function PendingSubmissionCard({
               disabled={rejecting}
             >
               <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-                Cancel
+                Cancelar
               </Text>
             </Pressable>
             <Pressable
-              className={`flex-1 items-center rounded-lg py-2.5 ${
+              className={`flex-1 items-center rounded-full py-2.5 ${
                 rejecting ? 'bg-red-400 dark:bg-red-800' : 'bg-red-600 active:bg-red-700'
               }`}
               onPress={handleReject}
               disabled={rejecting}
             >
               <Text className="text-sm font-semibold text-white">
-                {rejecting ? 'Rejecting...' : 'Reject'}
+                {rejecting ? 'Rechazando...' : 'Rechazar'}
               </Text>
             </Pressable>
           </View>

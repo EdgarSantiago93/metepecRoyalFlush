@@ -1,14 +1,16 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
+import { IconCalendar } from '@tabler/icons-react-native';
 import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import { SessionDealing } from './session-dealing';
 import { SessionInProgress } from './session-in-progress';
 import { SessionClosing } from './session-closing';
 import { SessionFinalized } from './session-finalized';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   session: Session;
@@ -99,6 +101,12 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
   const host = users.find((u) => u.id === session.hostUserId);
   const scheduledBy = users.find((u) => u.id === session.scheduledByUserId);
 
+  const colorScheme = useColorScheme();
+  const iconColor = colorScheme === 'dark' ? '#b5ac9e' : '#918779';
+
+  const inset = useSafeAreaInsets();
+  const paddingTop = inset.top + 10;
+
   const handleStart = useCallback(async () => {
     setStarting(true);
     try {
@@ -114,66 +122,85 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
   return (
     <ScrollView
       className="flex-1 bg-sand-50 dark:bg-sand-900"
-      contentContainerClassName="px-6 pt-16 pb-8"
+      contentContainerClassName="pb-12"
+      style={{ paddingTop }}
     >
-      <Text className="mb-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
-        Session Scheduled
-      </Text>
-
-      <View className="mt-1 mb-6 self-start rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900/40">
-        <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
-          Scheduled
+      {/* Header */}
+      <View className="px-6 pb-6">
+        <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
+          Juego Programado
         </Text>
+        <View className="self-start rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
+          <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
+            Programado
+          </Text>
+        </View>
       </View>
 
-      {/* Session details card */}
-      <View className="mb-6 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
+      {/* Session details */}
+      <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+        <SectionTitle icon={<IconCalendar size={18} color={iconColor} />} label="Detalles" />
         <InfoRow label="Host" value={host?.displayName ?? 'Unknown'} />
-        {session.scheduledFor && <InfoRow label="When" value={session.scheduledFor} />}
-        {session.location && <InfoRow label="Location" value={session.location} />}
-        {scheduledBy && <InfoRow label="Scheduled by" value={scheduledBy.displayName} />}
+        {session.scheduledFor && (
+          <InfoRow
+            label="Cuándo"
+            value={new Date(session.scheduledFor).toLocaleDateString('es-MX', {
+              day: '2-digit',
+              month: '2-digit',
+              year: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          />
+        )}
+        {session.location && <InfoRow label="Ubicación" value={session.location} />}
+        {scheduledBy && <InfoRow label="Programado por" value={scheduledBy.displayName} />}
       </View>
 
       {/* Action buttons for Treasurer/Admin */}
       {canManage && (
-        <View className="gap-3">
-          <Pressable
-            className={`items-center rounded-lg py-3.5 ${
-              !starting ? 'bg-gold-500 active:bg-gold-600' : 'bg-sand-300 dark:bg-sand-700'
-            }`}
-            onPress={() => setShowStartModal(true)}
-            disabled={starting}
-          >
-            {starting ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-base font-semibold text-white">Start Session</Text>
-            )}
-          </Pressable>
-          <Pressable
-            className="items-center rounded-lg border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
-            onPress={() => router.push('/schedule-session?edit=1' as never)}
-            disabled={starting}
-          >
-            <Text className="text-base font-semibold text-sand-700 dark:text-sand-300">
-              Edit Schedule
-            </Text>
-          </Pressable>
+        <View className="px-6 py-6">
+          <View className="gap-3">
+            <Pressable
+              className={`items-center rounded-full py-3.5 ${
+                !starting ? 'bg-gold-500 active:bg-gold-600' : 'bg-sand-300 dark:bg-sand-700'
+              }`}
+              onPress={() => setShowStartModal(true)}
+              disabled={starting}
+            >
+              {starting ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text className="text-base font-semibold text-white">Iniciar Juego</Text>
+              )}
+            </Pressable>
+            <Pressable
+              className="items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+              onPress={() => router.push('/schedule-session?edit=1' as never)}
+              disabled={starting}
+            >
+              <Text className="text-base font-semibold text-sand-700 dark:text-sand-300">
+                Editar Programación
+              </Text>
+            </Pressable>
+          </View>
         </View>
       )}
 
       {!canManage && (
-        <Text className="text-center text-sm text-sand-500 dark:text-sand-400">
-          Waiting for the treasurer to start the session.
-        </Text>
+        <View className="px-6 py-6">
+          <Text className="text-center text-sm text-sand-500 dark:text-sand-400">
+            Esperando a que el tesorero inicie el juego.
+          </Text>
+        </View>
       )}
 
       <ConfirmationModal
         visible={showStartModal}
-        title="Start Session"
-        message="Start the dealing phase? Players will be able to check in and receive their starting stacks."
-        confirmLabel="Start Session"
-        cancelLabel="Cancel"
+        title="Iniciar Juego"
+        message="¿Iniciar la fase de reparto? Los jugadores podrán hacer check in y recibir su stack inicial."
+        confirmLabel="Iniciar Juego"
+        cancelLabel="Cancelar"
         onConfirm={handleStart}
         onCancel={() => setShowStartModal(false)}
         loading={starting}
@@ -186,11 +213,22 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
 // Shared
 // ---------------------------------------------------------------------------
 
+function SectionTitle({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <View className="mb-4 flex-row items-center gap-2">
+      {icon}
+      <Text className="text-base font-sans-bold text-sand-950 dark:text-sand-50">
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <View className="mb-2 flex-row items-center justify-between last:mb-0">
+    <View className="mb-3 flex-row items-center justify-between last:mb-0">
       <Text className="text-sm text-sand-500 dark:text-sand-400">{label}</Text>
-      <Text className="text-sm font-medium text-sand-950 dark:text-sand-50">{value}</Text>
+      <Text className="text-sm font-sans-semibold text-sand-950 dark:text-sand-50">{value}</Text>
     </View>
   );
 }

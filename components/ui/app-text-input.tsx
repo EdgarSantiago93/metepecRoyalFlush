@@ -22,7 +22,6 @@ const PLACEHOLDER_COLOR = {
 
 export const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
   ({ size = 'default', className = '', placeholderTextColor, ...props }, ref) => {
-    console.log(`${BASE} ${SIZE_CLASSES[size]} ${className}`);
     return (
       <TextInput
         ref={ref}

@@ -44,7 +44,7 @@ function NotCheckedIn() {
   }, [appState]);
 
   return (
-    <View className="mx-6 mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
+    <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
       <Text className="mb-1 text-base font-semibold text-sand-950 dark:text-sand-50">
         Aún no has hecho check in
       </Text>
@@ -52,7 +52,7 @@ function NotCheckedIn() {
         Haz check in para recibir tu stack inicial del tesorero.
       </Text>
       <Pressable
-        className="items-center rounded-lg bg-gold-500 py-3 active:bg-gold-600"
+        className="items-center rounded-full bg-gold-500 py-3 active:bg-gold-600"
         onPress={() => setShowModal(true)}
       >
         <Text className="text-base font-semibold text-white">Check In</Text>
@@ -113,7 +113,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
   }, [appState, participant.id, disputeNote]);
 
   return (
-    <View className="mx-6 mb-4 rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
+    <View className="rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
       <Text className="mb-1 text-base font-semibold text-sand-950 dark:text-sand-50">
         Confirma Tu Stack Inicial
       </Text>
@@ -124,7 +124,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
       {!showDispute ? (
         <View className="flex-row gap-3">
           <Pressable
-            className="flex-1 items-center rounded-lg border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+            className="flex-1 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
             onPress={() => setShowDispute(true)}
             disabled={confirming}
           >
@@ -133,7 +133,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
             </Text>
           </Pressable>
           <Pressable
-            className={`flex-1 items-center rounded-lg py-3 ${confirming ? 'bg-gold-300 dark:bg-gold-700' : 'bg-gold-500 active:bg-gold-600'}`}
+            className={`flex-1 items-center rounded-full py-3 ${confirming ? 'bg-gold-300 dark:bg-gold-700' : 'bg-gold-500 active:bg-gold-600'}`}
             onPress={handleConfirm}
             disabled={confirming}
           >
@@ -146,7 +146,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
         <View className="gap-3">
           <AppTextInput
             size="sm"
-            placeholder="Describe the issue (e.g. wrong amount)"
+            placeholder="Describe el problema (ej. monto incorrecto)"
             value={disputeNote}
             onChangeText={setDisputeNote}
             multiline
@@ -154,7 +154,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
           />
           <View className="flex-row gap-3">
             <Pressable
-              className="flex-1 items-center rounded-lg border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+              className="flex-1 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
               onPress={() => {
                 setShowDispute(false);
                 setDisputeNote('');
@@ -166,7 +166,7 @@ function AwaitingConfirmation({ participant }: { participant: SessionParticipant
               </Text>
             </Pressable>
             <Pressable
-              className={`flex-1 items-center rounded-lg py-3 ${submittingDispute ? 'bg-red-400 dark:bg-red-800' : 'bg-red-600 active:bg-red-700'}`}
+              className={`flex-1 items-center rounded-full py-3 ${submittingDispute ? 'bg-red-400 dark:bg-red-800' : 'bg-red-600 active:bg-red-700'}`}
               onPress={handleDispute}
               disabled={submittingDispute}
             >
@@ -189,7 +189,7 @@ function Confirmed({ participant }: { participant: SessionParticipant }) {
   const formattedStack = `$${(participant.startingStackCents / 100).toLocaleString()} MXN`;
 
   return (
-    <View className="mx-6 mb-4 rounded-xl border border-felt-300 bg-felt-50 p-4 dark:border-felt-700 dark:bg-felt-900/30">
+    <View className="rounded-xl border border-felt-300 bg-felt-50 p-4 dark:border-felt-700 dark:bg-felt-900/30">
       <Text className="mb-1 text-base font-semibold text-felt-800 dark:text-felt-200">
         Estás registrado
       </Text>
@@ -206,7 +206,7 @@ function Confirmed({ participant }: { participant: SessionParticipant }) {
 
 function Disputed({ participant }: { participant: SessionParticipant }) {
   return (
-    <View className="mx-6 mb-4 rounded-xl border border-red-300 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/30">
+    <View className="rounded-xl border border-red-300 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/30">
       <Text className="mb-1 text-base font-semibold text-red-800 dark:text-red-200">
         Disputa Enviada
       </Text>
