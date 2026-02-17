@@ -17,16 +17,13 @@ export function DealingRoster({ participants, users }: Props) {
   const [showAddGuest, setShowAddGuest] = useState(false);
 
   return (
-    <View className="mx-6 mb-4">
+    <View>
       <View className="mb-3 flex-row items-center justify-between">
-        <Text className="text-base font-semibold text-sand-950 dark:text-sand-50">
-          Roster
-        </Text>
         <Pressable
-          className="rounded-lg bg-gold-500 px-3 py-1.5 active:bg-gold-600"
+          className="rounded-full bg-gold-500 px-3 py-1.5 active:bg-gold-600"
           onPress={() => setShowAddGuest(true)}
         >
-          <Text className="text-xs font-semibold text-white">Add Guest</Text>
+          <Text className="text-xs font-semibold text-white">Agregar Invitado</Text>
         </Pressable>
       </View>
 
@@ -35,13 +32,13 @@ export function DealingRoster({ participants, users }: Props) {
       {/* Header */}
       <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 px-3 py-2 dark:border-sand-700 dark:bg-sand-800">
         <Text className="flex-1 text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Name
+          Nombre
         </Text>
         <Text className="w-20 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
           Stack
         </Text>
         <Text className="w-24 text-right text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Status
+          Estado
         </Text>
       </View>
 
@@ -58,15 +55,15 @@ export function DealingRoster({ participants, users }: Props) {
       {participants.length === 0 && (
         <View className="rounded-b-lg border border-sand-200 px-3 py-6 dark:border-sand-700">
           <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
-            No participants yet
+            Sin participantes aún
           </Text>
         </View>
       )}
 
       {/* Summary footer */}
       <Text className="mt-2 text-center text-xs text-sand-500 dark:text-sand-400">
-        {checkedIn.length} checked in, {confirmed.length} confirmed of {participants.length}{' '}
-        {participants.length === 1 ? 'player' : 'players'}
+        {checkedIn.length} check-in, {confirmed.length} confirmados de {participants.length}{' '}
+        {participants.length === 1 ? 'jugador' : 'jugadores'}
       </Text>
     </View>
   );
@@ -102,7 +99,7 @@ function RosterRow({
       await appState.removeParticipant(participant.id);
       setShowRemoveModal(false);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to remove participant');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo eliminar participante');
     } finally {
       setRemoving(false);
       swipeRef.current?.close();
@@ -127,7 +124,7 @@ function RosterRow({
             setShowRemoveModal(true);
           }}
         >
-          <Text className="text-xs font-semibold text-white">Remove</Text>
+          <Text className="text-xs font-semibold text-white">Eliminar</Text>
         </Pressable>
       </Animated.View>
     );
@@ -151,7 +148,7 @@ function RosterRow({
             {participant.type === 'guest_ephemeral' && (
               <View className="rounded-full bg-gold-100 px-2 py-0.5 dark:bg-gold-900/40">
                 <Text className="text-[10px] font-semibold text-gold-700 dark:text-gold-300">
-                  Guest
+                  Invitado
                 </Text>
               </View>
             )}
@@ -167,10 +164,10 @@ function RosterRow({
 
       <ConfirmationModal
         visible={showRemoveModal}
-        title="Remove Participant"
-        message={`Remove ${name} from this session? They will need to check in again.`}
-        confirmLabel="Remove"
-        cancelLabel="Cancel"
+        title="Eliminar Participante"
+        message={`¿Eliminar a ${name} de esta sesión? Necesitará hacer check in de nuevo.`}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
         variant="destructive"
         onConfirm={handleRemove}
         onCancel={() => {
@@ -201,7 +198,7 @@ function AddGuestModal({ visible, onClose }: { visible: boolean; onClose: () => 
       setGuestName('');
       onClose();
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to add guest');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo agregar invitado');
     } finally {
       setAdding(false);
     }
@@ -210,9 +207,9 @@ function AddGuestModal({ visible, onClose }: { visible: boolean; onClose: () => 
   return (
     <ConfirmationModal
       visible={visible}
-      title="Add Guest"
-      message="Enter the guest's name. They'll be added with a $500 MXN buy-in."
-      confirmLabel="Add"
+      title="Agregar Invitado"
+      message="Ingresa el nombre del invitado. Se agregará con un buy-in de $500 MXN."
+      confirmLabel="Agregar"
       onConfirm={handleAdd}
       onCancel={() => {
         setGuestName('');
@@ -222,7 +219,7 @@ function AddGuestModal({ visible, onClose }: { visible: boolean; onClose: () => 
     >
       <AppTextInput
         size="sm"
-        placeholder="Guest name"
+        placeholder="Nombre del invitado"
         value={guestName}
         onChangeText={setGuestName}
         autoFocus
@@ -248,22 +245,22 @@ const STATUS_STYLES: Record<ParticipantStatus, { bg: string; text: string; label
   not_here: {
     bg: 'bg-sand-200 dark:bg-sand-700',
     text: 'text-sand-600 dark:text-sand-400',
-    label: 'Not here',
+    label: 'Ausente',
   },
   checked_in: {
     bg: 'bg-gold-100 dark:bg-gold-900/40',
     text: 'text-gold-700 dark:text-gold-300',
-    label: 'Checked in',
+    label: 'Check in',
   },
   confirmed: {
     bg: 'bg-felt-100 dark:bg-felt-900/40',
     text: 'text-felt-700 dark:text-felt-300',
-    label: 'Confirmed',
+    label: 'Confirmado',
   },
   disputed: {
     bg: 'bg-red-100 dark:bg-red-900/40',
     text: 'text-red-700 dark:text-red-300',
-    label: 'Disputed',
+    label: 'Disputa',
   },
 };
 

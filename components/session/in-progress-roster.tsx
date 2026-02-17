@@ -9,24 +9,20 @@ type Props = {
 
 export function InProgressRoster({ participants, injections, users }: Props) {
   return (
-    <View className="mx-6 mb-4">
-      <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-        Players
-      </Text>
-
+    <View>
       {/* Header */}
       <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 px-3 py-2 dark:border-sand-700 dark:bg-sand-800">
         <Text className="flex-1 text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Name
+          Nombre
         </Text>
         <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Start
+          Inicio
         </Text>
         <Text className="w-16 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Rebuys
+          Ribeyes
         </Text>
         <Text className="w-16 text-right text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Total In
+          Total
         </Text>
       </View>
 
@@ -71,7 +67,7 @@ export function InProgressRoster({ participants, injections, users }: Props) {
       {participants.length === 0 && (
         <View className="rounded-b-lg border border-sand-200 px-3 py-6 dark:border-sand-700">
           <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
-            No participants
+            Sin participantes
           </Text>
         </View>
       )}

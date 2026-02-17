@@ -389,7 +389,7 @@ function buildLiveEvents(
   for (const inj of injections) {
     const participant = participants.find((p) => p.id === inj.participantId);
     const playerName = participant ? getUserName(participant, users) : 'Unknown';
-    const rebuyType = inj.type === 'rebuy_500' ? 'Ribeye 🥩 Completo' : inj.type === 'half_250' ? 'Medio Ribeye 🥩' : 'Buy-in de Invitado';
+    const rebuyType = inj.type === 'rebuy_500' ? ' 1 Ribeye 🥩 ' : inj.type === 'half_250' ? ' 1/2 Ribeye 🥩 ' : 'Buy-in de Invitado';
 
     if (inj.status === 'pending') {
       events.push({
@@ -484,7 +484,7 @@ function LiveSessionSection({
 
       {/* Live event timeline */}
       {events.length > 0 && (
-        <View className="border-t border-gold-200/60 dark:border-gold-700/60">
+        <View className="border-t border-gold-200/60 dark:border-gold-700/60 pb-4" >
           {events.map((event, i) => {
             const isFirst = i === 0;
             const isLast = i === events.length - 1;
@@ -641,12 +641,23 @@ function LiveEventContent({ event }: { event: LiveTimelineEvent }) {
       );
     case 'rebuy_requested':
       return (
-        <View className="flex-row items-center justify-between">
-          <Text className="flex-1 text-xs text-sand-800 dark:text-sand-200">
-            <Text className="font-medium">{event.playerName}</Text> solicitó ribeye 🥩
-          </Text>
-          <Text className="text-xs text-gold-600 dark:text-gold-400">
-            {event.rebuyType} — {formatMxn(event.amountCents)}
+        // <View className="flex-row items-center justify-between">
+        //   <Text className="flex-1 text-xs text-sand-800 dark:text-sand-200">
+        //     <Text className="font-medium">{event.playerName}</Text> solicitó rebuy
+        //   </Text>
+        //   <Text className="text-xs text-gold-600 dark:text-gold-400">
+        //     {event.rebuyType} — {formatMxn(event.amountCents)}
+        //   </Text>
+        // </View>
+        <View className="flex-col items-start justify-between">
+        <Text className="flex-1 text-xs text-sand-800 dark:text-sand-200">
+          <Text className="font-medium">{event.playerName}</Text> solicitó 
+          <Text className='font-medium'>
+            {event.rebuyType}
+            </Text>
+            <Text className="text-xs text-gold-600 dark:text-gold-400">
+              {formatMxn(event.amountCents)}
+            </Text>
           </Text>
         </View>
       );
@@ -654,7 +665,12 @@ function LiveEventContent({ event }: { event: LiveTimelineEvent }) {
       return (
         <View className="flex-row items-center justify-between">
           <Text className="flex-1 text-xs text-sand-800 dark:text-sand-200">
-            <Text className="font-medium">{event.playerName}</Text> ribeye 🥩 aprobado
+            <Text className="font-medium">{event.playerName}</Text> ribeye
+            
+            <Text className='font-medium text-green-600'>
+            {' '} aprobado
+            </Text>
+             
           </Text>
           <Text className="text-xs font-semibold text-gold-600 dark:text-gold-400">
             +{formatMxn(event.amountCents)}
@@ -665,7 +681,7 @@ function LiveEventContent({ event }: { event: LiveTimelineEvent }) {
       return (
         <Text className="text-xs text-sand-800 dark:text-sand-200">
           <Text className="font-medium">{event.playerName}</Text>{' '}
-          <Text className="text-red-600 dark:text-red-400">ribeye 🥩 rechazado</Text>
+          <Text className="text-red-600 dark:text-red-400">ribeye rechazado</Text>
           {' '}<Text className="text-sand-500">({event.rebuyType})</Text>
         </Text>
       );

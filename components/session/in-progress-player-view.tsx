@@ -13,7 +13,7 @@ type Props = {
 export function InProgressPlayerView({ participant, injections }: Props) {
   if (!participant) {
     return (
-      <View className="mx-6 mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
+      <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
         <Text className="text-sm text-sand-500 dark:text-sand-400">
           No eres participante en este juego.
         </Text>
@@ -31,7 +31,7 @@ export function InProgressPlayerView({ participant, injections }: Props) {
   const formattedApproved = `$${(approvedTotal / 100).toLocaleString()}`;
 
   return (
-    <View className="mx-6 mb-4">
+    <View>
       {/* Stats card */}
       <View className="mb-3 rounded-xl border border-felt-300 bg-felt-50 p-4 dark:border-felt-700 dark:bg-felt-900/30">
         <Text className="mb-2 text-base font-semibold text-felt-800 dark:text-felt-200">
@@ -39,7 +39,7 @@ export function InProgressPlayerView({ participant, injections }: Props) {
         </Text>
         <View className="flex-row justify-between">
           <StatItem label="Inicio" value={`${formattedStack} MXN`} />
-          <StatItem label="Ribeyes 🥩" value={`${formattedApproved} MXN`} />
+          <StatItem label="Ribeyes" value={`${formattedApproved} MXN`} />
           {pendingCount > 0 && (
             <StatItem label="Pendiente" value={`${pendingCount}`} accent />
           )}
@@ -121,7 +121,7 @@ function RebuyActions() {
       setShowModal(false);
       setProofUri(null);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo solicitar el ribeye 🥩');
+      Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo solicitar el ribeye');
     } finally {
       setLoading(false);
     }
@@ -133,23 +133,23 @@ function RebuyActions() {
     <>
       <View className="flex-row gap-3">
         <Pressable
-          className="flex-1 items-center rounded-lg bg-gold-500 py-3 active:bg-gold-600"
+          className="flex-1 items-center rounded-full bg-gold-500 py-3 active:bg-gold-600"
           onPress={() => handleRequest('rebuy_500')}
         >
-          <Text className="text-sm font-semibold text-white">Ribeye 🥩 $500</Text>
+          <Text className="text-sm font-semibold text-white">Ribeye $500</Text>
         </Pressable>
         <Pressable
-          className="flex-1 items-center rounded-lg border border-gold-500 py-3 active:bg-gold-50 dark:active:bg-gold-900/30"
+          className="flex-1 items-center rounded-full border border-gold-500 py-3 active:bg-gold-50 dark:active:bg-gold-900/30"
           onPress={() => handleRequest('half_250')}
         >
-          <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">Ribeye 🥩 $250</Text>
+          <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">Ribeye $250</Text>
         </Pressable>
       </View>
 
       <ConfirmationModal
         visible={showModal}
-        title={`Solicitar Ribeye 🥩 de ${amount} MXN`}
-        message="El tesorero necesitará aprobar esta solicitud de ribeye 🥩."
+        title={`Solicitar Ribeye de ${amount} MXN`}
+        message="El tesorero necesitará aprobar esta solicitud de ribeye."
         confirmLabel="Solicitar"
         onConfirm={handleConfirm}
         onCancel={() => {
@@ -171,7 +171,7 @@ function RebuyActions() {
           </View>
         ) : (
           <Pressable
-            className="items-center rounded-lg border border-dashed border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+            className="items-center rounded-full border border-dashed border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
             onPress={handlePickImage}
           >
             <Text className="text-sm text-sand-500 dark:text-sand-400">

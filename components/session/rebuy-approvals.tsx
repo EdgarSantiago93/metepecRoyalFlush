@@ -15,25 +15,16 @@ export function RebuyApprovals({ injections, participants, users }: Props) {
 
   if (pending.length === 0) {
     return (
-      <View className="mx-6 mb-4">
-        <Text className="mb-2 text-base font-semibold text-sand-950 dark:text-sand-50">
-          Solicitudes de Ribeye 🥩
+      <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
+        <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
+          Sin solicitudes de ribeye pendientes
         </Text>
-        <View className="rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-          <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
-            Sin solicitudes de ribeye 🥩 pendientes
-          </Text>
-        </View>
       </View>
     );
   }
 
   return (
-    <View className="mx-6 mb-4">
-      <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-        Solicitudes de Ribeye 🥩 ({pending.length} pendientes)
-      </Text>
-
+    <View className="gap-3">
       {pending.map((inj) => (
         <PendingInjectionCard
           key={inj.id}
@@ -69,7 +60,7 @@ function PendingInjectionCard({
   const user = users.find((u) => u.id === participant?.userId);
   const playerName = user?.displayName ?? participant?.guestName ?? 'Unknown';
   const amount = `$${(injection.amountCents / 100).toLocaleString()} MXN`;
-  const typeLabel = injection.type === 'rebuy_500' ? 'Ribeye 🥩 Completo' : injection.type === 'half_250' ? 'Medio Ribeye 🥩' : 'Buy-in';
+  const typeLabel = injection.type === 'rebuy_500' ? 'Ribeye Completo' : injection.type === 'half_250' ? 'Medio Ribeye' : 'Buy-in';
 
   const handleApprove = useCallback(async () => {
     setApproving(true);
@@ -100,7 +91,7 @@ function PendingInjectionCard({
   const busy = approving || rejecting;
 
   return (
-    <View className="mb-3 rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
+    <View className="rounded-xl border border-gold-300 bg-gold-50 p-4 dark:border-gold-700 dark:bg-gold-900/30">
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-sm font-semibold text-sand-950 dark:text-sand-50">
           {playerName}
@@ -131,7 +122,7 @@ function PendingInjectionCard({
       {!showRejectInput ? (
         <View className="flex-row gap-3">
           <Pressable
-            className="flex-1 items-center rounded-lg border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+            className="flex-1 items-center rounded-full border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
             onPress={() => setShowRejectInput(true)}
             disabled={busy}
           >
@@ -140,7 +131,7 @@ function PendingInjectionCard({
             </Text>
           </Pressable>
           <Pressable
-            className={`flex-1 items-center rounded-lg py-2.5 ${
+            className={`flex-1 items-center rounded-full py-2.5 ${
               busy ? 'bg-felt-400 dark:bg-felt-800' : 'bg-felt-600 active:bg-felt-700'
             }`}
             onPress={handleApprove}
@@ -162,7 +153,7 @@ function PendingInjectionCard({
           />
           <View className="flex-row gap-3">
             <Pressable
-              className="flex-1 items-center rounded-lg border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+              className="flex-1 items-center rounded-full border border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
               onPress={() => {
                 setShowRejectInput(false);
                 setRejectNote('');
@@ -174,7 +165,7 @@ function PendingInjectionCard({
               </Text>
             </Pressable>
             <Pressable
-              className={`flex-1 items-center rounded-lg py-2.5 ${
+              className={`flex-1 items-center rounded-full py-2.5 ${
                 rejecting ? 'bg-red-400 dark:bg-red-800' : 'bg-red-600 active:bg-red-700'
               }`}
               onPress={handleReject}

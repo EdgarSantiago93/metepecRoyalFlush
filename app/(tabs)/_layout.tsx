@@ -2,12 +2,12 @@ import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { PulsingDot } from '@/components/ui/pulsing-dot';
 import { Colors } from '@/constants/theme';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { IconBook, IconCards, IconTrophy, IconUser } from '@tabler/icons-react-native';
 import { View } from 'react-native';
 
 export default function TabLayout() {
@@ -36,7 +36,7 @@ const hasLiveSession =
           options={{
             title: 'Temporada',
 
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="trophy.fill" color={color} />,
+            tabBarIcon: ({ color }) => <IconTrophy size={28} color={color} />,
           }}
         />
         <Tabs.Screen
@@ -55,7 +55,7 @@ const hasLiveSession =
             title: 'Registro',
 
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="book.closed.fill" color={color} />
+              <IconBook size={28} color={color} />
             ),
           }}
         />
@@ -64,7 +64,7 @@ const hasLiveSession =
           options={{
             title: 'Perfil',
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="person.crop.circle.fill" color={color} />
+              <IconUser size={28} color={color} />
             ),
           }}
         />
@@ -79,7 +79,7 @@ const GameComponent = ({isActive, color}: {isActive: boolean, color: string}) =>
 if (isActive) {
   return (
     <View style={{position: 'relative'}}>
-    <IconSymbol size={28} name="play.circle.fill" color={color} />
+    <IconCards size={28} color={color} />
     <View style={{position: 'absolute', top: 0, right: -5}}>
     <PulsingDot color={'green'} />
     </View>
@@ -87,6 +87,6 @@ if (isActive) {
   );
 }
   return (
-    <IconSymbol size={28} name="play.circle.fill" color={color} />
+    <IconCards size={28} color={color} />
   );
 };

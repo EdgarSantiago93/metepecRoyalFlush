@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
 import type { Season, SeasonHostOrder, SeasonMember, Session, User } from '@/types';
+import { IconArrowsShuffle, IconCards, IconTrophy } from '@tabler/icons-react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 type Props = {
   season: Season;
@@ -33,26 +36,36 @@ export function SeasonActive({ season, members, session, users }: Props) {
   }, [season.id]);
 
   const userMap = new Map(users.map((u) => [u.id, u]));
+  const colorScheme = useColorScheme();
+  const iconColor = colorScheme === 'dark' ? '#b5ac9e' : '#918779'; // sand-400 / sand-500
+  const inset = useSafeAreaInsets();
+  const paddingTop = inset.top + 10;
 
   return (
     <ScrollView
       className="flex-1 bg-sand-50 dark:bg-sand-900"
-      contentContainerClassName="px-6 pt-16 pb-8"
+      contentContainerClassName="pb-12"
+      style={{ paddingTop }}
     >
       {/* Header */}
-      <Text className="mb-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
-        {season.name ?? 'Temporada Actual'}
-      </Text>
-      <View className="mt-1 mb-6 self-start rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900">
-        <Text className="text-xs font-semibold text-felt-700 dark:text-felt-300">
-          Activa
+      <View className="px-6 pb-6">
+        <Text
+          className="mb-2 text-4xl font-heading text-sand-950 dark:text-sand-50"
+          numberOfLines={1}
+        >
+          {season.name ?? 'Temporada Actual'}
         </Text>
+        <View className="self-start rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900">
+          <Text className="text-xs font-semibold text-felt-700 dark:text-felt-300">
+            Activa
+          </Text>
+        </View>
       </View>
 
-      {/* Your Balance */}
+      {/* Balance Hero — full-bleed warm strip */}
       {currentMember && (
-        <View className="mb-4 rounded-xl border border-gold-200 bg-gold-50 p-5 dark:border-gold-800 dark:bg-gold-900/30">
-          <Text className="mb-1 text-sm font-medium text-gold-700 dark:text-gold-300">
+        <View className="bg-gold-50 px-6 py-8 dark:bg-gold-900/30">
+          <Text className="mb-1 text-sm font-sans-medium text-gold-600 dark:text-gold-400">
             Tu Balance
           </Text>
           <Text className="text-3xl font-bold text-gold-800 dark:text-gold-200">
@@ -61,25 +74,24 @@ export function SeasonActive({ season, members, session, users }: Props) {
         </View>
       )}
 
-      {/* Summary */}
-      <View className="mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
+      {/* Season Info */}
+      <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+        <SectionTitle icon={<IconTrophy size={18} color={iconColor} />} label="Temporada" />
         <InfoRow label="Tesorero" value={treasurer?.displayName ?? 'Unknown'} />
         <InfoRow label="Miembros" value={`${approvedCount} aprobados`} />
       </View>
 
-      {/* Session Status Card */}
-      <View className="mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-        <Text className="mb-3 text-sm font-semibold text-sand-700 dark:text-sand-300">
-          Juego
-        </Text>
+      {/* Session */}
+      <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+        <SectionTitle icon={<IconCards size={18} color={iconColor} />} label="Juego" />
         {!session && (
           <>
-            <Text className="mb-3 text-sm text-sand-500 dark:text-sand-400">
+            <Text className="mb-5 text-sm text-sand-500 dark:text-sand-400">
               Sin juego programado
             </Text>
             {canManage && (
               <Pressable
-                className="items-center rounded-lg bg-gold-500 py-2.5 active:bg-gold-600"
+                className="items-center rounded-full bg-gold-500 py-3.5 active:bg-gold-600"
                 onPress={() => router.push('/schedule-session' as never)}
               >
                 <Text className="text-sm font-semibold text-white">Programar Juego</Text>
@@ -91,9 +103,9 @@ export function SeasonActive({ season, members, session, users }: Props) {
           <>
             <SessionStatusRow session={session} users={users} />
             <Pressable
-              className="mt-3 items-center rounded-lg border border-sand-300 py-2.5 active:bg-sand-200 dark:border-sand-600 dark:active:bg-sand-700"
+              className="mt-5 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
               onPress={() => {
-                /* Switch to Session tab — future: Linking.openURL or Tabs API */
+                router.push('/session' as never);
               }}
             >
               <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
@@ -103,25 +115,41 @@ export function SeasonActive({ season, members, session, users }: Props) {
           </>
         )}
       </View>
-
-      {/* Host Order Preview */}
+     
+      {/* Host Order */}
       {hostOrder.length > 0 && (
-        <View className="mb-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-          <Text className="mb-3 text-sm font-semibold text-sand-700 dark:text-sand-300">
-            Rotación de Host
-          </Text>
+        <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+          <View className="flex-row items-center justify-between ">
+            <SectionTitle icon={<IconArrowsShuffle size={18} color={iconColor} />} label="Rotación de Host" />
+            {isAdmin && (
+              <Pressable
+                className="items-center justify-center py-1 active:opacity-70"
+                onPress={() => router.push('/host-order' as never)}
+              >
+                <Text className="text-sm font-sans-semibold text-gold-600 dark:text-gold-400">
+                  Editar
+                </Text>
+              </Pressable>
+            )}
+          </View>
           {hostOrder.map((ho, index) => {
             const user = userMap.get(ho.userId);
             if (!user) return null;
+            const initials = getInitials(user.displayName);
             return (
               <View
                 key={ho.id}
-                className="mb-1.5 flex-row items-center last:mb-0"
+                className="flex-row items-center gap-3 py-2.5"
               >
-                <Text className="mr-3 w-5 text-right text-xs font-medium text-sand-400 dark:text-sand-500">
-                  {index + 1}
+                <Text className="w-7 text-right text-xs font-sans-medium text-sand-400 dark:text-sand-500">
+                  #{index + 1}
                 </Text>
-                <Text className="text-sm text-sand-950 dark:text-sand-50">
+                <View className="h-[35px] w-[35px] items-center justify-center rounded-full bg-felt-100 dark:bg-felt-900">
+                  <Text className="text-xs font-sans-semibold text-felt-600 dark:text-felt-300">
+                    {initials}
+                  </Text>
+                </View>
+                <Text className="text-sm font-sans-medium text-sand-950 dark:text-sand-50">
                   {user.displayName}
                 </Text>
               </View>
@@ -130,32 +158,18 @@ export function SeasonActive({ season, members, session, users }: Props) {
         </View>
       )}
 
-      {/* Admin actions */}
-      {isAdmin && (
-        <View className="mt-2 gap-3">
-          <Pressable
-            className="items-center rounded-lg border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
-            onPress={() => router.push('/host-order' as never)}
-          >
-            <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">
-              Editar Orden de Host
-            </Text>
-          </Pressable>
-        </View>
-      )}
-
       {/* End Season — Treasurer / Admin only */}
       {canManage && (() => {
         const sessionActive = session && (session.state === 'dealing' || session.state === 'in_progress' || session.state === 'closing');
         return (
-          <View className="mt-4">
+          <View className="px-6 pt-8">
             {sessionActive && (
-              <Text className="mb-2 text-xs text-sand-500 dark:text-sand-400">
+              <Text className="mb-3 text-center text-xs text-sand-500 dark:text-sand-400">
                 No se puede terminar la temporada mientras un juego está activo
               </Text>
             )}
             <Pressable
-              className={`items-center rounded-lg py-3 ${
+              className={`items-center rounded-full py-3.5 ${
                 sessionActive
                   ? 'bg-red-300 dark:bg-red-800'
                   : 'bg-red-600 active:bg-red-700'
@@ -173,7 +187,7 @@ export function SeasonActive({ season, members, session, users }: Props) {
 }
 
 // ---------------------------------------------------------------------------
-// Session status row (inline in the card)
+// Session status row
 // ---------------------------------------------------------------------------
 
 function SessionStatusRow({ session, users }: { session: Session; users: User[] }) {
@@ -205,15 +219,28 @@ function SessionStatusRow({ session, users }: { session: Session; users: User[] 
 
   return (
     <View>
-      <View className="mb-2 flex-row items-center gap-2">
-        <View className={`rounded-full px-2.5 py-0.5 ${stateBg[session.state] ?? ''}`}>
+      <View className="mb-4 flex-row items-center">
+        <View className={`rounded-full px-3 py-1 ${stateBg[session.state] ?? ''}`}>
           <Text className={`text-xs font-semibold ${stateText[session.state] ?? ''}`}>
             {stateLabel[session.state] ?? session.state}
           </Text>
         </View>
       </View>
       <InfoRow label="Host" value={host?.displayName ?? 'Unknown'} />
-      {session.scheduledFor && <InfoRow label="Cuándo" value={session.scheduledFor} />}
+     <View className='h-[4px]'/>
+      {session.scheduledFor && (
+        <InfoRow
+          label="Cuándo"
+          value={new Date(session.scheduledFor).toLocaleDateString('es-MX', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        />
+      )}
+      <View className='h-[4px]'/>
       {session.location && <InfoRow label="Ubicación" value={session.location} />}
     </View>
   );
@@ -223,11 +250,31 @@ function SessionStatusRow({ session, users }: { session: Session; users: User[] 
 // Shared
 // ---------------------------------------------------------------------------
 
+function getInitials(displayName: string): string {
+  const parts = displayName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  const single = displayName.trim().slice(0, 2);
+  return (single.length >= 2 ? single : single + single).toUpperCase();
+}
+
+function SectionTitle({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <View className="mb-4 flex-row items-center gap-2">
+      {icon}
+      <Text className="text-base font-sans-bold text-sand-950 dark:text-sand-50">
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <View className="mb-1.5 flex-row items-center justify-between last:mb-0">
+    <View className="mb-3 flex-row items-center justify-between last:mb-0">
       <Text className="text-sm text-sand-500 dark:text-sand-400">{label}</Text>
-      <Text className="text-sm font-medium text-sand-950 dark:text-sand-50">{value}</Text>
+      <Text className="text-sm font-sans-semibold text-sand-950 dark:text-sand-50">{value}</Text>
     </View>
   );
 }

@@ -24,22 +24,22 @@ function StatusBadge({ status }: { status: 'not_submitted' | 'pending' | 'valida
     not_submitted: {
       bg: 'bg-sand-200 dark:bg-sand-700',
       text: 'text-sand-600 dark:text-sand-400',
-      label: 'Not submitted',
+      label: 'Sin envío',
     },
     pending: {
       bg: 'bg-gold-100 dark:bg-gold-900/40',
       text: 'text-gold-700 dark:text-gold-300',
-      label: 'Pending',
+      label: 'Pendiente',
     },
     validated: {
       bg: 'bg-felt-100 dark:bg-felt-900/40',
       text: 'text-felt-700 dark:text-felt-300',
-      label: 'Validated',
+      label: 'Validado',
     },
     rejected: {
       bg: 'bg-red-100 dark:bg-red-900/40',
       text: 'text-red-700 dark:text-red-300',
-      label: 'Rejected',
+      label: 'Rechazado',
     },
   }[status];
 
@@ -54,30 +54,26 @@ function StatusBadge({ status }: { status: 'not_submitted' | 'pending' | 'valida
 
 export function ClosingRoster({ participants, injections, endingSubmissions, users }: Props) {
   return (
-    <View className="mx-6 mb-4">
-      <Text className="mb-3 text-base font-semibold text-sand-950 dark:text-sand-50">
-        Closing Roster
-      </Text>
-
+    <View>
       {/* Header */}
       <View className="flex-row rounded-t-lg border border-b-0 border-sand-200 bg-sand-200/50 px-3 py-2 dark:border-sand-700 dark:bg-sand-800">
         <Text className="flex-1 text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Name
+          Nombre
         </Text>
         <Text className="w-14 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Start
+          Inicio
         </Text>
         <Text className="w-14 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Rebuys
+          Ribeyes
         </Text>
         <Text className="w-14 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Total In
+          Total
         </Text>
         <Text className="w-14 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Ending
+          Final
         </Text>
         <Text className="w-20 text-center text-xs font-semibold text-sand-600 dark:text-sand-400">
-          Status
+          Estado
         </Text>
       </View>
 
@@ -131,7 +127,7 @@ export function ClosingRoster({ participants, injections, endingSubmissions, use
       {participants.length === 0 && (
         <View className="rounded-b-lg border border-sand-200 px-3 py-6 dark:border-sand-700">
           <Text className="text-center text-sm text-sand-400 dark:text-sand-500">
-            No participants
+            Sin participantes
           </Text>
         </View>
       )}

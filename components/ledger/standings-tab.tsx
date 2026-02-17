@@ -1,3 +1,4 @@
+import { PulsingDot } from '@/components/ui/pulsing-dot';
 import { api } from '@/services/api/client';
 import type { SeasonMember, Session, SessionInjection, User } from '@/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -154,7 +155,9 @@ export function StandingsTab({ members, users, sessions, session, loading, onNav
       {/* In-progress session badge */}
       {liveSession && (
         <View className="mx-6 mb-3 flex-row items-center rounded-lg border border-gold-300 bg-gold-50 px-3 py-2.5 dark:border-gold-700 dark:bg-gold-900/30">
-          <View className="mr-2 h-2 w-2 rounded-full bg-gold-500" />
+          <View className="mr-2 " >
+          <PulsingDot />
+          </View>
           <Text className="flex-1 text-sm font-medium text-gold-800 dark:text-gold-200">
             Juego en curso
           </Text>

@@ -1,15 +1,9 @@
 import "../global.css";
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import 'react-native-reanimated';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {
+  CourierPrime_400Regular,
+  CourierPrime_700Bold,
+} from '@expo-google-fonts/courier-prime';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -20,6 +14,16 @@ import {
   Merriweather_400Regular,
   Merriweather_700Bold,
 } from '@expo-google-fonts/merriweather';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppStateProvider } from '@/contexts/app-state-context';
 import { AuthProvider } from '@/contexts/auth-context';
@@ -83,6 +87,8 @@ function RootNavigation() {
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
+    CourierPrime_400Regular,
+    CourierPrime_700Bold,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,

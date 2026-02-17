@@ -6,6 +6,18 @@ Friends in Metepec checking balances and managing poker nights on their phones. 
 
 Derived from the logo: Metepec Arbol de la Vida in deep forest green + gold + warm terracotta.
 
+## Layout Philosophy (Airbnb-inspired)
+
+Content-first, borderless sections. Inspired by Airbnb's mobile patterns:
+
+- **No card containers** on dashboard screens — content sits directly on the root background
+- **Thin dividers** (`border-b border-sand-200 dark:border-sand-700`) separate sections instead of card borders
+- **Each section owns its own padding** (`px-6 py-6`) — the ScrollView has no horizontal padding, allowing hero elements to go full-bleed
+- **Generous whitespace** — base-8 spacing scale, `py-6` between sections minimum
+- **Bold section titles** — `text-base font-sans-bold` as left-aligned anchors with `mb-4` gap to content
+
+Note: Enclosed card containers (`rounded-xl border bg-sand-100`) are still used for forms, modals, and detail screens where containment matters. The borderless pattern applies to dashboard/overview screens.
+
 ## Color Palette
 
 ### `felt` (brand green — accent only)
@@ -67,6 +79,8 @@ Backgrounds, text, borders. Warm cream to warm charcoal.
 
 Borders only — low-opacity warm borders (`sand-200` light, `sand-700` dark). No shadows.
 
+On dashboard screens: thin bottom-border dividers between sections (not card outlines).
+
 ## Surfaces
 
 - Light mode root: `bg-sand-50`
@@ -96,6 +110,44 @@ Clean geometric sans for everything else. Readable at small sizes, works for dat
 
 Fonts loaded via `@expo-google-fonts` in `app/_layout.tsx` with splash screen held until ready.
 
+## Icons
+
+### Package
+`@tabler/icons-react-native` — outline-style icons, 2px stroke. Requires `react-native-svg`.
+
+### Usage
+Import individual icons directly. Pass `size` and `color` as props.
+```tsx
+import { IconTrophy } from '@tabler/icons-react-native';
+<IconTrophy size={18} color={iconColor} />
+```
+
+### Dark mode
+Tabler icons accept a `color` string prop — cannot use Tailwind classes. Use `useColorScheme()` to switch:
+```tsx
+const colorScheme = useColorScheme();
+const iconColor = colorScheme === 'dark' ? '#b5ac9e' : '#918779'; // sand-400 / sand-500
+```
+
+### When to use icons
+- **Section titles** — small leading icon (18px) for scanability. Icon color: `sand-500` (light) / `sand-400` (dark).
+- **Navigation tabs** — 28px Tabler icons. Color managed by tab bar (`color` prop from Expo Router).
+- **Info rows / data labels** — text only. Icons don't add meaning here.
+
+### Established icons
+| Context | Label | Icon | Import |
+|---------|-------|------|--------|
+| Tab bar | Temporada | Trophy | `IconTrophy` |
+| Tab bar | Juego | Playing cards | `IconCards` |
+| Tab bar | Registro | Book | `IconBook` |
+| Tab bar | Perfil | User | `IconUser` |
+| Section title | Temporada | Trophy | `IconTrophy` |
+| Section title | Juego | Playing cards | `IconCards` |
+| Section title | Rotación de Host | Shuffle arrows | `IconArrowsShuffle` |
+
+### Deprecated: IconSymbol
+`components/ui/icon-symbol.tsx` and `icon-symbol.ios.tsx` are no longer imported anywhere. They wrapped SF Symbols (iOS) / Material Icons (Android). Safe to delete.
+
 ## Tab Bar
 
 - Active tint (light): `gold-500` (`#c49a3c`)
@@ -105,15 +157,21 @@ Fonts loaded via `@expo-google-fonts` in `app/_layout.tsx` with splash screen he
 
 ## Component Patterns
 
-### CTA Buttons
+### CTA Buttons (pill)
 ```
-bg-gold-500 active:bg-gold-600 text-white
+rounded-full bg-gold-500 py-3.5 active:bg-gold-600 text-white
 ```
 
-### Secondary/Cancel Buttons
+### Secondary Buttons (pill outline)
 ```
-border border-sand-300 active:bg-sand-100 text-sand-700
-dark:border-sand-600 dark:active:bg-sand-800 dark:text-sand-300
+rounded-full border border-sand-300 py-3 active:bg-sand-100 text-sand-700
+dark:border-sand-600 dark:active:bg-sand-700 dark:text-sand-300
+```
+
+### Destructive Buttons (pill)
+```
+rounded-full bg-red-600 py-3.5 active:bg-red-700 text-white
+Disabled: bg-red-300 dark:bg-red-800
 ```
 
 ### Disabled Buttons
@@ -146,16 +204,33 @@ border-felt-600 bg-felt-50 text-felt-700
 dark:border-felt-400 dark:bg-felt-900/30 dark:text-felt-300
 ```
 
-### Info Cards
+### Info Cards (forms/detail screens only)
 ```
 rounded-xl border border-sand-200 bg-sand-100 p-4
 dark:border-sand-700 dark:bg-sand-800
 ```
 
-### Info Row (inside cards)
+### Content Section (dashboard screens)
 ```
-Label: text-sand-500 dark:text-sand-400
-Value: text-sand-950 dark:text-sand-50 font-medium
+border-b border-sand-200 px-6 py-6 dark:border-sand-700
+```
+Section title uses `SectionTitle` component with leading Tabler icon:
+```tsx
+<SectionTitle icon={<IconTrophy size={18} color={iconColor} />} label="Temporada" />
+```
+Renders as: `flex-row items-center gap-2 mb-4` with `text-base font-sans-bold` label.
+
+### Full-Bleed Hero (balance, highlights)
+```
+bg-gold-50 px-6 py-8 dark:bg-gold-900/30
+```
+No border, no rounded corners — warm tint runs edge-to-edge.
+
+### Info Row
+```
+Label: text-sm text-sand-500 dark:text-sand-400
+Value: text-sm font-sans-semibold text-sand-950 dark:text-sand-50
+Row gap: mb-3 (last:mb-0)
 ```
 
 ## Files
@@ -165,3 +240,14 @@ Value: text-sand-950 dark:text-sand-50 font-medium
 | `tailwind.config.js` | Color token definitions (felt, gold, sand) |
 | `constants/theme.ts` | Tab bar + navigation theme colors |
 | `global.css` | Tailwind base/components/utilities |
+| `components/ui/icon-symbol.tsx` | **Deprecated** — no longer imported. Safe to delete. |
+
+## Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `@tabler/icons-react-native` | Feature icons (section titles, UI accents) |
+| `react-native-svg` | Required by Tabler icons |
+| `@expo-google-fonts/*` | Inter + Merriweather fonts |
+| `expo-symbols` | SF Symbols on iOS (tab bar) |
+| `@expo/vector-icons` | Material Icons fallback (tab bar) |
