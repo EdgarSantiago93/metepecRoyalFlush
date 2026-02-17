@@ -38,6 +38,7 @@ export default function DepositApprovalsScreen() {
   const members = appState.status === 'season_setup' ? appState.members : [];
   const users = appState.status === 'season_setup' ? appState.users : [];
   const isTreasurer = currentUser?.id === season?.treasurerUserId;
+  const isAdmin = currentUser?.isAdmin === true;
 
   const loadSubmissions = useCallback(async () => {
     if (!season) return;
@@ -87,7 +88,7 @@ export default function DepositApprovalsScreen() {
     [acting, rejectNote, loadSubmissions, appState],
   );
 
-  if (!isTreasurer) {
+  if (!isTreasurer && !isAdmin) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
         <Text className="mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
