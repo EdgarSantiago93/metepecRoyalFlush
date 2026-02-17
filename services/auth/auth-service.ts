@@ -13,9 +13,9 @@ export const authService = {
     await api.sendMagicLink(email);
   },
 
-  /** Verify the magic link and persist the session token. */
-  async verifyMagicLink(email: string, code: string): Promise<AuthSession> {
-    const { token, user } = await api.verifyMagicLink(email, code);
+  /** Verify the magic link token and persist the session JWT. */
+  async verifyMagicLink(magicToken: string): Promise<AuthSession> {
+    const { token, user } = await api.verifyMagicLink(magicToken);
     await tokenStorage.set(token);
     return { token, user };
   },

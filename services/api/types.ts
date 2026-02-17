@@ -337,7 +337,7 @@ export type GetSessionDetailResponse = {
 /** Mock-swappable API client interface. */
 export type ApiClient = {
   sendMagicLink: (email: string) => Promise<SendMagicLinkResponse>;
-  verifyMagicLink: (email: string, code: string) => Promise<VerifyMagicLinkResponse>;
+  verifyMagicLink: (token: string) => Promise<VerifyMagicLinkResponse>;
   getMe: (token: string) => Promise<GetMeResponse>;
   getActiveSeason: () => Promise<GetActiveSeasonResponse>;
   getActiveSession: () => Promise<GetActiveSessionResponse>;

@@ -10,7 +10,7 @@ type AuthState =
 
 type AuthContextValue = AuthState & {
   sendMagicLink: (email: string) => Promise<void>;
-  verifyMagicLink: (email: string, code: string) => Promise<void>;
+  verifyMagicLink: (token: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -34,8 +34,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await authService.sendMagicLink(email);
   }, []);
 
-  const verifyMagicLink = useCallback(async (email: string, code: string) => {
-    const session = await authService.verifyMagicLink(email, code);
+  const verifyMagicLink = useCallback(async (token: string) => {
+    const session = await authService.verifyMagicLink(token);
     setCurrentUserId(session.user.id);
     setState({ status: 'authenticated', user: session.user, token: session.token });
   }, []);

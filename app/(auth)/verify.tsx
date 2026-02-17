@@ -1,32 +1,9 @@
 import { Loader } from '@/components/ui/loader';
-import { useAuth } from '@/hooks/use-auth';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 export default function VerifyScreen() {
-  const { email, code } = useLocalSearchParams<{ email: string; code?: string }>();
-  const { verifyMagicLink } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [verifying, setVerifying] = useState(false);
-  const verifyAttempted = useRef(false);
-
-  useEffect(() => {
-    if (!email || !code || verifyAttempted.current) return;
-    verifyAttempted.current = true;
-
-    (async () => {
-      setVerifying(true);
-      try {
-        await verifyMagicLink(email, code);
-        router.replace('/');
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Verificación fallida');
-      } finally {
-        setVerifying(false);
-      }
-    })();
-  }, [email, code, verifyMagicLink]);
+  const { email } = useLocalSearchParams<{ email: string }>();
 
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-8 dark:bg-sand-900">
@@ -40,26 +17,19 @@ export default function VerifyScreen() {
         </Text>
       </Text>
 
-      {!error && (
-        <View className="items-center">
-          <Loader size={80} />
-          <Text className="text-sm text-sand-400">
-            {verifying ? 'Verificando...' : 'Esperando verificación...'}
-          </Text>
-        </View>
-      )}
+      <View className="items-center">
+        <Loader size={80} />
+        <Text className="text-sm text-sand-400">Esperando verificación...</Text>
+      </View>
 
-      {error && (
-        <View className="items-center">
-          <Text className="mb-4 text-sm text-red-500">{error}</Text>
-          <Pressable
-            className="rounded-lg bg-gold-500 px-6 py-3 active:bg-gold-600"
-            onPress={() => router.back()}
-          >
-            <Text className="font-semibold text-white">Intentar de nuevo</Text>
-          </Pressable>
-        </View>
-      )}
+      <Pressable
+        className="mt-8 rounded-lg border border-sand-200 px-6 py-3 dark:border-sand-700"
+        onPress={() => router.back()}
+      >
+        <Text className="font-semibold text-sand-600 dark:text-sand-300">
+          Intentar de nuevo
+        </Text>
+      </Pressable>
     </View>
   );
 }

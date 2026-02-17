@@ -1,18 +1,29 @@
 import type { GetMeResponse, SendMagicLinkResponse, VerifyMagicLinkResponse } from './types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
+const __DEV__ = process.env.NODE_ENV !== 'production';
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const url = `${API_URL}${path}`;
+  const method = options.method ?? 'GET';
+
+  if (__DEV__) {
+    console.log(`[API] → ${method} ${url}`, options.body ?? '');
+  }
+
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
     });
-  } catch {
+  } catch (err) {
+    if (__DEV__) {
+      console.error(`[API] ✗ ${method} ${url} — network error`, err);
+    }
     throw new Error('No se pudo conectar al servidor. Verifica tu conexión.');
   }
 
@@ -21,10 +32,17 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     const message =
       (body as { message?: string })?.message ??
       `Error del servidor (${res.status})`;
+    if (__DEV__) {
+      console.error(`[API] ✗ ${method} ${url} — ${res.status}`, body);
+    }
     throw new Error(message);
   }
 
-  return res.json() as Promise<T>;
+  const data = await res.json() as T;
+  if (__DEV__) {
+    console.log(`[API] ✓ ${method} ${url} — ${res.status}`, data);
+  }
+  return data;
 }
 
 export const httpAuth = {
@@ -35,10 +53,10 @@ export const httpAuth = {
     });
   },
 
-  async verifyMagicLink(email: string, code: string): Promise<VerifyMagicLinkResponse> {
+  async verifyMagicLink(token: string): Promise<VerifyMagicLinkResponse> {
     return apiFetch<VerifyMagicLinkResponse>('/auth/verify', {
       method: 'POST',
-      body: JSON.stringify({ email, code }),
+      body: JSON.stringify({ token }),
     });
   },
 
