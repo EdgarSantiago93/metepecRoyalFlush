@@ -1,32 +1,32 @@
 import { Loader } from '@/components/ui/loader';
 import { useAuth } from '@/hooks/use-auth';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 export default function VerifyScreen() {
-  const { email } = useLocalSearchParams<{ email: string }>();
+  const { email, code } = useLocalSearchParams<{ email: string; code?: string }>();
   const { verifyMagicLink } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
+  const verifyAttempted = useRef(false);
 
   useEffect(() => {
-    if (!email) return;
+    if (!email || !code || verifyAttempted.current) return;
+    verifyAttempted.current = true;
 
-    const timer = setTimeout(async () => {
+    (async () => {
       setVerifying(true);
       try {
-        await verifyMagicLink(email, 'mock-code');
+        await verifyMagicLink(email, code);
         router.replace('/');
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Verificación fallida');
       } finally {
         setVerifying(false);
       }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [email, verifyMagicLink]);
+    })();
+  }, [email, code, verifyMagicLink]);
 
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-8 dark:bg-sand-900">

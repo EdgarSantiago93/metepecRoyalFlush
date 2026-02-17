@@ -1,10 +1,10 @@
-# Auth — Mock Magic Link
+# Auth — Magic Link (Real Backend)
 
 ## Purpose
 
-Provides email-based authentication using a mock magic-link flow. Gates the main app (tabs) behind authentication and persists sessions across app restarts using `expo-secure-store`.
+Provides email-based authentication via a real NestJS backend. Users receive a magic link by email, tap it to open the app via deep link, and are authenticated automatically. Sessions persist across app restarts using `expo-secure-store`.
 
-This is a mock implementation designed to be swapped for a real NestJS backend by implementing the `ApiClient` interface.
+The app uses a **hybrid client** strategy: auth methods hit the real backend while non-auth methods still use mock seed data (until those endpoints are migrated).
 
 ## Architecture
 
@@ -16,7 +16,7 @@ loading → unauthenticated → authenticated
             └──── logout ──────────┘
 ```
 
-- **loading**: on mount, checks `expo-secure-store` for a stored token and validates it via `api.getMe()`
+- **loading**: on mount, checks `expo-secure-store` for a stored token and validates it via `GET /auth/me`
 - **unauthenticated**: no token found or token is invalid
 - **authenticated**: user object and token available in context
 
@@ -35,28 +35,55 @@ Bidirectional redirects prevent accessing the wrong route group:
 | iOS / Android | `expo-secure-store` (encrypted keychain) |
 | Web | In-memory variable (cleared on refresh, acceptable for dev) |
 
-### Mock API
+### Backend API endpoints
 
-The `ApiClient` interface (`services/api/types.ts`) defines three methods:
+| Method | Path | Auth | Body | Response |
+|--------|------|------|------|----------|
+| `POST` | `/auth/magic-link` | None | `{ email }` | `{ success, message }` |
+| `POST` | `/auth/verify` | None | `{ email, code }` | `{ token, user }` |
+| `GET` | `/auth/me` | JWT | — | `{ user }` |
 
-| Method | Delay | Behavior |
-|--------|-------|----------|
-| `sendMagicLink(email)` | 800ms | Checks email against seed allowlist |
-| `verifyMagicLink(email, code)` | 500ms | Returns session token + user |
-| `getMe(token)` | 300ms | Resolves user from token |
+### Hybrid client strategy
 
-Mock tokens embed the email (`mock-session-<email>-<timestamp>`) so `getMe` can resolve users even after app restart when the in-memory token map is lost.
+The `api` export in `services/api/client.ts` composes:
+
+```ts
+export const api: ApiClient = {
+  ...httpAuth,   // real HTTP auth (3 methods)
+  ...mockApi,    // mock everything else (seed data)
+};
+```
+
+This allows incremental migration — swap individual mock methods for real HTTP calls as backend endpoints become available.
+
+## Environment setup
+
+Create `.env` at the project root (already gitignored):
+
+```
+EXPO_PUBLIC_API_URL=http://localhost:3000
+```
+
+Expo SDK 54 auto-loads `EXPO_PUBLIC_*` vars from `.env` at build time. See `.env.example` for reference.
+
+## Deep link flow
+
+The app scheme is `metepecroyalflush://` (configured in `app.json`).
+
+### How it works
+
+1. User enters email on login screen → `POST /auth/magic-link`
+2. Backend sends an email containing a link: `metepecroyalflush://auth/verify?email=user@example.com&code=abc123`
+3. User taps the link → Expo Router navigates to `app/(auth)/verify.tsx` with `email` and `code` as search params
+4. Verify screen detects `code` is present → auto-calls `POST /auth/verify` immediately
+5. On success → auth state becomes `authenticated` → routed to tabs
+6. On error → shows error message with "Intentar de nuevo" button
+
+### Manual navigation (no code param)
+
+When navigating from the login screen (no `code` in params), the verify screen shows a "check your email" waiting UI with a spinner. The user must tap the magic link in their email to complete verification.
 
 ## Usage
-
-### Login flow
-
-1. User enters email on login screen
-2. Presses "Send login link" → calls `api.sendMagicLink`
-3. If not allowlisted → shows "Email not found in allowlist"
-4. If allowlisted → navigates to verify screen
-5. Verify screen auto-verifies after 2s (simulates clicking magic link)
-6. On success → auth state becomes `authenticated` → routed to tabs
 
 ### Using auth in components
 
@@ -77,27 +104,25 @@ function MyComponent() {
 }
 ```
 
-### Swapping for real API
+### Error handling
 
-1. Implement the `ApiClient` interface from `services/api/types.ts`
-2. Export it as `api` from `services/api/client.ts`
-3. No other changes needed — auth service and context consume the interface
-
-## Seed data
-
-10 pre-populated users in `data/seed-users.ts` with `@poker.local` emails. Edgar Santiago is the admin.
+The HTTP client provides user-friendly error messages:
+- **Network failure**: "No se pudo conectar al servidor. Verifica tu conexión."
+- **Backend error**: Passes through the NestJS `message` field (e.g., "Email not found")
+- **Unknown error**: "Error del servidor (status code)"
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `data/seed-users.ts` | Seed user records |
+| `.env` / `.env.example` | API URL configuration |
+| `services/api/http-auth-client.ts` | Real HTTP auth client (3 methods) |
+| `services/api/client.ts` | Hybrid client (real auth + mock non-auth) |
 | `services/api/types.ts` | `ApiClient` interface |
-| `services/api/client.ts` | Mock API implementation |
 | `services/auth/token-storage.ts` | Platform-aware token persistence |
 | `services/auth/auth-service.ts` | High-level auth operations |
 | `contexts/auth-context.tsx` | React Context + Provider |
 | `hooks/use-auth.ts` | Convenience hook |
 | `app/(auth)/_layout.tsx` | Auth stack layout with redirect guard |
 | `app/(auth)/login.tsx` | Email input screen |
-| `app/(auth)/verify.tsx` | Auto-verify screen |
+| `app/(auth)/verify.tsx` | Deep link verify screen |
