@@ -2,13 +2,14 @@ import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import type { SeasonHostOrder, User } from '@/types';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { IconCheck, IconPencil, IconX } from '@tabler/icons-react-native';
 import React, { useState } from 'react';
 import {
   Platform,
   Pressable,
   ScrollView,
   Text,
-  View
+  View,
 } from 'react-native';
 
 type InitialValues = {
@@ -30,6 +31,12 @@ function parseInitialDate(value?: string | null): Date | null {
   if (!value) return null;
   const d = new Date(value);
   return isNaN(d.getTime()) ? null : d;
+}
+
+function defaultDate(): Date {
+  const d = new Date();
+  d.setHours(19, 0, 0, 0);
+  return d;
 }
 
 export function SessionScheduleForm({
@@ -87,8 +94,8 @@ export function SessionScheduleForm({
           </Text>
           {selectedDate ? (
             <View className="flex-row items-center gap-2">
-              <View className="flex-1 rounded-xl border border-sand-200 bg-sand-100 px-4 py-3 dark:border-sand-700 dark:bg-sand-800">
-                <Text className="text-sm text-sand-950 dark:text-sand-50">
+              <View className="flex-1 justify-center rounded-lg border border-sand-300 bg-sand-100 px-4 min-h-[56px] dark:border-sand-600 dark:bg-sand-800">
+                <Text numberOfLines={1} className="font-sans-semibold text-base leading-6 text-sand-950 dark:text-sand-50">
                   {formatDate(selectedDate)}
                 </Text>
               </View>
@@ -96,20 +103,22 @@ export function SessionScheduleForm({
                 className="rounded-full border border-sand-300 px-3 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
                 onPress={() => setShowDatePicker(!showDatePicker)}
               >
-                <Text className="text-xs font-semibold text-gold-600 dark:text-gold-400">Cambiar</Text>
+                {showDatePicker
+                  ? <IconCheck size={16} color="#2a9d68" strokeWidth={3} />
+                  : <IconPencil size={16} color="#c49a3c" strokeWidth={2.5} />}
               </Pressable>
               <Pressable
                 className="rounded-full border border-sand-300 px-3 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
                 onPress={() => { setSelectedDate(null); setShowDatePicker(false); }}
               >
-                <Text className="text-xs font-semibold text-red-500">Quitar</Text>
+                <IconX size={16} color="#ef4444" strokeWidth={2.5} />
               </Pressable>
             </View>
           ) : (
             <Pressable
               className="items-center rounded-xl border border-dashed border-sand-300 py-4 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
               onPress={() => {
-                setSelectedDate(new Date());
+                setSelectedDate(defaultDate());
                 setShowDatePicker(true);
               }}
             >
@@ -120,9 +129,9 @@ export function SessionScheduleForm({
           )}
 
           {showDatePicker && (
-            <View className="mt-3 overflow-hidden rounded-xl border border-sand-200 bg-sand-100 dark:border-sand-700 dark:bg-sand-800">
+            <View className="mt-3 items-center overflow-hidden rounded-xl border border-sand-200 bg-sand-100 pb-4 dark:border-sand-700 dark:bg-sand-800">
               <DateTimePicker
-                value={selectedDate ?? new Date()}
+                value={selectedDate ?? defaultDate()}
                 mode="datetime"
                 display={Platform.OS === 'ios' ? 'inline' : 'default'}
                 onChange={(_event, date) => {
@@ -132,6 +141,8 @@ export function SessionScheduleForm({
                 minimumDate={new Date()}
                 locale="es-MX"
                 themeVariant="light"
+                textColor="#333333"
+                accentColor="#2a9d68"
               />
             </View>
           )}
