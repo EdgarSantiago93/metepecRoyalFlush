@@ -47,6 +47,7 @@ export default function SeasonScreen() {
         <SeasonEnded
           season={appState.season}
           users={appState.users}
+          payouts={appState.payouts}
           onCreateSeason={handleCreateSeason}
         />
       );

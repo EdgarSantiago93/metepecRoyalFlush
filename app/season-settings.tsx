@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Loader } from '@/components/ui/loader';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppState } from '@/hooks/use-app-state';
@@ -157,7 +158,7 @@ export default function SeasonSettingsScreen() {
           disabled={!hasChanged || saving}
         >
           {saving ? (
-            <ActivityIndicator color="white" />
+            <Loader size={40} />
           ) : (
             <Text
               className={`text-base font-semibold ${

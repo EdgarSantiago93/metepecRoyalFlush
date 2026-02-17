@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
+import { Loader } from '@/components/ui/loader';
 import { ErrorView } from '@/components/ui/error-view';
 import { LedgerPlayerDetail } from '@/components/ledger/ledger-player-detail';
 import { api } from '@/services/api/client';
@@ -48,7 +49,7 @@ export default function LedgerPlayerDetailScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }

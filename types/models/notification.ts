@@ -13,7 +13,10 @@ export type NotificationType =
   | 'submission_validated'
   | 'submission_rejected'
   | 'season_started'
-  | 'season_ended';
+  | 'season_ended'
+  | 'payout_sent'
+  | 'payout_confirmed'
+  | 'payout_disputed';
 
 /** In-app notification audit trail. */
 export type Notification = {

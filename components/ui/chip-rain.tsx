@@ -44,7 +44,8 @@ function makeChips(count: number): ChipConfig[] {
     swayDuration: 2000 + Math.random() * 3000, // 2–5s per half-cycle
     spinDuration: 3000 + Math.random() * 5000, // 3–8s per rotation
     delay: Math.random() * 4000, // stagger 0–4s
-    opacity: 0.3 + Math.random() * 0.5, // 10–30%
+    // opacity: 0.3 + Math.random() * 0.5, // 10–30%
+    opacity: 1,
   }));
 }
 
@@ -188,7 +189,7 @@ export function ChipShape({
 // Rain container — renders behind content via absolute fill
 // ---------------------------------------------------------------------------
 
-export function ChipRain({ count = 40 }: { count?: number }) {
+export function ChipRain({ count = 55 }: { count?: number }) {
   const chips = useMemo(() => makeChips(count), [count]);
 
   return (

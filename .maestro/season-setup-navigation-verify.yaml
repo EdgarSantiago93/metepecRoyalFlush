@@ -1,4 +1,4 @@
-appId: com.edgarsant93.metepecroyalflush
+appId: com.junedevelopment.metepecroyalflush
 name: Season Setup - Verify navigation fix
 ---
 # Full self-contained test: restarts app, switches preset, navigates sub-screens.
@@ -6,7 +6,7 @@ name: Season Setup - Verify navigation fix
 # Kill and relaunch dev build to start fresh
 - stopApp
 - launchApp:
-    appId: com.edgarsant93.metepecroyalflush
+    appId: com.junedevelopment.metepecroyalflush
 
 # Wait for app to fully load (either default or preset state)
 - extendedWaitUntil:

@@ -1,5 +1,6 @@
+import { Loader } from '@/components/ui/loader';
 import type React from 'react';
-import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
 
 type Props = {
   visible: boolean;
@@ -66,7 +67,7 @@ export function ConfirmationModal({
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="white" size="small" />
+                <Loader size={40} />
               ) : (
                 <Text className="text-sm font-semibold text-white">{confirmLabel}</Text>
               )}

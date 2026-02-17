@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { Loader } from '@/components/ui/loader';
 import type { EndingSubmission, Season, SeasonMember, Session, SessionInjection, SessionParticipant, User } from '@/types';
 import type { ParticipantSessionResult, SessionBalanceCheck } from '@/types/derived';
 import { useAuth } from '@/hooks/use-auth';
@@ -346,7 +347,7 @@ export function SessionFinalize({
             disabled={!canFinalize || finalizing}
           >
             {finalizing ? (
-              <ActivityIndicator color="white" />
+              <Loader size={40} />
             ) : (
               <Text
                 className={`text-base font-semibold ${

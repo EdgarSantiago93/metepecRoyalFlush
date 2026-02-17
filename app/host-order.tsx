@@ -4,16 +4,8 @@ import { api } from '@/services/api/client';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Loader } from '@/components/ui/loader';
 import DraggableFlatList, {
   type RenderItemParams,
   ScaleDecorator,
@@ -132,7 +124,7 @@ export default function HostOrderScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }
@@ -187,7 +179,7 @@ export default function HostOrderScreen() {
           disabled={saving}
         >
           {saving ? (
-            <ActivityIndicator color="white" size="small" />
+            <Loader size={40} />
           ) : (
             <Text className="text-sm font-semibold text-white">Guardar Orden</Text>
           )}

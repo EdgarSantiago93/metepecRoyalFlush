@@ -1,3 +1,4 @@
+import { Loader } from '@/components/ui/loader';
 import { PulsingDot } from '@/components/ui/pulsing-dot';
 import { useAppState } from '@/hooks/use-app-state';
 import { api } from '@/services/api/client';
@@ -5,7 +6,7 @@ import type { SeasonMember, Session, SessionInjection, SessionParticipant, User 
 import type { EndingSubmission } from '@/types/models/session';
 import { Image } from 'expo-image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 // ---------------------------------------------------------------------------
 // Timeline event types (historical — finalized sessions)
@@ -210,7 +211,7 @@ export function TimelineTab({ sessions, users, members, session, loading, onRelo
   if (loading || computingEvents) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
+        <Loader size={80} />
       </View>
     );
   }
@@ -322,7 +323,7 @@ export function TimelineTab({ sessions, users, members, session, loading, onRelo
       {/* Load more */}
       {hasMore && (
         <Pressable
-          className="mx-4 mt-4 items-center rounded-lg border border-sand-200 bg-sand-100 py-3 active:bg-sand-200 dark:border-sand-700 dark:bg-sand-800 dark:active:bg-sand-700"
+          className="mx-4 mt-4 items-center rounded-full border border-sand-200 bg-sand-100 py-3 active:bg-sand-200 dark:border-sand-700 dark:bg-sand-800 dark:active:bg-sand-700"
           onPress={() => setVisibleCount((c) => c + PAGE_SIZE)}
         >
           <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
@@ -549,7 +550,7 @@ function LiveNodeIndicator({ type }: { type: LiveTimelineEvent['type'] }) {
       return <View className="h-[10px] w-[10px] rounded-full bg-gold-500" />;
     case 'session_closing':
       // Amber circle
-      return <View className="h-[10px] w-[10px] rounded-full bg-amber-500" />;
+      return <View className="h-[10px] w-[10px] rounded-full bg-gold-500" />;
     case 'check_in':
       // Small gold diamond
       return (
@@ -618,7 +619,7 @@ function LiveEventContent({ event }: { event: LiveTimelineEvent }) {
       );
     case 'session_closing':
       return (
-        <Text className="text-xs font-semibold text-amber-700 dark:text-amber-300">
+        <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
           Juego cerrando — envíos abiertos
         </Text>
       );
@@ -667,7 +668,7 @@ function LiveEventContent({ event }: { event: LiveTimelineEvent }) {
           <Text className="flex-1 text-xs text-sand-800 dark:text-sand-200">
             <Text className="font-medium">{event.playerName}</Text> ribeye
             
-            <Text className='font-medium text-green-600'>
+            <Text className='font-medium text-felt-600 dark:text-felt-400'>
             {' '} aprobado
             </Text>
              
