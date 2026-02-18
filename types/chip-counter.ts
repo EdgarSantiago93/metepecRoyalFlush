@@ -53,4 +53,4 @@ export const CHIP_MAP: Record<string, ChipConfig> = {
 
 /** Roboflow API params (0–100 scale) */
 export const CONFIDENCE_THRESHOLD = 40;
-export const OVERLAP_THRESHOLD = 25;
+export const OVERLAP_THRESHOLD = 15;
