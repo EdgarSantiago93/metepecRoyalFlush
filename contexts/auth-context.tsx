@@ -12,6 +12,7 @@ type AuthContextValue = AuthState & {
   sendMagicLink: (email: string) => Promise<void>;
   verifyMagicLink: (token: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -46,9 +47,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ status: 'unauthenticated' });
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    if (state.status !== 'authenticated') return;
+    const session = await authService.restoreSession();
+    if (session) {
+      setState({ status: 'authenticated', user: session.user, token: session.token });
+    }
+  }, [state.status]);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, sendMagicLink, verifyMagicLink, logout }),
-    [state, sendMagicLink, verifyMagicLink, logout],
+    () => ({ ...state, sendMagicLink, verifyMagicLink, logout, refreshUser }),
+    [state, sendMagicLink, verifyMagicLink, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
