@@ -38,11 +38,13 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     throw new Error(message);
   }
 
-  const data = await res.json() as T;
+  const raw = await res.json();
   if (__DEV__) {
-    console.log(`[API] ✓ ${method} ${url} — ${res.status}`, data);
+    console.log(`[API] ✓ ${method} ${url} — ${res.status}`, raw);
   }
-  return data;
+  // Backend wraps responses in { data, statusCode } — unwrap
+  const data = (raw as { data?: unknown }).data ?? raw;
+  return data as T;
 }
 
 export const httpAuth = {
@@ -54,10 +56,11 @@ export const httpAuth = {
   },
 
   async verifyMagicLink(token: string): Promise<VerifyMagicLinkResponse> {
-    return apiFetch<VerifyMagicLinkResponse>('/auth/verify', {
+    const res = await apiFetch<{ accessToken: string; user: VerifyMagicLinkResponse['user'] }>('/auth/verify', {
       method: 'POST',
       body: JSON.stringify({ token }),
     });
+    return { token: res.accessToken, user: res.user };
   },
 
   async getMe(token: string): Promise<GetMeResponse> {
