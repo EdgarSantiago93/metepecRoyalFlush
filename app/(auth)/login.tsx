@@ -21,6 +21,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const LOGO_SMALL = 160;
 const LOGO_LARGE = 280;
@@ -32,6 +33,7 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const { bottom } = useSafeAreaInsets();
   const progress = useSharedValue(0);
 
   const logoStyle = useAnimatedStyle(() => {
@@ -72,9 +74,9 @@ export default function LoginScreen() {
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100}
       className="flex-1 bg-felt-600 dark:bg-felt-800"
-    
     >
       {/* Green table — logo centered */}
       <View className="flex-1 items-center justify-center">
@@ -100,7 +102,7 @@ export default function LoginScreen() {
         style={formStyle}
         pointerEvents={loading ? 'none' : 'auto'}
       >
-        <View className="rounded-3xl bg-sand-50 px-8 pb-12 pt-8 dark:bg-sand-900">
+        <View className="rounded-3xl bg-sand-50 px-8 pt-8 dark:bg-sand-900" style={{ paddingBottom: Math.max(bottom, 16) + 32 }}>
           <Text className="mb-6 text-center font-heading text-2xl text-sand-500 dark:text-sand-400">
           A darle
           </Text>
