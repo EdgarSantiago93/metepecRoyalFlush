@@ -59,6 +59,6 @@ export const CHIP_MAP: Record<string, ChipConfig> = {
   'Black PokerChip': { label: 'Negra', value: 100, color: '#1a1a1a', bgColor: '#f5f5f5' },
 };
 
-/** Roboflow API params (0–100 scale) */
-export const CONFIDENCE_THRESHOLD = 35;
-export const OVERLAP_THRESHOLD = 15;
+/** Roboflow API default params (0–100 scale) */
+export const DEFAULT_CONFIDENCE = 43;
+export const DEFAULT_OVERLAP = 15;

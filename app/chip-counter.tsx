@@ -41,7 +41,6 @@ export default function ChipCounterScreen() {
     if (!uri) return;
 
     try {
-      // Use ImageManipulator to get dimensions (no-op transform returns width/height)
       const context = ImageManipulator.manipulate(uri);
       const imageRef = await context.renderAsync();
       const result = await imageRef.saveAsync({ format: SaveFormat.JPEG });
@@ -66,12 +65,11 @@ export default function ChipCounterScreen() {
     setStep('draw');
   }, []);
 
-  const handleAnalyze = useCallback(async (base64: string, width: number, height: number) => {
+  const runDetection = useCallback(async (base64: string, confidence?: number, overlap?: number) => {
     setAnalyzing(true);
     setApiError(null);
-    setMaskedImage({ base64, width, height });
     try {
-      const response = await detectChips(base64);
+      const response = await detectChips(base64, { confidence, overlap });
       const { results: chipResults, grandTotal: total } =
         aggregateResults(response.predictions);
 
@@ -86,6 +84,16 @@ export default function ChipCounterScreen() {
       setAnalyzing(false);
     }
   }, []);
+
+  const handleAnalyze = useCallback(async (base64: string, width: number, height: number) => {
+    setMaskedImage({ base64, width, height });
+    await runDetection(base64);
+  }, [runDetection]);
+
+  const handleReanalyze = useCallback(async (confidence: number, overlap: number) => {
+    if (!maskedImage) return;
+    await runDetection(maskedImage.base64, confidence, overlap);
+  }, [maskedImage, runDetection]);
 
   const handleRetry = useCallback(() => {
     setStep('pick');
@@ -180,6 +188,7 @@ export default function ChipCounterScreen() {
         error={apiError}
         onRetry={handleRetry}
         onClose={handleClose}
+        onReanalyze={handleReanalyze}
       />
     );
   }
