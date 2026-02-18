@@ -11,7 +11,14 @@ export function setAuthToken(token: string | null, userId: string | null = null)
   _authUserId = userId;
 }
 
-async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${path}`;
   const method = options.method ?? 'GET';
 
@@ -19,14 +26,16 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     console.log(`[API] → ${method} ${url}`, options.body ?? '');
   }
 
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (_authToken) {
+    headers['Authorization'] = `Bearer ${_authToken}`;
+  }
+
   let res: Response;
   try {
     res = await fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers: { ...headers, ...options.headers as Record<string, string> },
     });
   } catch (err) {
     if (__DEV__) {
@@ -43,7 +52,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     if (__DEV__) {
       console.error(`[API] ✗ ${method} ${url} — ${res.status}`, body);
     }
-    throw new Error(message);
+    throw new ApiError(message, res.status);
   }
 
   const raw = await res.json();
@@ -80,12 +89,11 @@ export const httpAuth = {
   },
 
   async updateBankingInfo(req: UpdateBankingInfoRequest): Promise<UpdateBankingInfoResponse> {
-    if (!_authToken) throw new Error('No authenticated session');
+    if (!_authUserId) throw new Error('No authenticated session');
     // Backend returns user fields directly in data — wrap to match
     const user = await apiFetch<UpdateBankingInfoResponse['user']>(`/users/${_authUserId}`, {
       method: 'PATCH',
       body: JSON.stringify(req),
-      headers: { Authorization: `Bearer ${_authToken}` },
     });
     return { user };
   },

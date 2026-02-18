@@ -1,9 +1,15 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Toast from 'react-native-simple-toast';
 import type { EndingSubmission, Season, SeasonMember, SeasonPayout, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
 import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, SendPayoutRequest, UpdateBankingInfoRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
 import { api } from '@/services/api/client';
 import { applyPreset, type PresetKey } from '@/data/seed-seasons';
+
+function showErrorToast(err: unknown, fallback: string) {
+  const msg = err instanceof Error ? err.message : fallback;
+  Toast.showWithGravity(msg, Toast.SHORT, Toast.TOP);
+}
 
 // ---------------------------------------------------------------------------
 // Discriminated union
@@ -120,24 +126,39 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const createSeason = useCallback(
     async (req: CreateSeasonRequest) => {
-      const { season, members } = await api.createSeason(req);
-      const usersRes = await api.getUsers();
-      setState({ status: 'season_setup', season, members, users: usersRes.users });
+      try {
+        const { season, members } = await api.createSeason(req);
+        const usersRes = await api.getUsers();
+        setState({ status: 'season_setup', season, members, users: usersRes.users });
+      } catch (err) {
+        showErrorToast(err, 'No se pudo crear la temporada');
+        throw err;
+      }
     },
     [],
   );
 
   const startSeason = useCallback(async () => {
     if (state.status !== 'season_setup') return;
-    await api.startSeason(state.season.id);
-    await load();
+    try {
+      await api.startSeason(state.season.id);
+      await load();
+    } catch (err) {
+      showErrorToast(err, 'No se pudo iniciar la temporada');
+      throw err;
+    }
   }, [state, load]);
 
   const updateTreasurer = useCallback(
     async (userId: string) => {
       if (state.status !== 'season_setup') return;
-      await api.updateTreasurer({ seasonId: state.season.id, treasurerUserId: userId });
-      await load();
+      try {
+        await api.updateTreasurer({ seasonId: state.season.id, treasurerUserId: userId });
+        await load();
+      } catch (err) {
+        showErrorToast(err, 'No se pudo cambiar el tesorero');
+        throw err;
+      }
     },
     [state, load],
   );
@@ -371,8 +392,13 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const endSeason = useCallback(async () => {
     if (state.status !== 'season_active') return;
-    await api.endSeason({ seasonId: state.season.id });
-    await load();
+    try {
+      await api.endSeason({ seasonId: state.season.id });
+      await load();
+    } catch (err) {
+      showErrorToast(err, 'No se pudo terminar la temporada');
+      throw err;
+    }
   }, [state, load]);
 
   // ---------------------------------------------------------------------------
