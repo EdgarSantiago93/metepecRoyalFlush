@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { IconCheck, IconCreditCard, IconPencil, IconX } from '@tabler/icons-react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +21,7 @@ const BANK_FIELDS: { key: BankingKey; label: string }[] = [
 
 export default function ProfileScreen() {
   const auth = useAuth();
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const inset = useSafeAreaInsets();
   const paddingTop = inset.top + 10;
@@ -210,6 +212,20 @@ export default function ProfileScreen() {
           })}
         </View>
       </View>
+
+      {/* Contador de fichas (admin only) */}
+      {user.isAdmin && (
+        <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+          <Pressable
+            className="flex-row items-center justify-center gap-2 rounded-full bg-felt-600 py-3.5 active:bg-felt-700"
+            onPress={() => router.push('/chip-counter')}
+          >
+            <Text className="text-sm font-sans-semibold text-white">
+              Contador de Fichas
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       {/* Cerrar sesion */}
       <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
