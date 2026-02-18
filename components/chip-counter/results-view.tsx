@@ -9,7 +9,7 @@ import {
 } from '@/types/chip-counter';
 import { Image } from 'expo-image';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { Canvas, Circle, Rect, Skia } from '@shopify/react-native-skia';
+import { Canvas, Circle, Path as SkiaPath, Rect, Skia } from '@shopify/react-native-skia';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type { LayoutChangeEvent } from 'react-native';
@@ -36,6 +36,21 @@ const CHIP_OPTIONS = Object.entries(CHIP_MAP).map(([key, config]) => ({
   chipClass: key,
   ...config,
 }));
+
+const DOT_RADIUS = 10;
+
+/** Build a checkmark Skia path centered at (cx, cy) */
+function makeCheckPath(cx: number, cy: number, size: number) {
+  const path = Skia.Path.Make();
+  // Checkmark: left-bottom to middle-bottom to right-top
+  const s = size * 0.45;
+  path.moveTo(cx - s * 0.6, cy);
+  path.lineTo(cx - s * 0.1, cy + s * 0.5);
+  path.lineTo(cx + s * 0.7, cy - s * 0.45);
+  return path;
+}
+
+const IS_DARK_CHIP = (color: string) => color === '#1a1a1a';
 
 // ── Simple track slider ──────────────────────────────────────────────
 
@@ -93,12 +108,10 @@ function ThresholdSlider({ label, value, min, max, onValueChange }: SliderProps)
           onLayout={onTrackLayout}
           className="h-8 justify-center rounded-full bg-sand-200 dark:bg-sand-700"
         >
-          {/* Filled portion */}
           <View
             className="absolute left-0 top-0 h-8 rounded-full bg-felt-200 dark:bg-felt-800"
             style={{ width: `${pct * 100}%` }}
           />
-          {/* Thumb */}
           <View
             className="absolute h-6 w-6 rounded-full border-2 border-felt-600 bg-white shadow dark:bg-sand-100"
             style={{ left: `${pct * 100}%`, marginLeft: -12 }}
@@ -129,6 +142,7 @@ export function ResultsView({
   const [pendingTap, setPendingTap] = useState<{ x: number; y: number } | null>(null);
   const [confidence, setConfidence] = useState(DEFAULT_CONFIDENCE);
   const [overlap, setOverlap] = useState(DEFAULT_OVERLAP);
+  const [showBoxes, setShowBoxes] = useState(false);
 
   const onImageLayout = (e: LayoutChangeEvent) => {
     setContainerSize({
@@ -137,7 +151,6 @@ export function ResultsView({
     });
   };
 
-  // Calculate display rect for bounding boxes
   const displayRect = useMemo(() => {
     if (!containerSize.width || !containerSize.height) return null;
     const scaleX = containerSize.width / imageWidth;
@@ -160,7 +173,6 @@ export function ResultsView({
     for (const r of initialResults) {
       countMap.set(r.chipClass, { ...r });
     }
-
     for (const mc of manualChips) {
       const existing = countMap.get(mc.chipClass);
       if (existing) {
@@ -181,15 +193,14 @@ export function ResultsView({
         }
       }
     }
-
     const merged = Array.from(countMap.values()).sort((a, b) => b.value - a.value);
     const total = merged.reduce((sum, r) => sum + r.total, 0);
     const chips = merged.reduce((sum, r) => sum + r.count, 0);
     return { mergedResults: merged, mergedGrandTotal: total, totalChips: chips };
   }, [initialResults, manualChips]);
 
-  // Bounding boxes for API predictions
-  const boxElements = useMemo(() => {
+  // Bounding box rects + center dots for API predictions
+  const detectionElements = useMemo(() => {
     if (!displayRect) return [];
     return predictions.map((p) => {
       const config = CHIP_MAP[p.class];
@@ -200,24 +211,35 @@ export function ResultsView({
       const h = p.height * displayRect.scale;
       return {
         id: p.detection_id,
-        x: cx - w / 2,
-        y: cy - h / 2,
-        width: w,
-        height: h,
+        // Box
+        boxX: cx - w / 2,
+        boxY: cy - h / 2,
+        boxW: w,
+        boxH: h,
+        // Dot center
+        cx,
+        cy,
         color,
+        isDark: IS_DARK_CHIP(color),
       };
     });
   }, [predictions, displayRect]);
 
-  // Dot markers for manual chips
+  // Manual chip dots
   const manualDots = useMemo(() => {
     return manualChips.map((mc) => {
       const config = CHIP_MAP[mc.chipClass];
-      return { id: mc.id, x: mc.x, y: mc.y, color: config?.color ?? '#FFFFFF' };
+      const color = config?.color ?? '#FFFFFF';
+      return {
+        id: mc.id,
+        cx: mc.x,
+        cy: mc.y,
+        color,
+        isDark: IS_DARK_CHIP(color),
+      };
     });
   }, [manualChips]);
 
-  // Tap gesture to add manual chip
   const tapGesture = Gesture.Tap()
     .runOnJS(true)
     .onEnd((e) => {
@@ -238,26 +260,48 @@ export function ResultsView({
     setPendingTap(null);
   }, [pendingTap]);
 
-  const handleCancelPicker = useCallback(() => {
-    setPendingTap(null);
-  }, []);
-
-  const handleUndoLastManual = useCallback(() => {
-    setManualChips((prev) => prev.slice(0, -1));
-  }, []);
+  const handleCancelPicker = useCallback(() => setPendingTap(null), []);
+  const handleUndoLastManual = useCallback(() => setManualChips((prev) => prev.slice(0, -1)), []);
 
   const handleReanalyze = useCallback(() => {
     setManualChips([]);
     onReanalyze(confidence, overlap);
   }, [confidence, overlap, onReanalyze]);
 
+  // ── Render helpers for Skia dots ──
+
+  const renderDot = (id: string, cx: number, cy: number, color: string, isDark: boolean) => {
+    const fillPaint = Skia.Paint();
+    fillPaint.setColor(Skia.Color(color === '#FFFFFF' ? '#E5E5E5' : color));
+    fillPaint.setStyle(0);
+
+    const borderPaint = Skia.Paint();
+    borderPaint.setColor(Skia.Color(isDark ? '#FFFFFF' : '#333333'));
+    borderPaint.setStyle(1);
+    borderPaint.setStrokeWidth(2);
+
+    const checkPaint = Skia.Paint();
+    checkPaint.setColor(Skia.Color(isDark ? '#86efac' : '#16A34A'));
+    checkPaint.setStyle(1);
+    checkPaint.setStrokeWidth(2.5);
+    checkPaint.setStrokeCap(1); // Round
+
+    const checkPath = makeCheckPath(cx, cy, DOT_RADIUS * 2);
+
+    return [
+      <Circle key={`${id}-fill`} cx={cx} cy={cy} r={DOT_RADIUS} paint={fillPaint} />,
+      <Circle key={`${id}-border`} cx={cx} cy={cy} r={DOT_RADIUS} paint={borderPaint} />,
+      <SkiaPath key={`${id}-check`} path={checkPath} paint={checkPaint} />,
+    ];
+  };
+
+  // ── Early returns ──
+
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
         <Loader size={80} />
-        <Text className="mt-4 text-sm text-sand-500 dark:text-sand-400">
-          Detectando fichas…
-        </Text>
+        <Text className="mt-4 text-sm text-sand-500 dark:text-sand-400">Detectando fichas…</Text>
       </View>
     );
   }
@@ -267,21 +311,11 @@ export function ResultsView({
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
         <Text className="mb-4 text-center text-base text-red-600">{error}</Text>
         <View className="flex-row gap-3">
-          <Pressable
-            className="rounded-full border border-sand-300 px-6 py-3 active:bg-sand-100 dark:border-sand-600"
-            onPress={onRetry}
-          >
-            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">
-              Reintentar
-            </Text>
+          <Pressable className="rounded-full border border-sand-300 px-6 py-3 active:bg-sand-100 dark:border-sand-600" onPress={onRetry}>
+            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Reintentar</Text>
           </Pressable>
-          <Pressable
-            className="rounded-full bg-sand-300 px-6 py-3 active:bg-sand-400 dark:bg-sand-600"
-            onPress={onClose}
-          >
-            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">
-              Cerrar
-            </Text>
+          <Pressable className="rounded-full bg-sand-300 px-6 py-3 active:bg-sand-400 dark:bg-sand-600" onPress={onClose}>
+            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Cerrar</Text>
           </Pressable>
         </View>
       </View>
@@ -291,38 +325,28 @@ export function ResultsView({
   if (mergedResults.length === 0 && manualChips.length === 0) {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
-        <Text className="mb-2 text-lg font-sans-bold text-sand-950 dark:text-sand-50">
-          No se detectaron fichas
-        </Text>
+        <Text className="mb-2 text-lg font-sans-bold text-sand-950 dark:text-sand-50">No se detectaron fichas</Text>
         <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
           Intenta seleccionar un área más precisa o con mejor iluminación
         </Text>
         <View className="flex-row gap-3">
-          <Pressable
-            className="rounded-full border border-sand-300 px-6 py-3 active:bg-sand-100 dark:border-sand-600"
-            onPress={onRetry}
-          >
-            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">
-              Reintentar
-            </Text>
+          <Pressable className="rounded-full border border-sand-300 px-6 py-3 active:bg-sand-100 dark:border-sand-600" onPress={onRetry}>
+            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Reintentar</Text>
           </Pressable>
-          <Pressable
-            className="rounded-full bg-sand-300 px-6 py-3 active:bg-sand-400 dark:bg-sand-600"
-            onPress={onClose}
-          >
-            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">
-              Cerrar
-            </Text>
+          <Pressable className="rounded-full bg-sand-300 px-6 py-3 active:bg-sand-400 dark:bg-sand-600" onPress={onClose}>
+            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Cerrar</Text>
           </Pressable>
         </View>
       </View>
     );
   }
 
+  // ── Main render ──
+
   return (
     <>
       <ScrollView className="flex-1 bg-sand-50 dark:bg-sand-900" contentContainerClassName="pb-8">
-        {/* Image with bounding boxes + manual dots */}
+        {/* Image with detection dots + optional bounding boxes */}
         <View
           className="mx-4 mt-4 overflow-hidden rounded-xl"
           style={{ aspectRatio: imageWidth / imageHeight }}
@@ -344,47 +368,60 @@ export function ResultsView({
                   height: containerSize.height,
                 }}
               >
-                {/* API bounding boxes */}
-                {boxElements.map((box) => {
-                  const strokePaint = Skia.Paint();
-                  strokePaint.setStyle(1);
-                  strokePaint.setStrokeWidth(2);
-                  strokePaint.setColor(Skia.Color(box.color === '#FFFFFF' ? '#E5E5E5' : box.color));
-                  return (
-                    <Rect
-                      key={box.id}
-                      x={box.x}
-                      y={box.y}
-                      width={box.width}
-                      height={box.height}
-                      paint={strokePaint}
-                    />
-                  );
-                })}
-                {/* Manual chip dots — fill */}
-                {manualDots.map((dot) => {
-                  const fillPaint = Skia.Paint();
-                  fillPaint.setColor(Skia.Color(dot.color === '#FFFFFF' ? '#E5E5E5' : dot.color));
-                  fillPaint.setStyle(0);
-                  return <Circle key={dot.id} cx={dot.x} cy={dot.y} r={10} paint={fillPaint} />;
-                })}
-                {/* Manual chip dots — white border */}
-                {manualDots.map((dot) => {
-                  const borderPaint = Skia.Paint();
-                  borderPaint.setColor(Skia.Color('white'));
-                  borderPaint.setStyle(1);
-                  borderPaint.setStrokeWidth(2);
-                  return <Circle key={`${dot.id}-b`} cx={dot.x} cy={dot.y} r={10} paint={borderPaint} />;
-                })}
+                {/* Bounding boxes (toggled) */}
+                {showBoxes &&
+                  detectionElements.map((el) => {
+                    const strokePaint = Skia.Paint();
+                    strokePaint.setStyle(1);
+                    strokePaint.setStrokeWidth(2);
+                    strokePaint.setColor(Skia.Color(el.color === '#FFFFFF' ? '#E5E5E5' : el.color));
+                    return (
+                      <Rect
+                        key={`box-${el.id}`}
+                        x={el.boxX}
+                        y={el.boxY}
+                        width={el.boxW}
+                        height={el.boxH}
+                        paint={strokePaint}
+                      />
+                    );
+                  })}
+                {/* API detection dots */}
+                {detectionElements.flatMap((el) =>
+                  renderDot(el.id, el.cx, el.cy, el.color, el.isDark),
+                )}
+                {/* Manual chip dots */}
+                {manualDots.flatMap((dot) =>
+                  renderDot(dot.id, dot.cx, dot.cy, dot.color, dot.isDark),
+                )}
               </Canvas>
             </GestureDetector>
           )}
         </View>
 
-        {/* Tap hint */}
-        <Text className="mx-4 mt-2 text-center text-xs text-sand-400 dark:text-sand-500">
-          Toca la imagen para agregar fichas no detectadas
-        </Text>
+        {/* Controls row: tap hint + show boxes toggle */}
+        <View className="mx-4 mt-2 flex-row items-center justify-between">
+          <Text className="text-xs text-sand-400 dark:text-sand-500">
+            Toca la imagen para agregar fichas
+          </Text>
+          <Pressable
+            className="flex-row items-center gap-1.5"
+            onPress={() => setShowBoxes((v) => !v)}
+          >
+            <View
+              className={`h-4 w-4 items-center justify-center rounded border ${
+                showBoxes
+                  ? 'border-felt-600 bg-felt-600'
+                  : 'border-sand-400 bg-transparent dark:border-sand-500'
+              }`}
+            >
+              {showBoxes && (
+                <Text className="text-[10px] leading-[12px] text-white">✓</Text>
+              )}
+            </View>
+            <Text className="text-xs text-sand-500 dark:text-sand-400">Cajas</Text>
+          </Pressable>
+        </View>
 
         {/* Undo button for manual chips */}
         {manualChips.length > 0 && (
@@ -400,107 +437,47 @@ export function ResultsView({
 
         {/* Detection thresholds */}
         <View className="mx-4 mt-4 rounded-xl border border-sand-200 bg-sand-100 p-4 dark:border-sand-700 dark:bg-sand-800">
-          <ThresholdSlider
-            label="Confianza"
-            value={confidence}
-            min={10}
-            max={90}
-            onValueChange={setConfidence}
-          />
-          <ThresholdSlider
-            label="Superposición"
-            value={overlap}
-            min={0}
-            max={100}
-            onValueChange={setOverlap}
-          />
-          <Pressable
-            className="mt-1 items-center rounded-full bg-felt-600 py-2.5 active:bg-felt-700"
-            onPress={handleReanalyze}
-          >
-            <Text className="text-sm font-sans-semibold text-white">
-              Re-analizar
-            </Text>
+          <ThresholdSlider label="Confianza" value={confidence} min={10} max={90} onValueChange={setConfidence} />
+          <ThresholdSlider label="Superposición" value={overlap} min={0} max={100} onValueChange={setOverlap} />
+          <Pressable className="mt-1 items-center rounded-full bg-felt-600 py-2.5 active:bg-felt-700" onPress={handleReanalyze}>
+            <Text className="text-sm font-sans-semibold text-white">Re-analizar</Text>
           </Pressable>
         </View>
 
         {/* Results table */}
         <View className="mx-4 mt-4 overflow-hidden rounded-xl border border-sand-200 dark:border-sand-700">
-          {/* Header */}
           <View className="flex-row border-b border-sand-200 bg-sand-100 px-4 py-3 dark:border-sand-700 dark:bg-sand-800">
-            <Text className="flex-1 text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">
-              Ficha
-            </Text>
-            <Text className="w-16 text-center text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">
-              Cant.
-            </Text>
-            <Text className="w-16 text-center text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">
-              Valor
-            </Text>
-            <Text className="w-20 text-right text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">
-              Subtotal
-            </Text>
+            <Text className="flex-1 text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">Ficha</Text>
+            <Text className="w-16 text-center text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">Cant.</Text>
+            <Text className="w-16 text-center text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">Valor</Text>
+            <Text className="w-20 text-right text-xs font-sans-bold uppercase text-sand-500 dark:text-sand-400">Subtotal</Text>
           </View>
-
-          {/* Rows */}
           {mergedResults.map((r) => (
-            <View
-              key={r.chipClass}
-              className="flex-row items-center border-b border-sand-100 px-4 py-3 dark:border-sand-800"
-            >
+            <View key={r.chipClass} className="flex-row items-center border-b border-sand-100 px-4 py-3 dark:border-sand-800">
               <View className="flex-1 flex-row items-center gap-2">
-                <View
-                  className="h-4 w-4 rounded-full border border-sand-300 dark:border-sand-600"
-                  style={{ backgroundColor: r.color }}
-                />
-                <Text className="text-sm font-sans-semibold text-sand-950 dark:text-sand-50">
-                  {r.label}
-                </Text>
+                <View className="h-4 w-4 rounded-full border border-sand-300 dark:border-sand-600" style={{ backgroundColor: r.color }} />
+                <Text className="text-sm font-sans-semibold text-sand-950 dark:text-sand-50">{r.label}</Text>
               </View>
-              <Text className="w-16 text-center font-mono text-sm text-sand-700 dark:text-sand-300">
-                {r.count}
-              </Text>
-              <Text className="w-16 text-center font-mono text-sm text-sand-500 dark:text-sand-400">
-                {formatMXN(r.value)}
-              </Text>
-              <Text className="w-20 text-right font-mono-bold text-sm text-sand-950 dark:text-sand-50">
-                {formatMXN(r.total)}
-              </Text>
+              <Text className="w-16 text-center font-mono text-sm text-sand-700 dark:text-sand-300">{r.count}</Text>
+              <Text className="w-16 text-center font-mono text-sm text-sand-500 dark:text-sand-400">{formatMXN(r.value)}</Text>
+              <Text className="w-20 text-right font-mono-bold text-sm text-sand-950 dark:text-sand-50">{formatMXN(r.total)}</Text>
             </View>
           ))}
-
-          {/* Grand total */}
           <View className="flex-row items-center bg-felt-50 px-4 py-4 dark:bg-felt-900/30">
-            <Text className="flex-1 text-base font-sans-bold text-sand-950 dark:text-sand-50">
-              Total
-            </Text>
-            <Text className="w-16 text-center font-mono-bold text-sm text-sand-950 dark:text-sand-50">
-              {totalChips}
-            </Text>
+            <Text className="flex-1 text-base font-sans-bold text-sand-950 dark:text-sand-50">Total</Text>
+            <Text className="w-16 text-center font-mono-bold text-sm text-sand-950 dark:text-sand-50">{totalChips}</Text>
             <View className="w-16" />
-            <Text className="w-20 text-right text-lg font-heading text-felt-700 dark:text-felt-300">
-              {formatMXN(mergedGrandTotal)}
-            </Text>
+            <Text className="w-20 text-right text-lg font-heading text-felt-700 dark:text-felt-300">{formatMXN(mergedGrandTotal)}</Text>
           </View>
         </View>
 
         {/* Action buttons */}
         <View className="mx-4 mt-6 flex-row gap-3">
-          <Pressable
-            className="flex-1 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
-            onPress={onRetry}
-          >
-            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">
-              Reintentar
-            </Text>
+          <Pressable className="flex-1 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800" onPress={onRetry}>
+            <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Reintentar</Text>
           </Pressable>
-          <Pressable
-            className="flex-1 items-center rounded-full bg-felt-600 py-3 active:bg-felt-700"
-            onPress={onClose}
-          >
-            <Text className="text-sm font-sans-semibold text-white">
-              Cerrar
-            </Text>
+          <Pressable className="flex-1 items-center rounded-full bg-felt-600 py-3 active:bg-felt-700" onPress={onClose}>
+            <Text className="text-sm font-sans-semibold text-white">Cerrar</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -520,26 +497,14 @@ export function ResultsView({
                   style={{ minWidth: 90 }}
                   onPress={() => handleSelectChipType(opt.chipClass)}
                 >
-                  <View
-                    className="mb-2 h-8 w-8 rounded-full border border-sand-300 dark:border-sand-600"
-                    style={{ backgroundColor: opt.color }}
-                  />
-                  <Text className="text-xs font-sans-semibold text-sand-950 dark:text-sand-50">
-                    {opt.label}
-                  </Text>
-                  <Text className="text-xs text-sand-500 dark:text-sand-400">
-                    {formatMXN(opt.value)}
-                  </Text>
+                  <View className="mb-2 h-8 w-8 rounded-full border border-sand-300 dark:border-sand-600" style={{ backgroundColor: opt.color }} />
+                  <Text className="text-xs font-sans-semibold text-sand-950 dark:text-sand-50">{opt.label}</Text>
+                  <Text className="text-xs text-sand-500 dark:text-sand-400">{formatMXN(opt.value)}</Text>
                 </Pressable>
               ))}
             </View>
-            <Pressable
-              className="mt-4 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600"
-              onPress={handleCancelPicker}
-            >
-              <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">
-                Cancelar
-              </Text>
+            <Pressable className="mt-4 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600" onPress={handleCancelPicker}>
+              <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Cancelar</Text>
             </Pressable>
           </Pressable>
         </Pressable>
