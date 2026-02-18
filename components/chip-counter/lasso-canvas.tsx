@@ -16,7 +16,7 @@ type LassoCanvasProps = {
   onBack: () => void;
 };
 
-const MIN_POINT_DISTANCE = 3;
+const MIN_POINT_DISTANCE_SQ = 9; // 3px squared
 
 function computeDisplayRect(
   imgW: number,
@@ -50,7 +50,10 @@ export function LassoCanvas({
 
   const displayRect = computeDisplayRect(imageWidth, imageHeight, containerWidth, containerHeight);
 
+  // .runOnJS(true) forces callbacks to JS thread, avoiding the worklet error.
+  // With point thinning (3px min), this is performant enough for freehand drawing.
   const panGesture = Gesture.Pan()
+    .runOnJS(true)
     .minDistance(0)
     .onBegin((e) => {
       const path = Skia.Path.Make();
@@ -67,7 +70,7 @@ export function LassoCanvas({
 
       const dx = e.x - lastPoint.x;
       const dy = e.y - lastPoint.y;
-      if (dx * dx + dy * dy < MIN_POINT_DISTANCE * MIN_POINT_DISTANCE) return;
+      if (dx * dx + dy * dy < MIN_POINT_DISTANCE_SQ) return;
 
       path.lineTo(e.x, e.y);
       lastPointRef.current = { x: e.x, y: e.y };
