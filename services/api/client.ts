@@ -28,7 +28,7 @@ function makeId(prefix: string): string {
  * Hybrid API client: real auth + mock everything else.
  * Auth methods hit the real backend; non-auth methods use seed data.
  */
-const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe'> = {
+const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo'> = {
   async getActiveSeason() {
     await delay(300);
     return { season: mockStore.season, members: mockStore.members };
@@ -355,21 +355,6 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe'> = 
     payout.resolvedAt = now;
 
     return { payout };
-  },
-
-  async updateBankingInfo(req) {
-    await delay(400);
-    const currentUserId = getCurrentUserId();
-
-    const user = SEED_USERS.find((u) => u.id === currentUserId);
-    if (!user) throw new Error('User not found');
-
-    if (req.bankingNombre !== undefined) user.bankingNombre = req.bankingNombre ?? null;
-    if (req.bankingCuenta !== undefined) user.bankingCuenta = req.bankingCuenta ?? null;
-    if (req.bankingBanco !== undefined) user.bankingBanco = req.bankingBanco ?? null;
-    if (req.bankingClabe !== undefined) user.bankingClabe = req.bankingClabe ?? null;
-
-    return { user };
   },
 
   // ---------------------------------------------------------------------------

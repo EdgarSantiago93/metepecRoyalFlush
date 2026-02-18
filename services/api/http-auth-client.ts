@@ -1,7 +1,15 @@
-import type { GetMeResponse, SendMagicLinkResponse, VerifyMagicLinkResponse } from './types';
+import type { GetMeResponse, SendMagicLinkResponse, UpdateBankingInfoRequest, UpdateBankingInfoResponse, VerifyMagicLinkResponse } from './types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 const __DEV__ = process.env.NODE_ENV !== 'production';
+
+let _authToken: string | null = null;
+let _authUserId: string | null = null;
+
+export function setAuthToken(token: string | null, userId: string | null = null): void {
+  _authToken = token;
+  _authUserId = userId;
+}
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${path}`;
@@ -64,8 +72,21 @@ export const httpAuth = {
   },
 
   async getMe(token: string): Promise<GetMeResponse> {
-    return apiFetch<GetMeResponse>('/auth/me', {
+    // Backend returns user fields directly in data — wrap to match GetMeResponse
+    const user = await apiFetch<GetMeResponse['user']>('/auth/me', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    return { user };
+  },
+
+  async updateBankingInfo(req: UpdateBankingInfoRequest): Promise<UpdateBankingInfoResponse> {
+    if (!_authToken) throw new Error('No authenticated session');
+    // Backend returns user fields directly in data — wrap to match
+    const user = await apiFetch<UpdateBankingInfoResponse['user']>(`/users/${_authUserId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(req),
+      headers: { Authorization: `Bearer ${_authToken}` },
+    });
+    return { user };
   },
 };

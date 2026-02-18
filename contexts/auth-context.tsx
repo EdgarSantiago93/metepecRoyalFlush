@@ -1,7 +1,10 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { User } from '@/types';
+import { api } from '@/services/api/client';
 import { authService } from '@/services/auth/auth-service';
 import { setCurrentUserId } from '@/services/api/client';
+import { setAuthToken } from '@/services/api/http-auth-client';
+import type { UpdateBankingInfoRequest } from '@/services/api/types';
 
 type AuthState =
   | { status: 'loading' }
@@ -13,9 +16,20 @@ type AuthContextValue = AuthState & {
   verifyMagicLink: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<User>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
+
+function setAuth(token: string, userId: string) {
+  setCurrentUserId(userId);
+  setAuthToken(token, userId);
+}
+
+function clearAuth() {
+  setCurrentUserId(null);
+  setAuthToken(null);
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading' });
@@ -23,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     authService.restoreSession().then((session) => {
       if (session) {
-        setCurrentUserId(session.user.id);
+        setAuth(session.token, session.user.id);
         setState({ status: 'authenticated', user: session.user, token: session.token });
       } else {
         setState({ status: 'unauthenticated' });
@@ -37,13 +51,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyMagicLink = useCallback(async (token: string) => {
     const session = await authService.verifyMagicLink(token);
-    setCurrentUserId(session.user.id);
+    setAuth(session.token, session.user.id);
     setState({ status: 'authenticated', user: session.user, token: session.token });
   }, []);
 
   const logout = useCallback(async () => {
     await authService.logout();
-    setCurrentUserId(null);
+    clearAuth();
     setState({ status: 'unauthenticated' });
   }, []);
 
@@ -55,9 +69,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.status]);
 
+  const updateBankingInfo = useCallback(async (req: UpdateBankingInfoRequest): Promise<User> => {
+    const { user } = await api.updateBankingInfo(req);
+    setState((prev) => {
+      if (prev.status !== 'authenticated') return prev;
+      return { ...prev, user };
+    });
+    return user;
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, sendMagicLink, verifyMagicLink, logout, refreshUser }),
-    [state, sendMagicLink, verifyMagicLink, logout, refreshUser],
+    () => ({ ...state, sendMagicLink, verifyMagicLink, logout, refreshUser, updateBankingInfo }),
+    [state, sendMagicLink, verifyMagicLink, logout, refreshUser, updateBankingInfo],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
