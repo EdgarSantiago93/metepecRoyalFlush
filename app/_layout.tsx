@@ -80,6 +80,7 @@ function RootNavigation() {
           <Stack.Screen name="ledger-player-detail" options={{ title: 'Detalle de Jugador' }} />
           <Stack.Screen name="end-season" options={{ title: 'Finalizar Temporada' }} />
           <Stack.Screen name="payouts" options={{ title: 'Pagos' }} />
+          <Stack.Screen name="chip-counter" options={{ title: 'Contador de Fichas' }} />
         </Stack>
         </AppStateProvider>
       </AuthGate>
