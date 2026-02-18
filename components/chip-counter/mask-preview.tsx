@@ -14,7 +14,7 @@ type MaskPreviewProps = {
   lassoPath: SkPath;
   displayRect: DisplayRect;
   onBack: () => void;
-  onAnalyze: (base64: string) => void;
+  onAnalyze: (base64: string, width: number, height: number) => void;
   analyzing: boolean;
 };
 
@@ -135,7 +135,7 @@ export function MaskPreview({
       });
 
       if (result.base64) {
-        onAnalyze(result.base64);
+        onAnalyze(result.base64, result.width, result.height);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al comprimir imagen');

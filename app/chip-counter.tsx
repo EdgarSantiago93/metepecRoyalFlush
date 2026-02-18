@@ -32,6 +32,7 @@ export default function ChipCounterScreen() {
   const [grandTotal, setGrandTotal] = useState(0);
   const [filteredCount, setFilteredCount] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [maskedImage, setMaskedImage] = useState<{ base64: string; width: number; height: number } | null>(null);
 
   // Canvas area height: full height minus header (~56px) and bottom inset
   const canvasHeight = screenHeight - 56 - insets.bottom - 80;
@@ -66,9 +67,10 @@ export default function ChipCounterScreen() {
     setStep('draw');
   }, []);
 
-  const handleAnalyze = useCallback(async (base64: string) => {
+  const handleAnalyze = useCallback(async (base64: string, width: number, height: number) => {
     setAnalyzing(true);
     setApiError(null);
+    setMaskedImage({ base64, width, height });
     try {
       const response = await detectChips(base64);
       const filtered = filterPredictions(response.predictions);
@@ -100,6 +102,7 @@ export default function ChipCounterScreen() {
     setFilteredCount(0);
     setApiError(null);
     setAnalyzing(false);
+    setMaskedImage(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -168,12 +171,12 @@ export default function ChipCounterScreen() {
   }
 
   // Step 4: Results
-  if (step === 'results' && imageUri) {
+  if (step === 'results' && maskedImage) {
     return (
       <ResultsView
-        imageUri={imageUri}
-        imageWidth={imageSize.width}
-        imageHeight={imageSize.height}
+        imageBase64={maskedImage.base64}
+        imageWidth={maskedImage.width}
+        imageHeight={maskedImage.height}
         predictions={predictions}
         results={results}
         grandTotal={grandTotal}

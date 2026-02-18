@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 
 type ResultsViewProps = {
-  imageUri: string;
+  imageBase64: string;
   imageWidth: number;
   imageHeight: number;
   predictions: RoboflowPrediction[];
@@ -25,7 +25,7 @@ function formatMXN(amount: number): string {
 }
 
 export function ResultsView({
-  imageUri,
+  imageBase64,
   imageWidth,
   imageHeight,
   predictions,
@@ -163,7 +163,7 @@ export function ResultsView({
         onLayout={onImageLayout}
       >
         <Image
-          source={{ uri: imageUri }}
+          source={{ uri: `data:image/jpeg;base64,${imageBase64}` }}
           style={{ width: '100%', height: '100%' }}
           contentFit="contain"
         />
@@ -253,7 +253,11 @@ export function ResultsView({
           <Text className="flex-1 text-base font-sans-bold text-sand-950 dark:text-sand-50">
             Total
           </Text>
-          <Text className="text-lg font-heading text-felt-700 dark:text-felt-300">
+          <Text className="w-16 text-center font-mono-bold text-sm text-sand-950 dark:text-sand-50">
+            {results.reduce((sum, r) => sum + r.count, 0)}
+          </Text>
+          <View className="w-16" />
+          <Text className="w-20 text-right text-lg font-heading text-felt-700 dark:text-felt-300">
             {formatMXN(grandTotal)}
           </Text>
         </View>
