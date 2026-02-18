@@ -34,6 +34,14 @@ export type ChipCountResult = {
 
 export type CounterStep = 'pick' | 'draw' | 'preview' | 'results';
 
+/** A chip manually tagged by the user on the results image */
+export type ManualChip = {
+  id: string;
+  x: number;
+  y: number;
+  chipClass: string;
+};
+
 export type DisplayRect = {
   offsetX: number;
   offsetY: number;
@@ -52,5 +60,5 @@ export const CHIP_MAP: Record<string, ChipConfig> = {
 };
 
 /** Roboflow API params (0–100 scale) */
-export const CONFIDENCE_THRESHOLD = 40;
+export const CONFIDENCE_THRESHOLD = 35;
 export const OVERLAP_THRESHOLD = 15;
