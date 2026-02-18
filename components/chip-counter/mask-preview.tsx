@@ -23,9 +23,11 @@ const JPEG_QUALITY = 0.7;
 
 function scalePathToOriginal(path: SkPath, displayRect: DisplayRect): SkPath {
   const { offsetX, offsetY, scale } = displayRect;
+  // Order matters: Skia post-concatenates, so S · T applies T first (subtract
+  // display offset), then S (scale up to original image coords).
   const matrix = Skia.Matrix();
-  matrix.translate(-offsetX, -offsetY);
   matrix.scale(1 / scale, 1 / scale);
+  matrix.translate(-offsetX, -offsetY);
   const scaled = path.copy();
   scaled.transform(matrix);
   return scaled;
