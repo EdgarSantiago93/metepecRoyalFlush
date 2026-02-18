@@ -69,6 +69,7 @@ function RootNavigation() {
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="deposit-upload" options={{ title: 'Subir Depósito', presentation: 'modal' }} />
           <Stack.Screen name="deposit-approvals" options={{ title: 'Aprobar Depósitos' }} />

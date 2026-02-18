@@ -1,90 +1,34 @@
 import { mockStore } from '@/data/seed-seasons';
-import { SEED_USERS, SEED_USERS_BY_EMAIL } from '@/data/seed-users';
+import { SEED_USERS } from '@/data/seed-users';
+import { httpAuth } from './http-auth-client';
 import type { ApiClient } from './types';
 
 const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------------------
-// Mock authenticated user tracking
+// Authenticated user tracking (used by mock non-auth methods)
 // ---------------------------------------------------------------------------
 
-let _mockCurrentUserId: string | null = null;
+let _currentUserId: string | null = null;
 
-export function setMockCurrentUserId(id: string | null): void {
-  _mockCurrentUserId = id;
+export function setCurrentUserId(id: string | null): void {
+  _currentUserId = id;
 }
 
 function getCurrentUserId(): string {
-  if (!_mockCurrentUserId) throw new Error('No authenticated user');
-  return _mockCurrentUserId;
+  if (!_currentUserId) throw new Error('No authenticated user');
+  return _currentUserId;
 }
-
-/**
- * Parse a mock token to extract the email.
- * Format: `mock-session-<email>-<timestamp>`
- */
-function emailFromToken(token: string): string | null {
-  const match = token.match(/^mock-session-(.+)-\d+$/);
-  return match?.[1] ?? null;
-}
-
-/** In-memory token → email map for the current process lifetime. */
-const activeTokens = new Map<string, string>();
 
 function makeId(prefix: string): string {
   return `${prefix}${Date.now().toString(36).padStart(22, '0')}`.slice(0, 26);
 }
 
 /**
- * Mock API client.
- * To swap for a real backend: implement the `ApiClient` interface and change this export.
+ * Hybrid API client: real auth + mock everything else.
+ * Auth methods hit the real backend; non-auth methods use seed data.
  */
-export const api: ApiClient = {
-  async sendMagicLink(email: string) {
-    await delay(800);
-    const normalized = email.toLowerCase().trim();
-    const user = SEED_USERS_BY_EMAIL.get(normalized);
-    if (!user) {
-      throw new Error('Email not found in allowlist');
-    }
-    return { success: true, message: `Magic link sent to ${user.email}` };
-  },
-
-  async verifyMagicLink(email: string, _code: string) {
-    await delay(500);
-    const normalized = email.toLowerCase().trim();
-    const user = SEED_USERS_BY_EMAIL.get(normalized);
-    if (!user) {
-      throw new Error('Email not found in allowlist');
-    }
-    const token = `mock-session-${normalized}-${Date.now()}`;
-    activeTokens.set(token, normalized);
-    return { token, user };
-  },
-
-  async getMe(token: string) {
-    await delay(300);
-
-    // First try in-memory map (same process)
-    const emailFromMap = activeTokens.get(token);
-    if (emailFromMap) {
-      const user = SEED_USERS_BY_EMAIL.get(emailFromMap);
-      if (user) return { user };
-    }
-
-    // Fallback: parse email from token (survives app restart)
-    const emailFromParsed = emailFromToken(token);
-    if (emailFromParsed) {
-      const user = SEED_USERS_BY_EMAIL.get(emailFromParsed);
-      if (user) {
-        activeTokens.set(token, emailFromParsed);
-        return { user };
-      }
-    }
-
-    throw new Error('Invalid or expired session');
-  },
-
+const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe'> = {
   async getActiveSeason() {
     await delay(300);
     return { season: mockStore.season, members: mockStore.members };
@@ -1019,4 +963,9 @@ export const api: ApiClient = {
 
     return { session, participants, injections, endingSubmissions, finalizeNote };
   },
+};
+
+export const api: ApiClient = {
+  ...httpAuth,
+  ...mockApi,
 };
