@@ -1,7 +1,7 @@
 import { LassoCanvas } from '@/components/chip-counter/lasso-canvas';
 import { MaskPreview } from '@/components/chip-counter/mask-preview';
 import { ResultsView } from '@/components/chip-counter/results-view';
-import { aggregateResults, detectChips, filterPredictions } from '@/services/chip-counter/roboflow';
+import { aggregateResults, detectChips } from '@/services/chip-counter/roboflow';
 import type {
   ChipCountResult,
   CounterStep,
@@ -30,7 +30,6 @@ export default function ChipCounterScreen() {
   const [predictions, setPredictions] = useState<RoboflowPrediction[]>([]);
   const [results, setResults] = useState<ChipCountResult[]>([]);
   const [grandTotal, setGrandTotal] = useState(0);
-  const [filteredCount, setFilteredCount] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
   const [maskedImage, setMaskedImage] = useState<{ base64: string; width: number; height: number } | null>(null);
 
@@ -73,14 +72,12 @@ export default function ChipCounterScreen() {
     setMaskedImage({ base64, width, height });
     try {
       const response = await detectChips(base64);
-      const filtered = filterPredictions(response.predictions);
-      const { results: chipResults, grandTotal: total, filteredCount: fCount } =
+      const { results: chipResults, grandTotal: total } =
         aggregateResults(response.predictions);
 
-      setPredictions(filtered);
+      setPredictions(response.predictions);
       setResults(chipResults);
       setGrandTotal(total);
-      setFilteredCount(fCount);
       setStep('results');
     } catch (e) {
       setApiError(e instanceof Error ? e.message : 'Error al analizar la imagen');
@@ -99,7 +96,6 @@ export default function ChipCounterScreen() {
     setPredictions([]);
     setResults([]);
     setGrandTotal(0);
-    setFilteredCount(0);
     setApiError(null);
     setAnalyzing(false);
     setMaskedImage(null);
@@ -180,7 +176,6 @@ export default function ChipCounterScreen() {
         predictions={predictions}
         results={results}
         grandTotal={grandTotal}
-        filteredCount={filteredCount}
         loading={analyzing}
         error={apiError}
         onRetry={handleRetry}

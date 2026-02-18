@@ -13,7 +13,6 @@ type ResultsViewProps = {
   predictions: RoboflowPrediction[];
   results: ChipCountResult[];
   grandTotal: number;
-  filteredCount: number;
   loading: boolean;
   error: string | null;
   onRetry: () => void;
@@ -31,7 +30,6 @@ export function ResultsView({
   predictions,
   results,
   grandTotal,
-  filteredCount,
   loading,
   error,
   onRetry,
@@ -262,13 +260,6 @@ export function ResultsView({
           </Text>
         </View>
       </View>
-
-      {/* Filtered note */}
-      {filteredCount > 0 && (
-        <Text className="mx-4 mt-2 text-xs text-sand-400 dark:text-sand-500">
-          {filteredCount} detección{filteredCount !== 1 ? 'es' : ''} con baja confianza omitida{filteredCount !== 1 ? 's' : ''}
-        </Text>
-      )}
 
       {/* Action buttons */}
       <View className="mx-4 mt-6 flex-row gap-3">

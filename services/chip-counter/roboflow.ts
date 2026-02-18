@@ -1,6 +1,7 @@
 import {
   CHIP_MAP,
   CONFIDENCE_THRESHOLD,
+  OVERLAP_THRESHOLD,
   type ChipCountResult,
   type RoboflowPrediction,
   type RoboflowResponse,
@@ -14,7 +15,13 @@ export async function detectChips(base64Image: string): Promise<RoboflowResponse
     throw new Error('EXPO_PUBLIC_ROBOFLOW_API_KEY no está configurada');
   }
 
-  const response = await fetch(`${ROBOFLOW_URL}?api_key=${ROBOFLOW_API_KEY}`, {
+  const params = new URLSearchParams({
+    api_key: ROBOFLOW_API_KEY,
+    confidence: String(CONFIDENCE_THRESHOLD),
+    overlap: String(OVERLAP_THRESHOLD),
+  });
+
+  const response = await fetch(`${ROBOFLOW_URL}?${params}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: base64Image,
@@ -27,20 +34,12 @@ export async function detectChips(base64Image: string): Promise<RoboflowResponse
   return response.json();
 }
 
-export function filterPredictions(predictions: RoboflowPrediction[]): RoboflowPrediction[] {
-  return predictions.filter((p) => p.confidence >= CONFIDENCE_THRESHOLD);
-}
-
 export function aggregateResults(predictions: RoboflowPrediction[]): {
   results: ChipCountResult[];
   grandTotal: number;
-  filteredCount: number;
 } {
-  const filtered = filterPredictions(predictions);
-  const filteredCount = predictions.length - filtered.length;
-
   const countMap = new Map<string, number>();
-  for (const p of filtered) {
+  for (const p of predictions) {
     countMap.set(p.class, (countMap.get(p.class) ?? 0) + 1);
   }
 
@@ -64,5 +63,5 @@ export function aggregateResults(predictions: RoboflowPrediction[]): {
 
   const grandTotal = results.reduce((sum, r) => sum + r.total, 0);
 
-  return { results, grandTotal, filteredCount };
+  return { results, grandTotal };
 }
