@@ -51,6 +51,7 @@ function makeCheckPath(cx: number, cy: number, size: number) {
 }
 
 const IS_DARK_CHIP = (color: string) => color === '#1a1a1a';
+const IS_GREEN_CHIP = (color: string) => color === '#16A34A';
 
 // ── Simple track slider ──────────────────────────────────────────────
 
@@ -280,8 +281,9 @@ export function ResultsView({
     borderPaint.setStyle(1);
     borderPaint.setStrokeWidth(2);
 
+    const isGreen = IS_GREEN_CHIP(color);
     const checkPaint = Skia.Paint();
-    checkPaint.setColor(Skia.Color(isDark ? '#86efac' : '#16A34A'));
+    checkPaint.setColor(Skia.Color(isDark ? '#86efac' : isGreen ? '#FFFFFF' : '#16A34A'));
     checkPaint.setStyle(1);
     checkPaint.setStrokeWidth(2.5);
     checkPaint.setStrokeCap(1); // Round
