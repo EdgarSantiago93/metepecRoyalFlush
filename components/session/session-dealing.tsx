@@ -6,6 +6,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { IconCards, IconUsers } from '@tabler/icons-react-native';
 import { DealingPlayerView } from './dealing-player-view';
 import { DealingRoster } from './dealing-roster';
+import { PokerHandsButton } from './poker-hands-button';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -96,9 +97,12 @@ export function SessionDealing({ session, season, members, participants, users }
     >
       {/* Header */}
       <View className="px-6 pb-6">
-        <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
-          Repartiendo
-        </Text>
+        <View className="flex-row items-start justify-between">
+          <Text className="mb-2 flex-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
+            Repartiendo
+          </Text>
+          <PokerHandsButton />
+        </View>
         <View className="flex-row items-center gap-2">
           <View className="rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
             <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">

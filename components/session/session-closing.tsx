@@ -7,6 +7,7 @@ import { Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } fro
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ClosingPlayerView } from './closing-player-view';
 import { ClosingRoster } from './closing-roster';
+import { PokerHandsButton } from './poker-hands-button';
 import { SessionFinalize } from './session-finalize';
 import { SubmissionReview } from './submission-review';
 
@@ -105,9 +106,12 @@ export function SessionClosing({
     >
       {/* Header */}
       <View className="px-6 pb-6">
-        <Text className="mb-2 text-3xl font-heading text-sand-950 dark:text-sand-50">
-          Juego de hoy
-        </Text>
+        <View className="flex-row items-start justify-between">
+          <Text className="mb-2 flex-1 text-3xl font-heading text-sand-950 dark:text-sand-50">
+            Juego de hoy
+          </Text>
+          <PokerHandsButton />
+        </View>
         <View className="flex-row items-center gap-2">
           <View className="rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
             <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">

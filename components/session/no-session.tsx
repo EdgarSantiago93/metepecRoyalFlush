@@ -3,6 +3,8 @@ import type { Season, SeasonMember, User } from '@/types';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PokerHandsButton } from './poker-hands-button';
 
 type Props = {
   season: Season;
@@ -13,6 +15,7 @@ type Props = {
 export function NoSession({ season, users }: Props) {
   const router = useRouter();
   const auth = useAuth();
+  const insets = useSafeAreaInsets();
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
   const isAdmin = currentUser?.isAdmin === true;
@@ -20,6 +23,10 @@ export function NoSession({ season, users }: Props) {
 
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
+      {/* Poker hands reference button */}
+      <View className="absolute right-4" style={{ top: insets.top + 10 }}>
+        <PokerHandsButton />
+      </View>
         <Image
           source={require('@/assets/images/nogame.png')}
           style={{ width: 200, height: 200, marginBottom: 24 }}
