@@ -28,7 +28,7 @@ function makeId(prefix: string): string {
  * Hybrid API client: real auth + mock everything else.
  * Auth methods hit the real backend; non-auth methods use seed data.
  */
-const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo' | 'getActiveSeason' | 'getUsers' | 'createSeason' | 'updateTreasurer' | 'startSeason' | 'endSeason'> = {
+const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo' | 'getActiveSeason' | 'getUsers' | 'createSeason' | 'updateSeasonName' | 'updateTreasurer' | 'startSeason' | 'endSeason' | 'getHostOrder' | 'saveHostOrder'> = {
   async getActiveSession() {
     await delay(200);
     return { session: mockStore.session };
@@ -53,7 +53,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       id: makeId('01SD'),
       seasonId: req.seasonId,
       userId: req.userId,
-      photoUrl: req.photoUri,
+      mediaKey: req.mediaKey,
       note: req.note ?? null,
       status: 'pending' as const,
       reviewedAt: null,
@@ -106,38 +106,6 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
   },
 
   // ---------------------------------------------------------------------------
-  // Host order
-  // ---------------------------------------------------------------------------
-
-  async getHostOrder(seasonId: string) {
-    await delay(200);
-    const hostOrder = mockStore.hostOrder
-      .filter((h) => h.seasonId === seasonId)
-      .sort((a, b) => a.sortIndex - b.sortIndex);
-    return { hostOrder };
-  },
-
-  async saveHostOrder(req) {
-    await delay(400);
-    const now = new Date().toISOString();
-
-    const newOrder = req.userIds.map((userId, i) => ({
-      id: makeId('01SH') + String(i).padStart(2, '0'),
-      seasonId: req.seasonId,
-      userId,
-      sortIndex: i,
-      updatedAt: now,
-    }));
-
-    mockStore.hostOrder = [
-      ...mockStore.hostOrder.filter((h) => h.seasonId !== req.seasonId),
-      ...newOrder,
-    ];
-
-    return { hostOrder: newOrder };
-  },
-
-  // ---------------------------------------------------------------------------
   // Payouts
   // ---------------------------------------------------------------------------
 
@@ -173,7 +141,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       toUserId: req.toUserId,
       amountCents: req.amountCents,
       status: 'pending',
-      proofPhotoUrl: req.proofPhotoUrl ?? null,
+      proofMediaKey: req.proofMediaKey ?? null,
       note: req.note ?? null,
       confirmedAt: null,
       disputedAt: null,
@@ -466,7 +434,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       amountCents: 50000,
       requestedByUserId: getCurrentUserId(),
       requestedAt: now,
-      proofPhotoUrl: null,
+      proofMediaKey: null,
       status: 'approved',
       reviewedAt: now,
       reviewedByUserId: getCurrentUserId(),
@@ -559,7 +527,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       amountCents,
       requestedByUserId: currentUserId,
       requestedAt: now,
-      proofPhotoUrl: req.proofPhotoUrl ?? null,
+      proofMediaKey: req.proofMediaKey ?? null,
       status: 'pending',
       reviewedAt: null,
       reviewedByUserId: null,
@@ -647,7 +615,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       sessionId: req.sessionId,
       participantId: req.participantId,
       endingStackCents: req.endingStackCents,
-      photoUrl: req.photoUrl,
+      mediaKey: req.mediaKey,
       submittedAt: now,
       submittedByUserId: req.submittedByUserId ?? getCurrentUserId(),
       note: req.note ?? null,

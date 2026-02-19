@@ -1,11 +1,12 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
-import { PressablePhoto } from '@/components/ui/photo-viewer';
+import { MediaImage } from '@/components/ui/media-image';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
+import { uploadMedia } from '@/services/media/upload';
 import type { SeasonDepositSubmission } from '@/types';
 import { pickMedia } from '@/utils/media-picker';
 import { Image } from 'expo-image';
@@ -49,10 +50,11 @@ export default function DepositUploadScreen() {
     if (!photoUri || !season || !currentUser || submitting) return;
     setSubmitting(true);
     try {
+      const { mediaKey } = await uploadMedia(photoUri);
       await api.submitDeposit({
         seasonId: season.id,
         userId: currentUser.id,
-        photoUri,
+        mediaKey,
         note: note.trim() || undefined,
       });
       await appState.refresh();
@@ -107,10 +109,11 @@ export default function DepositUploadScreen() {
           <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
             Tu comprobante de depósito está siendo revisado por el tesorero.
           </Text>
-          {existingSubmission.photoUrl && (
+          {existingSubmission.mediaKey && (
             <View className="mb-4 w-full">
-              <PressablePhoto
-                uri={existingSubmission.photoUrl}
+              <MediaImage
+                mediaKey={existingSubmission.mediaKey}
+                variant="pressable"
                 height={200}
                 className="overflow-hidden rounded-xl border border-sand-200 dark:border-sand-700"
               />

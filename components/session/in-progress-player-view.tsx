@@ -4,6 +4,7 @@ import type { SessionInjection, SessionParticipant } from '@/types';
 import { useAppState } from '@/hooks/use-app-state';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { PhotoThumbnail } from '@/components/ui/photo-viewer';
+import { uploadMedia } from '@/services/media/upload';
 import { pickMedia } from '@/utils/media-picker';
 
 type Props = {
@@ -98,7 +99,12 @@ function RebuyActions() {
   const handleConfirm = useCallback(async () => {
     setLoading(true);
     try {
-      await appState.requestRebuy(rebuyType, proofUri ?? undefined);
+      let proofMediaKey: string | undefined;
+      if (proofUri) {
+        const result = await uploadMedia(proofUri);
+        proofMediaKey = result.mediaKey;
+      }
+      await appState.requestRebuy(rebuyType, proofMediaKey);
       setShowModal(false);
       setProofUri(null);
     } catch (e) {

@@ -78,7 +78,7 @@ export type SessionInjection = {
   // Request
   requestedByUserId: string | null; // FK → users
   requestedAt: string; // ISO datetime
-  proofPhotoUrl: string | null;
+  proofMediaKey: string | null;
 
   // Approval
   status: InjectionStatus;
@@ -101,7 +101,7 @@ export type EndingSubmission = {
   sessionId: string; // FK → sessions
   participantId: string; // FK → session_participants
   endingStackCents: number; // MXN cents
-  photoUrl: string;
+  mediaKey: string;
   submittedAt: string; // ISO datetime
   submittedByUserId: string | null; // FK → users — allows "submit for someone else"
   note: string | null;

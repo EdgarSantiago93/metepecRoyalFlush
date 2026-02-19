@@ -26,6 +26,7 @@ export type AppState =
 export type AppStateContextValue = AppState & {
   createSeason: (req: CreateSeasonRequest) => Promise<void>;
   startSeason: () => Promise<void>;
+  updateSeasonName: (name: string) => Promise<void>;
   updateTreasurer: (userId: string) => Promise<void>;
   scheduleSession: (req: ScheduleSessionRequest) => Promise<void>;
   updateScheduledSession: (req: UpdateScheduledSessionRequest) => Promise<void>;
@@ -37,11 +38,11 @@ export type AppStateContextValue = AppState & {
   addGuest: (guestName: string) => Promise<void>;
   moveToInProgress: () => Promise<void>;
   refreshParticipants: () => Promise<void>;
-  requestRebuy: (type: InjectionType, proofPhotoUrl?: string) => Promise<void>;
+  requestRebuy: (type: InjectionType, proofMediaKey?: string) => Promise<void>;
   reviewInjection: (injectionId: string, action: 'approve' | 'reject', note?: string) => Promise<void>;
   endSession: () => Promise<void>;
   refreshInjections: () => Promise<void>;
-  submitEndingStack: (participantId: string, endingStackCents: number, photoUrl: string, note?: string) => Promise<void>;
+  submitEndingStack: (participantId: string, endingStackCents: number, mediaKey: string, note?: string) => Promise<void>;
   reviewEndingSubmission: (submissionId: string, action: 'validate' | 'reject', note?: string) => Promise<void>;
   refreshEndingSubmissions: () => Promise<void>;
   finalizeSession: (overrideNote?: string) => Promise<void>;
@@ -148,6 +149,23 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       throw err;
     }
   }, [state, load]);
+
+  const updateSeasonName = useCallback(
+    async (name: string) => {
+      if (state.status !== 'season_setup' && state.status !== 'season_active') return;
+      try {
+        const { season } = await api.updateSeasonName({ seasonId: state.season.id, name });
+        setState((prev) => {
+          if (prev.status !== 'season_setup' && prev.status !== 'season_active') return prev;
+          return { ...prev, season };
+        });
+      } catch (err) {
+        showErrorToast(err, 'No se pudo actualizar el nombre');
+        throw err;
+      }
+    },
+    [state],
+  );
 
   const updateTreasurer = useCallback(
     async (userId: string) => {
@@ -297,9 +315,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   }, [state]);
 
   const requestRebuy = useCallback(
-    async (type: InjectionType, proofPhotoUrl?: string) => {
+    async (type: InjectionType, proofMediaKey?: string) => {
       if (state.status !== 'season_active' || !state.session) return;
-      await api.requestRebuy({ sessionId: state.session.id, type, proofPhotoUrl });
+      await api.requestRebuy({ sessionId: state.session.id, type, proofMediaKey });
       const { injections } = await api.getSessionInjections(state.session.id);
       setState((prev) => {
         if (prev.status !== 'season_active') return prev;
@@ -343,13 +361,13 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   }, [state]);
 
   const submitEndingStack = useCallback(
-    async (participantId: string, endingStackCents: number, photoUrl: string, note?: string) => {
+    async (participantId: string, endingStackCents: number, mediaKey: string, note?: string) => {
       if (state.status !== 'season_active' || !state.session) return;
       await api.submitEndingStack({
         sessionId: state.session.id,
         participantId,
         endingStackCents,
-        photoUrl,
+        mediaKey,
         note,
       });
       const { submissions } = await api.getEndingSubmissions(state.session.id);
@@ -489,6 +507,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       ...state,
       createSeason,
       startSeason,
+      updateSeasonName,
       updateTreasurer,
       scheduleSession,
       updateScheduledSession,
@@ -518,7 +537,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       refresh: load,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, addGuest, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, sendPayout, confirmPayout, disputePayout, resolvePayout, updateBankingInfo, refreshPayouts, load, _devSetPreset],
+    [state, createSeason, startSeason, updateSeasonName, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, addGuest, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, sendPayout, confirmPayout, disputePayout, resolvePayout, updateBankingInfo, refreshPayouts, load, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
