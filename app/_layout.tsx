@@ -81,6 +81,7 @@ function RootNavigation() {
           <Stack.Screen name="end-season" options={{ title: 'Finalizar Temporada' }} />
           <Stack.Screen name="payouts" options={{ title: 'Pagos' }} />
           <Stack.Screen name="chip-counter" options={{ title: 'Contador de Fichas' }} />
+          <Stack.Screen name="poker-hands" options={{ title: 'Manos de Poker', presentation: 'modal', headerShown: false }} />
         </Stack>
         </AppStateProvider>
       </AuthGate>

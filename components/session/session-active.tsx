@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PokerHandsButton } from './poker-hands-button';
 import { SessionClosing } from './session-closing';
 import { SessionDealing } from './session-dealing';
 import { SessionFinalized } from './session-finalized';
@@ -128,9 +129,12 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
     >
       {/* Header */}
       <View className="px-6 pb-6">
-        <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
-          Juego Programado
-        </Text>
+        <View className="flex-row items-start justify-between">
+          <Text className="mb-2 flex-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
+            Juego Programado
+          </Text>
+          <PokerHandsButton />
+        </View>
         <View className="self-start rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
           <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
             Programado

@@ -4,6 +4,7 @@ import { IconChartBar, IconMeat, IconTrophy, IconUsers } from '@tabler/icons-rea
 import { useMemo } from 'react';
 import { ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PokerHandsButton } from './poker-hands-button';
 
 type Props = {
   session: Session;
@@ -104,9 +105,12 @@ export function SessionFinalized({
     >
       {/* Header */}
       <View className="px-6 pb-6">
-        <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
-          Resumen del Juego
-        </Text>
+        <View className="flex-row items-start justify-between">
+          <Text className="mb-2 flex-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
+            Resumen del Juego
+          </Text>
+          <PokerHandsButton />
+        </View>
         <View className="flex-row items-center gap-2">
           <View className="rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900">
             <Text className="text-xs font-semibold text-felt-700 dark:text-felt-300">

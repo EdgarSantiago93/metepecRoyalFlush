@@ -1,9 +1,17 @@
 import { Image } from 'expo-image';
 import { Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PokerHandsButton } from './poker-hands-button';
 
 export function NoSeasonSession() {
+  const insets = useSafeAreaInsets();
+
   return (
     <View className="flex-1 items-center justify-center bg-sand-50 px-12">
+      {/* Poker hands reference button */}
+      <View className="absolute right-4" style={{ top: insets.top + 10 }}>
+        <PokerHandsButton />
+      </View>
        <Image
           source={require('@/assets/images/noseason.png')}
           style={{ width: 200, height: 200, marginBottom: 24 }}

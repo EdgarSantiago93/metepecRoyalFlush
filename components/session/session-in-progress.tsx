@@ -8,6 +8,7 @@ import { Alert, Pressable, RefreshControl, ScrollView, Text, useColorScheme, Vie
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { InProgressPlayerView } from './in-progress-player-view';
 import { InProgressRoster } from './in-progress-roster';
+import { PokerHandsButton } from './poker-hands-button';
 import { RebuyApprovals } from './rebuy-approvals';
 
 type Props = {
@@ -86,9 +87,12 @@ export function SessionInProgress({ session, season, members, participants, inje
     >
       {/* Header */}
       <View className="px-6 pb-6">
-        <Text className="mb-2 text-2xl font-heading text-sand-950 dark:text-sand-50">
-          Juego En Curso
-        </Text>
+        <View className="flex-row items-start justify-between">
+          <Text className="mb-2 flex-1 text-2xl font-heading text-sand-950 dark:text-sand-50">
+            Juego En Curso
+          </Text>
+          <PokerHandsButton />
+        </View>
         <View className="flex-row items-center gap-2">
           <View className="rounded-full bg-felt-100 px-3 py-1 dark:bg-felt-900">
             <Text className="text-xs font-semibold text-felt-700 dark:text-felt-300">
