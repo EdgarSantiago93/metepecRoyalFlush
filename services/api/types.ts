@@ -49,7 +49,7 @@ export type CreateSeasonResponse = {
 export type SubmitDepositRequest = {
   seasonId: string;
   userId: string;
-  photoUri: string;
+  mediaKey: string;
   note?: string;
 };
 
@@ -93,6 +93,15 @@ export type SaveHostOrderResponse = {
 // ---------------------------------------------------------------------------
 // Season management
 // ---------------------------------------------------------------------------
+
+export type UpdateSeasonNameRequest = {
+  seasonId: string;
+  name: string;
+};
+
+export type UpdateSeasonNameResponse = {
+  season: Season;
+};
 
 export type UpdateTreasurerRequest = {
   seasonId: string;
@@ -192,7 +201,7 @@ export type GetSessionInjectionsResponse = {
 export type RequestRebuyRequest = {
   sessionId: string;
   type: InjectionType;
-  proofPhotoUrl?: string;
+  proofMediaKey?: string;
 };
 
 export type RequestRebuyResponse = {
@@ -225,7 +234,7 @@ export type SubmitEndingStackRequest = {
   sessionId: string;
   participantId: string;
   endingStackCents: number;
-  photoUrl: string;
+  mediaKey: string;
   note?: string;
   submittedByUserId?: string;
 };
@@ -282,7 +291,7 @@ export type SendPayoutRequest = {
   seasonId: string;
   toUserId: string;
   amountCents: number;
-  proofPhotoUrl?: string;
+  proofMediaKey?: string;
   note?: string;
 };
 
@@ -346,6 +355,7 @@ export type ApiClient = {
   submitDeposit: (req: SubmitDepositRequest) => Promise<SubmitDepositResponse>;
   getDepositSubmissions: (seasonId: string) => Promise<GetDepositSubmissionsResponse>;
   reviewDeposit: (req: ReviewDepositRequest) => Promise<ReviewDepositResponse>;
+  updateSeasonName: (req: UpdateSeasonNameRequest) => Promise<UpdateSeasonNameResponse>;
   getHostOrder: (seasonId: string) => Promise<GetHostOrderResponse>;
   saveHostOrder: (req: SaveHostOrderRequest) => Promise<SaveHostOrderResponse>;
   updateTreasurer: (req: UpdateTreasurerRequest) => Promise<UpdateTreasurerResponse>;

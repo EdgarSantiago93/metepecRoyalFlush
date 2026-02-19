@@ -46,7 +46,7 @@ export type SeasonDepositSubmission = {
   id: string; // ULID
   seasonId: string; // FK → seasons
   userId: string; // FK → users
-  photoUrl: string;
+  mediaKey: string;
   note: string | null;
   status: DepositSubmissionStatus;
   reviewedAt: string | null;

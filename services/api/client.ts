@@ -1,6 +1,6 @@
 import { mockStore } from '@/data/seed-seasons';
-import { SEED_USERS } from '@/data/seed-users';
 import { httpAuth } from './http-auth-client';
+import { httpSeason } from './http-season-client';
 import type { ApiClient } from './types';
 
 const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -28,69 +28,10 @@ function makeId(prefix: string): string {
  * Hybrid API client: real auth + mock everything else.
  * Auth methods hit the real backend; non-auth methods use seed data.
  */
-const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo'> = {
-  async getActiveSeason() {
-    await delay(300);
-    return { season: mockStore.season, members: mockStore.members };
-  },
-
+const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo' | 'getActiveSeason' | 'getUsers' | 'createSeason' | 'updateSeasonName' | 'updateTreasurer' | 'startSeason' | 'endSeason' | 'getHostOrder' | 'saveHostOrder'> = {
   async getActiveSession() {
     await delay(200);
     return { session: mockStore.session };
-  },
-
-  async getUsers() {
-    await delay(200);
-    return { users: SEED_USERS };
-  },
-
-  async createSeason(req) {
-    await delay(600);
-    const now = new Date().toISOString();
-    const seasonId = makeId('01SE');
-
-    const season = {
-      id: seasonId,
-      name: req.name ?? null,
-      status: 'setup' as const,
-      createdByUserId: getCurrentUserId(),
-      treasurerUserId: req.treasurerUserId,
-      createdAt: now,
-      startedAt: null,
-      endedAt: null,
-    };
-
-    const members = SEED_USERS.map((u, i) => ({
-      id: makeId('01SM') + String(i).padStart(2, '0'),
-      seasonId,
-      userId: u.id,
-      approvalStatus: 'not_submitted' as const,
-      currentBalanceCents: 0,
-      approvedAt: null,
-      approvedByUserId: null,
-      rejectionNote: null,
-      createdAt: now,
-    }));
-
-    const hostOrder = SEED_USERS.map((u, i) => ({
-      id: makeId('01SH') + String(i).padStart(2, '0'),
-      seasonId,
-      userId: u.id,
-      sortIndex: i,
-      updatedAt: now,
-    }));
-
-    mockStore.season = season;
-    mockStore.members = members;
-    mockStore.session = null;
-    mockStore.depositSubmissions = [];
-    mockStore.hostOrder = hostOrder;
-    mockStore.sessionParticipants = [];
-    mockStore.sessionInjections = [];
-    mockStore.endingSubmissions = [];
-    mockStore.payouts = [];
-
-    return { season, members };
   },
 
   // ---------------------------------------------------------------------------
@@ -112,7 +53,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       id: makeId('01SD'),
       seasonId: req.seasonId,
       userId: req.userId,
-      photoUrl: req.photoUri,
+      mediaKey: req.mediaKey,
       note: req.note ?? null,
       status: 'pending' as const,
       reviewedAt: null,
@@ -165,106 +106,6 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
   },
 
   // ---------------------------------------------------------------------------
-  // Host order
-  // ---------------------------------------------------------------------------
-
-  async getHostOrder(seasonId: string) {
-    await delay(200);
-    const hostOrder = mockStore.hostOrder
-      .filter((h) => h.seasonId === seasonId)
-      .sort((a, b) => a.sortIndex - b.sortIndex);
-    return { hostOrder };
-  },
-
-  async saveHostOrder(req) {
-    await delay(400);
-    const now = new Date().toISOString();
-
-    const newOrder = req.userIds.map((userId, i) => ({
-      id: makeId('01SH') + String(i).padStart(2, '0'),
-      seasonId: req.seasonId,
-      userId,
-      sortIndex: i,
-      updatedAt: now,
-    }));
-
-    mockStore.hostOrder = [
-      ...mockStore.hostOrder.filter((h) => h.seasonId !== req.seasonId),
-      ...newOrder,
-    ];
-
-    return { hostOrder: newOrder };
-  },
-
-  // ---------------------------------------------------------------------------
-  // Season management
-  // ---------------------------------------------------------------------------
-
-  async updateTreasurer(req) {
-    await delay(400);
-
-    if (!mockStore.season || mockStore.season.id !== req.seasonId) {
-      throw new Error('Season not found');
-    }
-    if (mockStore.season.status !== 'setup') {
-      throw new Error('Can only change treasurer during setup');
-    }
-
-    mockStore.season.treasurerUserId = req.treasurerUserId;
-    return { season: mockStore.season };
-  },
-
-  async startSeason(seasonId: string) {
-    await delay(600);
-    const now = new Date().toISOString();
-
-    if (!mockStore.season || mockStore.season.id !== seasonId) {
-      throw new Error('Season not found');
-    }
-    if (mockStore.season.status !== 'setup') {
-      throw new Error('Season is not in setup status');
-    }
-
-    const approvedCount = mockStore.members.filter(
-      (m) => m.seasonId === seasonId && m.approvalStatus === 'approved',
-    ).length;
-
-    if (approvedCount < 2) {
-      throw new Error('At least 2 approved members required to start the season');
-    }
-
-    mockStore.season.status = 'active';
-    mockStore.season.startedAt = now;
-
-    return { season: mockStore.season };
-  },
-
-  // ---------------------------------------------------------------------------
-  // End Season
-  // ---------------------------------------------------------------------------
-
-  async endSeason(req) {
-    await delay(600);
-    const now = new Date().toISOString();
-
-    if (!mockStore.season || mockStore.season.id !== req.seasonId) {
-      throw new Error('Season not found');
-    }
-    if (mockStore.season.status !== 'active') {
-      throw new Error('Season must be active to end');
-    }
-    if (mockStore.session && (mockStore.session.state === 'dealing' || mockStore.session.state === 'in_progress' || mockStore.session.state === 'closing')) {
-      throw new Error('Cannot end season while a session is in progress');
-    }
-
-    mockStore.season.status = 'ended';
-    mockStore.season.endedAt = now;
-    mockStore.session = null;
-
-    return { season: mockStore.season };
-  },
-
-  // ---------------------------------------------------------------------------
   // Payouts
   // ---------------------------------------------------------------------------
 
@@ -300,7 +141,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       toUserId: req.toUserId,
       amountCents: req.amountCents,
       status: 'pending',
-      proofPhotoUrl: req.proofPhotoUrl ?? null,
+      proofMediaKey: req.proofMediaKey ?? null,
       note: req.note ?? null,
       confirmedAt: null,
       disputedAt: null,
@@ -593,7 +434,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       amountCents: 50000,
       requestedByUserId: getCurrentUserId(),
       requestedAt: now,
-      proofPhotoUrl: null,
+      proofMediaKey: null,
       status: 'approved',
       reviewedAt: now,
       reviewedByUserId: getCurrentUserId(),
@@ -686,7 +527,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       amountCents,
       requestedByUserId: currentUserId,
       requestedAt: now,
-      proofPhotoUrl: req.proofPhotoUrl ?? null,
+      proofMediaKey: req.proofMediaKey ?? null,
       status: 'pending',
       reviewedAt: null,
       reviewedByUserId: null,
@@ -774,7 +615,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
       sessionId: req.sessionId,
       participantId: req.participantId,
       endingStackCents: req.endingStackCents,
-      photoUrl: req.photoUrl,
+      mediaKey: req.mediaKey,
       submittedAt: now,
       submittedByUserId: req.submittedByUserId ?? getCurrentUserId(),
       note: req.note ?? null,
@@ -952,5 +793,6 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
 
 export const api: ApiClient = {
   ...httpAuth,
+  ...httpSeason,
   ...mockApi,
 };

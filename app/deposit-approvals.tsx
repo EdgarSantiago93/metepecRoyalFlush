@@ -1,8 +1,8 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
+import { MediaImage } from '@/components/ui/media-image';
 import { MemberRow } from '@/components/ui/member-row';
-import { PressablePhoto } from '@/components/ui/photo-viewer';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
@@ -182,10 +182,11 @@ export default function DepositApprovalsScreen() {
                 <View className="border-t border-sand-200 px-4 py-3 dark:border-sand-700">
                   {submission ? (
                     <>
-                      {submission.photoUrl && (
+                      {submission.mediaKey && (
                         <View className="mb-3">
-                          <PressablePhoto
-                            uri={submission.photoUrl}
+                          <MediaImage
+                            mediaKey={submission.mediaKey}
+                            variant="pressable"
                             height={180}
                             className="overflow-hidden rounded-lg border border-sand-200 dark:border-sand-700"
                           />

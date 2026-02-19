@@ -1,6 +1,9 @@
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { PhotoThumbnail } from '@/components/ui/photo-viewer';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
+import { uploadMedia } from '@/services/media/upload';
+import { pickMedia } from '@/utils/media-picker';
 import { IconAlertTriangle, IconCash, IconCheck, IconClock, IconCopy } from '@tabler/icons-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useCallback, useState } from 'react';
@@ -14,6 +17,12 @@ export function PayoutsScreen() {
   const auth = useAuth();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [proofUri, setProofUri] = useState<string | null>(null);
+
+  const handlePickProof = useCallback(async () => {
+    const uri = await pickMedia({ quality: 0.7 });
+    if (uri) setProofUri(uri);
+  }, []);
 
   const handleSendPayout = useCallback(async () => {
     if (appState.status !== 'season_ended' || !selectedUserId) return;
@@ -21,22 +30,29 @@ export function PayoutsScreen() {
     if (!member) return;
     setLoading(true);
     try {
+      let proofMediaKey: string | undefined;
+      if (proofUri) {
+        const result = await uploadMedia(proofUri);
+        proofMediaKey = result.mediaKey;
+      }
       await appState.sendPayout({
         seasonId: appState.season.id,
         toUserId: selectedUserId,
         amountCents: member.currentBalanceCents,
+        proofMediaKey,
       });
       setSelectedUserId(null);
+      setProofUri(null);
     } catch (e) {
       Toast.showWithGravity(
-        e instanceof Error ? e.message : '❌ No se pudo enviar el pago',
+        e instanceof Error ? e.message : 'No se pudo enviar el pago',
         Toast.SHORT,
         Toast.TOP,
       );
     } finally {
       setLoading(false);
     }
-  }, [appState, selectedUserId]);
+  }, [appState, selectedUserId, proofUri]);
 
   const handleCopy = useCallback(async (text: string) => {
     await Clipboard.setStringAsync(text);
@@ -190,24 +206,47 @@ export function PayoutsScreen() {
                 {/* Actions */}
                 <View className="gap-3">
                   {canManage && !selectedPayout && (
-                    <Pressable
-                      className={`items-center rounded-full py-3.5 ${loading ? 'bg-gold-300 dark:bg-gold-700' : 'bg-gold-500 active:bg-gold-600'}`}
-                      onPress={handleSendPayout}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <ButtonActivityIndicator />
-                      ) : (
-                        <Text className="text-sm font-semibold text-white">
-                          Depósito Confirmado
-                        </Text>
-                      )}
-                    </Pressable>
+                    <>
+                      {/* Optional proof photo */}
+                      <View className="mb-1">
+                        {proofUri ? (
+                          <View className="flex-row items-center gap-3">
+                            <PhotoThumbnail uri={proofUri} size={48} />
+                            <Pressable onPress={() => setProofUri(null)}>
+                              <Text className="text-xs text-red-500">Eliminar foto</Text>
+                            </Pressable>
+                          </View>
+                        ) : (
+                          <Pressable
+                            className="items-center rounded-full border border-dashed border-sand-300 py-2.5 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
+                            onPress={handlePickProof}
+                          >
+                            <Text className="text-xs text-sand-500 dark:text-sand-400">
+                              Adjuntar comprobante (opcional)
+                            </Text>
+                          </Pressable>
+                        )}
+                      </View>
+
+                      <Pressable
+                        className={`items-center rounded-full py-3.5 ${loading ? 'bg-gold-300 dark:bg-gold-700' : 'bg-gold-500 active:bg-gold-600'}`}
+                        onPress={handleSendPayout}
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <ButtonActivityIndicator />
+                        ) : (
+                          <Text className="text-sm font-semibold text-white">
+                            Depósito Confirmado
+                          </Text>
+                        )}
+                      </Pressable>
+                    </>
                   )}
 
                   <Pressable
                     className="items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-700"
-                    onPress={() => setSelectedUserId(null)}
+                    onPress={() => { setSelectedUserId(null); setProofUri(null); }}
                     disabled={loading}
                   >
                     <Text className="text-sm font-semibold text-sand-700 dark:text-sand-300">

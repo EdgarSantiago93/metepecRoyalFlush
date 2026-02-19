@@ -1,8 +1,9 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { PhotoThumbnail } from '@/components/ui/photo-viewer';
 import { useAppState } from '@/hooks/use-app-state';
+import { uploadMedia } from '@/services/media/upload';
 import type { EndingSubmission, SessionInjection, SessionParticipant, User } from '@/types';
-import * as ImagePicker from 'expo-image-picker';
+import { pickMedia } from '@/utils/media-picker';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 
@@ -179,27 +180,8 @@ function SubmissionForm({
   }, [participants, participant.id, endingSubmissions]);
 
   const handlePickImage = useCallback(async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status === 'granted') {
-      const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
-      if (!result.canceled && result.assets[0]) {
-        setPhotoUri(result.assets[0].uri);
-      }
-      return;
-    }
-
-    const libStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (libStatus.status !== 'granted') {
-      Alert.alert('Permiso necesario', 'Se necesita acceso a la cámara o galería para fotos de comprobante.');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-    }
+    const uri = await pickMedia({ quality: 0.7 });
+    if (uri) setPhotoUri(uri);
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -214,10 +196,11 @@ function SubmissionForm({
     }
     setLoading(true);
     try {
+      const { mediaKey } = await uploadMedia(photoUri);
       await appState.submitEndingStack(
         selectedParticipantId,
         cents,
-        photoUri,
+        mediaKey,
         note.trim() || undefined,
       );
       setEndingStack('');

@@ -153,7 +153,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         id: `01SD000000000000000000${String(i + 1).padStart(4, '0')}`,
         seasonId,
         userId: SEED_USERS[i].id,
-        photoUrl: `https://placeholder.mock/deposit-${i + 1}.jpg`,
+        mediaKey: `https://placeholder.mock/deposit-${i + 1}.jpg`,
         note: i === 3 ? 'Transferencia SPEI' : null,
         status: status as 'pending' | 'approved' | 'rejected',
         reviewedAt: status === 'approved' || status === 'rejected' ? NOW : null,
@@ -416,7 +416,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         amountCents: 50000,
         requestedByUserId: SEED_USERS[1].id,
         requestedAt: NOW,
-        proofPhotoUrl: null,
+        proofMediaKey: null,
         status: 'approved',
         reviewedAt: NOW,
         reviewedByUserId: SEED_USERS[1].id,
@@ -541,7 +541,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         amountCents: 50000,
         requestedByUserId: SEED_USERS[0].id,
         requestedAt: '2026-02-13T13:00:00.000Z',
-        proofPhotoUrl: null,
+        proofMediaKey: null,
         status: 'approved',
         reviewedAt: '2026-02-13T13:05:00.000Z',
         reviewedByUserId: SEED_USERS[1].id, // Carlos approved
@@ -557,7 +557,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         amountCents: 50000,
         requestedByUserId: SEED_USERS[2].id,
         requestedAt: '2026-02-13T13:30:00.000Z',
-        proofPhotoUrl: 'https://placeholder.mock/rebuy-proof-1.jpg',
+        proofMediaKey: 'https://placeholder.mock/rebuy-proof-1.jpg',
         status: 'pending',
         reviewedAt: null,
         reviewedByUserId: null,
@@ -573,7 +573,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         amountCents: 25000,
         requestedByUserId: SEED_USERS[3].id,
         requestedAt: '2026-02-13T13:15:00.000Z',
-        proofPhotoUrl: null,
+        proofMediaKey: null,
         status: 'rejected',
         reviewedAt: '2026-02-13T13:20:00.000Z',
         reviewedByUserId: SEED_USERS[1].id,
@@ -589,7 +589,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         amountCents: 25000,
         requestedByUserId: SEED_USERS[1].id,
         requestedAt: '2026-02-13T14:00:00.000Z',
-        proofPhotoUrl: null,
+        proofMediaKey: null,
         status: 'pending',
         reviewedAt: null,
         reviewedByUserId: null,
@@ -714,7 +714,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         amountCents: 50000,
         requestedByUserId: SEED_USERS[0].id,
         requestedAt: '2026-02-13T13:00:00.000Z',
-        proofPhotoUrl: null,
+        proofMediaKey: null,
         status: 'approved',
         reviewedAt: '2026-02-13T13:05:00.000Z',
         reviewedByUserId: SEED_USERS[1].id,
@@ -730,7 +730,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         sessionId,
         participantId: '01SP0000000000000000000020',
         endingStackCents: 85000,
-        photoUrl: 'https://placeholder.mock/ending-edgar.jpg',
+        mediaKey: 'https://placeholder.mock/ending-edgar.jpg',
         submittedAt: '2026-02-13T15:00:00.000Z',
         submittedByUserId: SEED_USERS[0].id,
         note: null,
@@ -746,7 +746,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         sessionId,
         participantId: '01SP0000000000000000000021',
         endingStackCents: 60000,
-        photoUrl: 'https://placeholder.mock/ending-carlos.jpg',
+        mediaKey: 'https://placeholder.mock/ending-carlos.jpg',
         submittedAt: '2026-02-13T15:10:00.000Z',
         submittedByUserId: SEED_USERS[1].id,
         note: 'Counted twice',
@@ -762,7 +762,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         sessionId,
         participantId: '01SP0000000000000000000022',
         endingStackCents: 30000,
-        photoUrl: 'https://placeholder.mock/ending-miguel.jpg',
+        mediaKey: 'https://placeholder.mock/ending-miguel.jpg',
         submittedAt: '2026-02-13T15:15:00.000Z',
         submittedByUserId: SEED_USERS[2].id,
         note: null,
@@ -887,7 +887,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         amountCents: 50000,
         requestedByUserId: SEED_USERS[0].id,
         requestedAt: '2026-02-13T13:00:00.000Z',
-        proofPhotoUrl: null,
+        proofMediaKey: null,
         status: 'approved',
         reviewedAt: '2026-02-13T13:05:00.000Z',
         reviewedByUserId: SEED_USERS[1].id,
@@ -908,7 +908,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         sessionId,
         participantId: '01SP0000000000000000000030',
         endingStackCents: 85000,
-        photoUrl: 'https://placeholder.mock/ending-edgar.jpg',
+        mediaKey: 'https://placeholder.mock/ending-edgar.jpg',
         submittedAt: '2026-02-13T15:00:00.000Z',
         submittedByUserId: SEED_USERS[0].id,
         note: null,
@@ -923,7 +923,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         sessionId,
         participantId: '01SP0000000000000000000031',
         endingStackCents: 60000,
-        photoUrl: 'https://placeholder.mock/ending-carlos.jpg',
+        mediaKey: 'https://placeholder.mock/ending-carlos.jpg',
         submittedAt: '2026-02-13T15:10:00.000Z',
         submittedByUserId: SEED_USERS[1].id,
         note: null,
@@ -938,7 +938,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         sessionId,
         participantId: '01SP0000000000000000000032',
         endingStackCents: 30000,
-        photoUrl: 'https://placeholder.mock/ending-miguel.jpg',
+        mediaKey: 'https://placeholder.mock/ending-miguel.jpg',
         submittedAt: '2026-02-13T15:15:00.000Z',
         submittedByUserId: SEED_USERS[2].id,
         note: null,
@@ -953,7 +953,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         sessionId,
         participantId: '01SP0000000000000000000033',
         endingStackCents: 75000,
-        photoUrl: 'https://placeholder.mock/ending-andres.jpg',
+        mediaKey: 'https://placeholder.mock/ending-andres.jpg',
         submittedAt: '2026-02-13T15:20:00.000Z',
         submittedByUserId: SEED_USERS[3].id,
         note: null,
@@ -1086,8 +1086,8 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     ];
     // S1 injections: Edgar 1x500, Jorge 1x500
     const s1Injections: SessionInjection[] = [
-      { id: '01SIMS00000000000000000101', sessionId: s1Id, participantId: '01SPMS00000000000000000101', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[0].id, requestedAt: '2026-02-01T20:30:00.000Z', proofPhotoUrl: null, status: 'approved', reviewedAt: '2026-02-01T20:35:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T20:30:00.000Z' },
-      { id: '01SIMS00000000000000000102', sessionId: s1Id, participantId: '01SPMS00000000000000000105', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[4].id, requestedAt: '2026-02-01T21:00:00.000Z', proofPhotoUrl: null, status: 'approved', reviewedAt: '2026-02-01T21:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T21:00:00.000Z' },
+      { id: '01SIMS00000000000000000101', sessionId: s1Id, participantId: '01SPMS00000000000000000101', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[0].id, requestedAt: '2026-02-01T20:30:00.000Z', proofMediaKey: null, status: 'approved', reviewedAt: '2026-02-01T20:35:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T20:30:00.000Z' },
+      { id: '01SIMS00000000000000000102', sessionId: s1Id, participantId: '01SPMS00000000000000000105', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[4].id, requestedAt: '2026-02-01T21:00:00.000Z', proofMediaKey: null, status: 'approved', reviewedAt: '2026-02-01T21:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T21:00:00.000Z' },
     ];
     // S1 endings — sum PnL = 0
     // Edgar:  start=500, rebuys=500, total_in=1000, ending=650  => PnL = 650-500-500 = -350
@@ -1098,12 +1098,12 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     // Luis:   start=500, rebuys=0,   total_in=500,  ending=250  => PnL = 250-500-0   = -250
     // Sum = -350+350-100+200+150-250 = 0
     const s1Endings: EndingSubmission[] = [
-      { id: '01ESMS00000000000000000101', sessionId: s1Id, participantId: '01SPMS00000000000000000101', endingStackCents: 65000, photoUrl: 'mock://s1-edgar.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[0].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000102', sessionId: s1Id, participantId: '01SPMS00000000000000000102', endingStackCents: 85000, photoUrl: 'mock://s1-carlos.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[1].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000103', sessionId: s1Id, participantId: '01SPMS00000000000000000103', endingStackCents: 40000, photoUrl: 'mock://s1-miguel.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[2].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000104', sessionId: s1Id, participantId: '01SPMS00000000000000000104', endingStackCents: 70000, photoUrl: 'mock://s1-andres.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[3].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000105', sessionId: s1Id, participantId: '01SPMS00000000000000000105', endingStackCents: 115000, photoUrl: 'mock://s1-jorge.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[4].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000106', sessionId: s1Id, participantId: '01SPMS00000000000000000106', endingStackCents: 25000, photoUrl: 'mock://s1-luis.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[5].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000101', sessionId: s1Id, participantId: '01SPMS00000000000000000101', endingStackCents: 65000, mediaKey: 'mock://s1-edgar.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[0].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000102', sessionId: s1Id, participantId: '01SPMS00000000000000000102', endingStackCents: 85000, mediaKey: 'mock://s1-carlos.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[1].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000103', sessionId: s1Id, participantId: '01SPMS00000000000000000103', endingStackCents: 40000, mediaKey: 'mock://s1-miguel.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[2].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000104', sessionId: s1Id, participantId: '01SPMS00000000000000000104', endingStackCents: 70000, mediaKey: 'mock://s1-andres.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[3].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000105', sessionId: s1Id, participantId: '01SPMS00000000000000000105', endingStackCents: 115000, mediaKey: 'mock://s1-jorge.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[4].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000106', sessionId: s1Id, participantId: '01SPMS00000000000000000106', endingStackCents: 25000, mediaKey: 'mock://s1-luis.jpg', submittedAt: '2026-02-01T23:00:00.000Z', submittedByUserId: SEED_USERS[5].id, note: null, status: 'validated', reviewedAt: '2026-02-01T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-01T23:00:00.000Z' },
     ];
 
     // Session 2: Feb 5 — 5 players (different mix), balanced
@@ -1117,8 +1117,8 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     ];
     // S2 injections: Miguel 1x500, Andres 1x250
     const s2Injections: SessionInjection[] = [
-      { id: '01SIMS00000000000000000201', sessionId: s2Id, participantId: '01SPMS00000000000000000203', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[2].id, requestedAt: '2026-02-05T20:30:00.000Z', proofPhotoUrl: null, status: 'approved', reviewedAt: '2026-02-05T20:35:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T20:30:00.000Z' },
-      { id: '01SIMS00000000000000000202', sessionId: s2Id, participantId: '01SPMS00000000000000000204', type: 'half_250', amountCents: 25000, requestedByUserId: SEED_USERS[3].id, requestedAt: '2026-02-05T21:00:00.000Z', proofPhotoUrl: null, status: 'approved', reviewedAt: '2026-02-05T21:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T21:00:00.000Z' },
+      { id: '01SIMS00000000000000000201', sessionId: s2Id, participantId: '01SPMS00000000000000000203', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[2].id, requestedAt: '2026-02-05T20:30:00.000Z', proofMediaKey: null, status: 'approved', reviewedAt: '2026-02-05T20:35:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T20:30:00.000Z' },
+      { id: '01SIMS00000000000000000202', sessionId: s2Id, participantId: '01SPMS00000000000000000204', type: 'half_250', amountCents: 25000, requestedByUserId: SEED_USERS[3].id, requestedAt: '2026-02-05T21:00:00.000Z', proofMediaKey: null, status: 'approved', reviewedAt: '2026-02-05T21:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T21:00:00.000Z' },
     ];
     // S2 endings — sum PnL = 0
     // Edgar:   start=650,  rebuys=0,   ending=900   => PnL = 900-650-0   = +250
@@ -1128,11 +1128,11 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     // Ricardo: start=500,  rebuys=0,   ending=800   => PnL = 800-500-0   = +300
     // Sum = +250-300-150-100+300 = 0
     const s2Endings: EndingSubmission[] = [
-      { id: '01ESMS00000000000000000201', sessionId: s2Id, participantId: '01SPMS00000000000000000201', endingStackCents: 90000, photoUrl: 'mock://s2-edgar.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[0].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000202', sessionId: s2Id, participantId: '01SPMS00000000000000000202', endingStackCents: 55000, photoUrl: 'mock://s2-carlos.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[1].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000203', sessionId: s2Id, participantId: '01SPMS00000000000000000203', endingStackCents: 75000, photoUrl: 'mock://s2-miguel.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[2].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000204', sessionId: s2Id, participantId: '01SPMS00000000000000000204', endingStackCents: 85000, photoUrl: 'mock://s2-andres.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[3].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000205', sessionId: s2Id, participantId: '01SPMS00000000000000000205', endingStackCents: 80000, photoUrl: 'mock://s2-ricardo.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[6].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000201', sessionId: s2Id, participantId: '01SPMS00000000000000000201', endingStackCents: 90000, mediaKey: 'mock://s2-edgar.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[0].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000202', sessionId: s2Id, participantId: '01SPMS00000000000000000202', endingStackCents: 55000, mediaKey: 'mock://s2-carlos.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[1].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000203', sessionId: s2Id, participantId: '01SPMS00000000000000000203', endingStackCents: 75000, mediaKey: 'mock://s2-miguel.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[2].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000204', sessionId: s2Id, participantId: '01SPMS00000000000000000204', endingStackCents: 85000, mediaKey: 'mock://s2-andres.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[3].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000205', sessionId: s2Id, participantId: '01SPMS00000000000000000205', endingStackCents: 80000, mediaKey: 'mock://s2-ricardo.jpg', submittedAt: '2026-02-05T23:00:00.000Z', submittedByUserId: SEED_USERS[6].id, note: null, status: 'validated', reviewedAt: '2026-02-05T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-05T23:00:00.000Z' },
     ];
 
     // Session 3: Feb 9 — 4 players, balanced
@@ -1145,7 +1145,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     ];
     // S3 injections: Luis 1x500
     const s3Injections: SessionInjection[] = [
-      { id: '01SIMS00000000000000000301', sessionId: s3Id, participantId: '01SPMS00000000000000000304', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[5].id, requestedAt: '2026-02-09T21:00:00.000Z', proofPhotoUrl: null, status: 'approved', reviewedAt: '2026-02-09T21:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T21:00:00.000Z' },
+      { id: '01SIMS00000000000000000301', sessionId: s3Id, participantId: '01SPMS00000000000000000304', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[5].id, requestedAt: '2026-02-09T21:00:00.000Z', proofMediaKey: null, status: 'approved', reviewedAt: '2026-02-09T21:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T21:00:00.000Z' },
     ];
     // S3 endings — sum PnL = 0
     // Edgar:  start=900,  rebuys=0,   ending=750   => PnL = 750-900-0   = -150
@@ -1154,10 +1154,10 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
     // Luis:   start=250,  rebuys=500, ending=850   => PnL = 850-250-500 = +100
     // Sum = -150+250-200+100 = 0
     const s3Endings: EndingSubmission[] = [
-      { id: '01ESMS00000000000000000301', sessionId: s3Id, participantId: '01SPMS00000000000000000301', endingStackCents: 75000, photoUrl: 'mock://s3-edgar.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[0].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000302', sessionId: s3Id, participantId: '01SPMS00000000000000000302', endingStackCents: 80000, photoUrl: 'mock://s3-carlos.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[1].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000303', sessionId: s3Id, participantId: '01SPMS00000000000000000303', endingStackCents: 95000, photoUrl: 'mock://s3-jorge.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[4].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
-      { id: '01ESMS00000000000000000304', sessionId: s3Id, participantId: '01SPMS00000000000000000304', endingStackCents: 85000, photoUrl: 'mock://s3-luis.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[5].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000301', sessionId: s3Id, participantId: '01SPMS00000000000000000301', endingStackCents: 75000, mediaKey: 'mock://s3-edgar.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[0].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000302', sessionId: s3Id, participantId: '01SPMS00000000000000000302', endingStackCents: 80000, mediaKey: 'mock://s3-carlos.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[1].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000303', sessionId: s3Id, participantId: '01SPMS00000000000000000303', endingStackCents: 95000, mediaKey: 'mock://s3-jorge.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[4].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
+      { id: '01ESMS00000000000000000304', sessionId: s3Id, participantId: '01SPMS00000000000000000304', endingStackCents: 85000, mediaKey: 'mock://s3-luis.jpg', submittedAt: '2026-02-09T23:00:00.000Z', submittedByUserId: SEED_USERS[5].id, note: null, status: 'validated', reviewedAt: '2026-02-09T23:05:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-09T23:00:00.000Z' },
     ];
 
     // Session 4: Feb 14 — currently in_progress (live)
@@ -1169,7 +1169,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
       { id: '01SPMS00000000000000000404', sessionId: s4Id, type: 'member', userId: SEED_USERS[3].id, guestName: null, startingStackCents: 85000, checkedInAt: '2026-02-14T19:00:00.000Z', confirmedStartAt: '2026-02-14T19:05:00.000Z', startDisputeNote: null, removedAt: null, removedByUserId: null, createdAt: '2026-02-14T19:00:00.000Z' },
     ];
     const s4Injections: SessionInjection[] = [
-      { id: '01SIMS00000000000000000401', sessionId: s4Id, participantId: '01SPMS00000000000000000401', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[0].id, requestedAt: '2026-02-14T20:30:00.000Z', proofPhotoUrl: null, status: 'approved', reviewedAt: '2026-02-14T20:35:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-14T20:30:00.000Z' },
+      { id: '01SIMS00000000000000000401', sessionId: s4Id, participantId: '01SPMS00000000000000000401', type: 'rebuy_500', amountCents: 50000, requestedByUserId: SEED_USERS[0].id, requestedAt: '2026-02-14T20:30:00.000Z', proofMediaKey: null, status: 'approved', reviewedAt: '2026-02-14T20:35:00.000Z', reviewedByUserId: treasurer.id, reviewNote: null, createdAt: '2026-02-14T20:30:00.000Z' },
     ];
 
     // Finalized sessions
@@ -1294,7 +1294,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         toUserId: SEED_USERS[0].id,
         amountCents: 75000,
         status: 'confirmed',
-        proofPhotoUrl: 'https://placeholder.mock/payout-edgar.jpg',
+        proofMediaKey: 'https://placeholder.mock/payout-edgar.jpg',
         note: 'SPEI transfer',
         confirmedAt: '2026-02-14T10:00:00.000Z',
         disputedAt: null,
@@ -1310,7 +1310,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         toUserId: SEED_USERS[2].id,
         amountCents: 30000,
         status: 'disputed',
-        proofPhotoUrl: 'https://placeholder.mock/payout-miguel.jpg',
+        proofMediaKey: 'https://placeholder.mock/payout-miguel.jpg',
         note: null,
         confirmedAt: null,
         disputedAt: '2026-02-14T12:00:00.000Z',
@@ -1326,7 +1326,7 @@ const PRESETS: Record<PresetKey, () => MockStore> = {
         toUserId: SEED_USERS[3].id,
         amountCents: 95000,
         status: 'pending',
-        proofPhotoUrl: null,
+        proofMediaKey: null,
         note: 'Transfer pending',
         confirmedAt: null,
         disputedAt: null,

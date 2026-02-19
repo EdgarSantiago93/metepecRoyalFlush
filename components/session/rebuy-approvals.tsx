@@ -1,5 +1,5 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
-import { PhotoThumbnail } from '@/components/ui/photo-viewer';
+import { MediaImage } from '@/components/ui/media-image';
 import { useAppState } from '@/hooks/use-app-state';
 import type { SessionInjection, SessionParticipant, User } from '@/types';
 import { useCallback, useState } from 'react';
@@ -114,9 +114,9 @@ function PendingInjectionCard({
         Solicitado {new Date(injection.requestedAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
       </Text>
 
-      {injection.proofPhotoUrl && (
+      {injection.proofMediaKey && (
         <View className="mb-3">
-          <PhotoThumbnail uri={injection.proofPhotoUrl} label="Ver comprobante" />
+          <MediaImage mediaKey={injection.proofMediaKey} variant="thumbnail" label="Ver comprobante" />
         </View>
       )}
 
