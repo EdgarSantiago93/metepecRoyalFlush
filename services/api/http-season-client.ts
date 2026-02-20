@@ -98,7 +98,11 @@ export const httpSeason = {
   },
 
   async getDepositSubmissions(seasonId: string): Promise<GetDepositSubmissionsResponse> {
-    return apiFetch<GetDepositSubmissionsResponse>(`/seasons/${seasonId}/deposits`);
+    // Backend returns { deposits: [...] }, normalize to { submissions: [...] }
+    const res = await apiFetch<{ deposits: GetDepositSubmissionsResponse['submissions'] }>(
+      `/seasons/${seasonId}/deposits`,
+    );
+    return { submissions: res.deposits ?? [] };
   },
 
   async reviewDeposit(req: ReviewDepositRequest): Promise<ReviewDepositResponse> {

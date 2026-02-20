@@ -19,16 +19,16 @@ export function MiniCard({ card }: Props) {
 
   return (
     <View
-      className="items-center justify-center rounded-md border border-sand-200 bg-white dark:border-sand-600 dark:bg-sand-800"
-      style={{ width: 38, height: 52, marginHorizontal: 2 }}
+      className="items-center justify-center rounded border border-sand-200 bg-white dark:border-sand-600 dark:bg-sand-800"
+      style={{ width: 28, height: 38, marginHorizontal: 1 }}
     >
       <Text
-        style={{ color: suitColor, fontSize: 14, lineHeight: 18 }}
+        style={{ color: suitColor, fontSize: 11, lineHeight: 14 }}
         className="font-sans-bold"
       >
         {card.rank}
       </Text>
-      <Text style={{ color: suitColor, fontSize: 12, lineHeight: 14, marginTop: -1 }}>
+      <Text style={{ color: suitColor, fontSize: 9, lineHeight: 11, marginTop: -1 }}>
         {suitSymbol}
       </Text>
     </View>
