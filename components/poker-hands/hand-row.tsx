@@ -8,24 +8,32 @@ type Props = {
 };
 
 /**
- * A single row in the poker hands reference:
- * ranking number, hand name (Spanish), and 5 mini playing cards.
+ * A single compact row in the poker hands reference:
+ * ranking number, hand name, and 5 mini playing cards — all inline.
  */
 export function HandRow({ hand, rank }: Props) {
   return (
-    <View className="mb-4 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 dark:border-sand-700 dark:bg-sand-800/60">
-      {/* Name row */}
-      <View className="mb-2 flex-row items-center gap-2">
-        <View className="h-6 w-6 items-center justify-center rounded-full bg-gold-500">
-          <Text className="text-xs font-sans-bold text-white">{rank}</Text>
-        </View>
-        <Text className="text-sm font-sans-semibold text-sand-950 dark:text-sand-50">
-          {hand.name}
+    <View className="flex-row items-center py-1.5">
+      <View className="h-5 w-5 items-center justify-center rounded-full bg-gold-500">
+        <Text style={{ fontSize: 10, lineHeight: 13 }} className="font-sans-bold text-white">
+          {rank}
         </Text>
       </View>
-
-      {/* Cards row */}
-      <View className="flex-row justify-center">
+      <View className="ml-2 flex-1">
+        <Text
+          className="text-xs font-sans-semibold text-sand-950 dark:text-sand-50"
+          numberOfLines={1}
+        >
+          {hand.name}
+        </Text>
+        <Text
+          className="text-[9px] text-sand-400 dark:text-sand-500"
+          numberOfLines={1}
+        >
+          {hand.desc}
+        </Text>
+      </View>
+      <View className="flex-row">
         {hand.cards.map((card, i) => (
           <MiniCard key={`${card.rank}-${card.suit}-${i}`} card={card} />
         ))}

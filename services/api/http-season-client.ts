@@ -6,8 +6,18 @@ import type {
   EndSeasonRequest,
   EndSeasonResponse,
   GetActiveSeasonResponse,
+  GetDepositSubmissionsResponse,
+  GetHostOrderResponse,
   GetUsersResponse,
+  ReviewDepositRequest,
+  ReviewDepositResponse,
+  SaveHostOrderRequest,
+  SaveHostOrderResponse,
   StartSeasonResponse,
+  SubmitDepositRequest,
+  SubmitDepositResponse,
+  UpdateSeasonNameRequest,
+  UpdateSeasonNameResponse,
   UpdateTreasurerRequest,
   UpdateTreasurerResponse,
 } from './types';
@@ -38,6 +48,13 @@ export const httpSeason = {
     });
   },
 
+  async updateSeasonName(req: UpdateSeasonNameRequest): Promise<UpdateSeasonNameResponse> {
+    return apiFetch<UpdateSeasonNameResponse>(`/seasons/${req.seasonId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ name: req.name }),
+    });
+  },
+
   async updateTreasurer(req: UpdateTreasurerRequest): Promise<UpdateTreasurerResponse> {
     return apiFetch<UpdateTreasurerResponse>(`/seasons/${req.seasonId}/treasurer`, {
       method: 'PUT',
@@ -54,6 +71,47 @@ export const httpSeason = {
   async endSeason(req: EndSeasonRequest): Promise<EndSeasonResponse> {
     return apiFetch<EndSeasonResponse>(`/seasons/${req.seasonId}/end`, {
       method: 'POST',
+    });
+  },
+
+  async getHostOrder(seasonId: string): Promise<GetHostOrderResponse> {
+    return apiFetch<GetHostOrderResponse>(`/seasons/${seasonId}/host-order`);
+  },
+
+  async saveHostOrder(req: SaveHostOrderRequest): Promise<SaveHostOrderResponse> {
+    return apiFetch<SaveHostOrderResponse>(`/seasons/${req.seasonId}/host-order`, {
+      method: 'PUT',
+      body: JSON.stringify({ userIds: req.userIds }),
+    });
+  },
+
+  async submitDeposit(req: SubmitDepositRequest): Promise<SubmitDepositResponse> {
+    return apiFetch<SubmitDepositResponse>(`/seasons/${req.seasonId}/deposits`, {
+      method: 'POST',
+      body: JSON.stringify({
+        seasonId: req.seasonId,
+        userId: req.userId,
+        mediaKey: req.mediaKey,
+        note: req.note,
+      }),
+    });
+  },
+
+  async getDepositSubmissions(seasonId: string): Promise<GetDepositSubmissionsResponse> {
+    // Backend returns { deposits: [...] }, normalize to { submissions: [...] }
+    const res = await apiFetch<{ deposits: GetDepositSubmissionsResponse['submissions'] }>(
+      `/seasons/${seasonId}/deposits`,
+    );
+    return { submissions: res.deposits ?? [] };
+  },
+
+  async reviewDeposit(req: ReviewDepositRequest): Promise<ReviewDepositResponse> {
+    return apiFetch<ReviewDepositResponse>(`/deposits/${req.submissionId}/review`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: req.action,
+        reviewNote: req.reviewNote,
+      }),
     });
   },
 };

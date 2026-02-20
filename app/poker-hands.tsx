@@ -20,10 +20,10 @@ export default function PokerHandsScreen() {
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
       {/* Header */}
       <View
-        className="flex-row items-center justify-between border-b border-sand-200 px-6 pb-4 dark:border-sand-700"
-        style={{ paddingTop: insets.top + 12 }}
+        className="flex-row items-center justify-between border-b border-sand-200 px-4 pb-3 dark:border-sand-700"
+        style={{ paddingTop: insets.top + 8 }}
       >
-        <Text className="text-xl font-heading text-sand-950 dark:text-sand-50">
+        <Text className="text-lg font-heading text-sand-950 dark:text-sand-50">
           Manos de Poker
         </Text>
         <Pressable
@@ -36,18 +36,14 @@ export default function PokerHandsScreen() {
       </View>
 
       {/* Hands list */}
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-6 py-6 pb-12"
-        showsVerticalScrollIndicator={false}
-      >
-        <Text className="mb-4 text-center text-xs text-sand-500 dark:text-sand-400">
+      <View className="flex-1 px-4 pt-3 pb-4">
+        <Text className="mb-2 text-center text-[10px] text-sand-500 dark:text-sand-400">
           De mayor a menor valor
         </Text>
         {POKER_HANDS.map((hand, index) => (
           <HandRow key={hand.name} hand={hand} rank={index + 1} />
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 }

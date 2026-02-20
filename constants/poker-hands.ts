@@ -16,6 +16,7 @@ export type Card = {
 
 export type PokerHand = {
   name: string;
+  desc: string;
   cards: Card[];
 };
 
@@ -43,6 +44,7 @@ export const SUIT_COLORS_DARK: Record<Suit, string> = {
 export const POKER_HANDS: PokerHand[] = [
   {
     name: 'Escalera Real',
+    desc: 'A, K, Q, J, 10 del mismo palo',
     cards: [
       { rank: 'A', suit: 'spades' },
       { rank: 'K', suit: 'spades' },
@@ -53,6 +55,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Escalera de Color',
+    desc: '5 consecutivas del mismo palo',
     cards: [
       { rank: '9', suit: 'hearts' },
       { rank: '8', suit: 'hearts' },
@@ -63,6 +66,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Poker',
+    desc: '4 cartas del mismo valor',
     cards: [
       { rank: 'K', suit: 'spades' },
       { rank: 'K', suit: 'hearts' },
@@ -73,6 +77,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Full House',
+    desc: 'Tercia + par',
     cards: [
       { rank: 'J', suit: 'spades' },
       { rank: 'J', suit: 'hearts' },
@@ -83,6 +88,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Color',
+    desc: '5 cartas del mismo palo',
     cards: [
       { rank: 'A', suit: 'diamonds' },
       { rank: 'J', suit: 'diamonds' },
@@ -93,6 +99,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Escalera',
+    desc: '5 cartas consecutivas',
     cards: [
       { rank: '10', suit: 'spades' },
       { rank: '9', suit: 'hearts' },
@@ -103,6 +110,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Tercia',
+    desc: '3 cartas del mismo valor',
     cards: [
       { rank: 'Q', suit: 'spades' },
       { rank: 'Q', suit: 'hearts' },
@@ -113,6 +121,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Dos Pares',
+    desc: '2 pares diferentes',
     cards: [
       { rank: 'A', suit: 'spades' },
       { rank: 'A', suit: 'hearts' },
@@ -123,6 +132,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Par',
+    desc: '2 cartas del mismo valor',
     cards: [
       { rank: '10', suit: 'hearts' },
       { rank: '10', suit: 'diamonds' },
@@ -133,6 +143,7 @@ export const POKER_HANDS: PokerHand[] = [
   },
   {
     name: 'Carta Alta',
+    desc: 'La carta más alta gana',
     cards: [
       { rank: 'A', suit: 'spades' },
       { rank: 'J', suit: 'hearts' },
