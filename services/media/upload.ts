@@ -1,4 +1,7 @@
 import { apiFetch } from '@/services/api/http-auth-client';
+import { AlphaType, ColorType, Skia } from '@shopify/react-native-skia';
+import { encode as encodeBlurhash } from 'blurhash';
+import { File } from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
 /**
@@ -25,6 +28,53 @@ function putFileToUrl(
       type: contentType,
     });
   });
+}
+
+const BLURHASH_SIZE = 32;
+const BLURHASH_COMPONENTS_X = 4;
+const BLURHASH_COMPONENTS_Y = 3;
+
+/**
+ * Generate a blurhash string from a local image URI.
+ * Resizes to 32×32, reads RGBA pixels via Skia, and encodes.
+ * Returns null on any error — blurhash is non-blocking.
+ */
+async function generateBlurhash(imageUri: string): Promise<string | null> {
+  try {
+    // 1. Resize to tiny thumbnail for fast pixel reading
+    const thumb = await manipulateAsync(
+      imageUri,
+      [{ resize: { width: BLURHASH_SIZE, height: BLURHASH_SIZE } }],
+      { format: SaveFormat.PNG },
+    );
+
+    // 2. Read file as base64 and load into Skia
+    const file = new File(thumb.uri);
+    const base64Data = await file.base64();
+    const skData = Skia.Data.fromBase64(base64Data);
+    const skImage = Skia.Image.MakeImageFromEncoded(skData);
+    if (!skImage) return null;
+
+    // 3. Read RGBA pixels
+    const pixels = skImage.readPixels(0, 0, {
+      width: BLURHASH_SIZE,
+      height: BLURHASH_SIZE,
+      colorType: ColorType.RGBA_8888,
+      alphaType: AlphaType.Unpremul,
+    });
+    if (!pixels) return null;
+
+    // 4. Encode to blurhash
+    return encodeBlurhash(
+      new Uint8ClampedArray(pixels.buffer),
+      BLURHASH_SIZE,
+      BLURHASH_SIZE,
+      BLURHASH_COMPONENTS_X,
+      BLURHASH_COMPONENTS_Y,
+    );
+  } catch {
+    return null;
+  }
 }
 
 type UploadMediaResult = {
@@ -56,10 +106,13 @@ export async function uploadMedia(
     format: SaveFormat.JPEG,
   });
 
-  // 2. Get file size (manipulateAsync does not return file size) — read once for size
-  const sizeResponse = await fetch(manipulated.uri);
-  const blob = await sizeResponse.blob();
-  const sizeBytes = blob.size;
+  // 2. Get file size and generate blurhash in parallel
+  const [sizeBytes, blurhash] = await Promise.all([
+    fetch(manipulated.uri)
+      .then((r) => r.blob())
+      .then((b) => b.size),
+    generateBlurhash(manipulated.uri),
+  ]);
 
   // 3. Get presigned URL
   const filename = `upload-${Date.now()}.jpg`;
@@ -68,7 +121,8 @@ export async function uploadMedia(
     body: JSON.stringify({
       contentType: 'image/jpeg',
       fileName: filename,
-      sizeBytes: sizeBytes,
+      sizeBytes,
+      blurhash,
     }),
   });
 
