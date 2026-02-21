@@ -341,9 +341,10 @@ type PhotoThumbnailProps = {
   uri: string;
   size?: number;
   label?: string;
+  blurhash?: string | null;
 };
 
-export function PhotoThumbnail({ uri, size = 36, label }: PhotoThumbnailProps) {
+export function PhotoThumbnail({ uri, size = 36, label, blurhash }: PhotoThumbnailProps) {
   const [viewerVisible, setViewerVisible] = useState(false);
 
   return (
@@ -360,7 +361,8 @@ export function PhotoThumbnail({ uri, size = 36, label }: PhotoThumbnailProps) {
             source={{ uri }}
             style={{ width: size, height: size }}
             contentFit="cover"
-            transition={100}
+            transition={250}
+            {...(blurhash ? { placeholder: { blurhash } } : undefined)}
           />
         </View>
         {label && (
@@ -388,6 +390,7 @@ type PressablePhotoProps = {
   width?: number | string;
   height?: number;
   className?: string;
+  blurhash?: string | null;
 };
 
 export function PressablePhoto({
@@ -395,6 +398,7 @@ export function PressablePhoto({
   width = '100%',
   height = 180,
   className: containerClassName,
+  blurhash,
 }: PressablePhotoProps) {
   const [viewerVisible, setViewerVisible] = useState(false);
 
@@ -408,7 +412,8 @@ export function PressablePhoto({
           source={{ uri }}
           style={{ width: width as number, height }}
           contentFit="cover"
-          transition={100}
+          transition={250}
+          {...(blurhash ? { placeholder: { blurhash } } : undefined)}
         />
       </Pressable>
 

@@ -29,6 +29,7 @@ export function MediaImage({
   className,
 }: MediaImageProps) {
   const [uri, setUri] = useState<string | null>(null);
+  const [blurhash, setBlurhash] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,9 +48,10 @@ export function MediaImage({
     // Otherwise resolve via API
     let cancelled = false;
     getMediaUrl(mediaKey)
-      .then((url) => {
+      .then(({ url, blurhash: hash }) => {
         if (!cancelled) {
           setUri(url);
+          setBlurhash(hash);
           setLoading(false);
         }
       })
@@ -72,8 +74,8 @@ export function MediaImage({
   if (!uri) return null;
 
   if (variant === 'thumbnail') {
-    return <PhotoThumbnail uri={uri} size={size} label={label} />;
+    return <PhotoThumbnail uri={uri} size={size} label={label} blurhash={blurhash} />;
   }
 
-  return <PressablePhoto uri={uri} height={height} className={className} />;
+  return <PressablePhoto uri={uri} height={height} className={className} blurhash={blurhash} />;
 }

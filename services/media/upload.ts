@@ -80,9 +80,13 @@ export async function uploadMedia(
 }
 
 /**
- * Resolves a mediaKey to a publicly accessible URL.
+ * Resolves a mediaKey to a publicly accessible URL and optional blurhash.
  */
-export async function getMediaUrl(mediaKey: string): Promise<string> {
-  const { url } = await apiFetch<{ url: string }>(`/media/${mediaKey}`);
-  return url;
+export async function getMediaUrl(
+  mediaKey: string,
+): Promise<{ url: string; blurhash: string | null }> {
+  const { url, blurhash } = await apiFetch<{ url: string; blurhash?: string }>(
+    `/media/${mediaKey}`,
+  );
+  return { url, blurhash: blurhash ?? null };
 }
