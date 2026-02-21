@@ -25,6 +25,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Loader } from "@/components/ui/loader";
 import { AppStateProvider } from '@/contexts/app-state-context';
 import { AuthProvider } from '@/contexts/auth-context';
@@ -58,6 +59,7 @@ function RootNavigation() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthGate>
         <AppStateProvider>
+        <ErrorBoundary>
         <Stack
           screenOptions={{
             headerStyle: { backgroundColor: '#fdfbf7' },
@@ -83,6 +85,7 @@ function RootNavigation() {
           <Stack.Screen name="chip-counter" options={{ title: 'Contador de Fichas' }} />
           <Stack.Screen name="poker-hands" options={{ title: 'Manos de Poker', presentation: 'modal', headerShown: false }} />
         </Stack>
+        </ErrorBoundary>
         </AppStateProvider>
       </AuthGate>
       <StatusBar style="auto" />

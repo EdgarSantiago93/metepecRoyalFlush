@@ -89,20 +89,43 @@ export const httpSeason = {
     return apiFetch<SubmitDepositResponse>(`/seasons/${req.seasonId}/deposits`, {
       method: 'POST',
       body: JSON.stringify({
-        seasonId: req.seasonId,
-        userId: req.userId,
         mediaKey: req.mediaKey,
-        note: req.note,
+        ...(req.note ? { note: req.note } : {}),
       }),
     });
   },
 
   async getDepositSubmissions(seasonId: string): Promise<GetDepositSubmissionsResponse> {
-    // Backend returns { deposits: [...] }, normalize to { submissions: [...] }
-    const res = await apiFetch<{ deposits: GetDepositSubmissionsResponse['submissions'] }>(
+    // Backend returns { deposits: [...] } with photoMediaId; map to frontend shape
+    type BackendDeposit = {
+      id: string;
+      seasonId: string;
+      userId: string;
+      photoMediaId: string;
+      note: string | null;
+      status: string;
+      reviewedAt: string | null;
+      reviewedByUserId: string | null;
+      reviewNote: string | null;
+      createdAt: string;
+    };
+    const res = await apiFetch<BackendDeposit[] | { deposits: BackendDeposit[] }>(
       `/seasons/${seasonId}/deposits`,
     );
-    return { submissions: res.deposits ?? [] };
+    const raw = Array.isArray(res) ? res : (res.deposits ?? []);
+    const submissions = raw.map((d) => ({
+      id: d.id,
+      seasonId: d.seasonId,
+      userId: d.userId,
+      mediaKey: d.photoMediaId,
+      note: d.note,
+      status: d.status as 'pending' | 'approved' | 'rejected',
+      reviewedAt: d.reviewedAt,
+      reviewedByUserId: d.reviewedByUserId,
+      reviewNote: d.reviewNote,
+      createdAt: d.createdAt,
+    }));
+    return { submissions };
   },
 
   async reviewDeposit(req: ReviewDepositRequest): Promise<ReviewDepositResponse> {

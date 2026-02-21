@@ -1,5 +1,6 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
-import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { ErrorView } from '@/components/ui/error-boundary';
 import { Loader } from '@/components/ui/loader';
 import { MediaImage } from '@/components/ui/media-image';
 import { MemberRow } from '@/components/ui/member-row';
@@ -10,7 +11,7 @@ import { api } from '@/services/api/client';
 import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 type FilterTab = 'all' | ApprovalStatus;
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
@@ -30,8 +31,14 @@ export default function DepositApprovalsScreen() {
   const [submissions, setSubmissions] = useState<SeasonDepositSubmission[]>([]);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState('');
+  const [pendingAction, setPendingAction] = useState<{
+    submissionId: string;
+    action: 'approve' | 'reject';
+  } | null>(null);
   const [acting, setActing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const season = appState.status === 'season_setup' ? appState.season : null;
@@ -42,51 +49,95 @@ export default function DepositApprovalsScreen() {
 
   const loadSubmissions = useCallback(async () => {
     if (!season) return;
-    const res = await api.getDepositSubmissions(season.id);
-    setSubmissions(res.submissions);
-    setLoading(false);
+    try {
+      setError(null);
+      const res = await api.getDepositSubmissions(season.id);
+      setSubmissions(res.submissions);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudieron cargar los depósitos');
+    } finally {
+      setLoading(false);
+    }
   }, [season]);
 
   useEffect(() => {
     loadSubmissions();
   }, [loadSubmissions]);
 
+  const [toast, setToast] = useState<string | null>(null);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Tiempo de espera agotado')), 2000),
+      );
+      await Promise.race([
+        Promise.all([loadSubmissions(), appState.refresh()]),
+        timeout,
+      ]);
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : 'Error al actualizar');
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadSubmissions, appState]);
+
   const getUserName = (userId: string) =>
     users.find((u) => u.id === userId)?.displayName ?? 'Unknown';
-
-  const filteredMembers = members.filter((m) => filter === 'all' || m.approvalStatus === filter);
 
   const getLatestSubmission = (userId: string) =>
     submissions
       .filter((s) => s.userId === userId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
 
-  const handleReview = useCallback(
-    async (submissionId: string, action: 'approve' | 'reject') => {
-      if (acting) return;
-      if (action === 'reject' && !rejectNote.trim()) {
-        Alert.alert('Nota requerida', 'Por favor agrega una nota explicando el rechazo.');
-        return;
-      }
-      setActing(true);
-      try {
-        await api.reviewDeposit({
-          submissionId,
-          action,
-          reviewNote: action === 'reject' ? rejectNote.trim() : undefined,
-        });
-        setRejectNote('');
-        setExpandedUserId(null);
-        await loadSubmissions();
-        await appState.refresh();
-      } catch (e) {
-        Alert.alert('Error', e instanceof Error ? e.message : 'Revisión fallida');
-      } finally {
-        setActing(false);
-      }
-    },
-    [acting, rejectNote, loadSubmissions, appState],
-  );
+  // Derive effective approval status per member from latest submission
+  const getEffectiveStatus = (member: (typeof members)[number]): ApprovalStatus => {
+    const sub = getLatestSubmission(member.userId);
+    if (!sub) return member.approvalStatus;
+    if (sub.status === 'approved') return 'approved';
+    if (sub.status === 'rejected') return 'rejected';
+    return 'pending';
+  };
+
+  const filteredMembers = members.filter((m) => filter === 'all' || getEffectiveStatus(m) === filter);
+
+  const handleApprovePress = (submissionId: string) => {
+    setPendingAction({ submissionId, action: 'approve' });
+  };
+
+  const handleRejectPress = (submissionId: string) => {
+    if (!rejectNote.trim()) {
+      setToast('Agrega una nota explicando el rechazo');
+      setTimeout(() => setToast(null), 3000);
+      return;
+    }
+    setPendingAction({ submissionId, action: 'reject' });
+  };
+
+  const handleConfirmAction = useCallback(async () => {
+    if (!pendingAction) return;
+    setActing(true);
+    try {
+      await api.reviewDeposit({
+        submissionId: pendingAction.submissionId,
+        action: pendingAction.action,
+        reviewNote: pendingAction.action === 'reject' ? rejectNote.trim() : undefined,
+      });
+      setRejectNote('');
+      setExpandedUserId(null);
+      setPendingAction(null);
+      await loadSubmissions();
+      await appState.refresh();
+    } catch (e) {
+      setPendingAction(null);
+      setToast(e instanceof Error ? e.message : 'Revisión fallida');
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setActing(false);
+    }
+  }, [pendingAction, rejectNote, loadSubmissions, appState]);
 
   if (!isTreasurer && !isAdmin) {
     return (
@@ -115,8 +166,25 @@ export default function DepositApprovalsScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <ErrorView
+        message={error}
+        onRetry={() => {
+          setLoading(true);
+          loadSubmissions();
+        }}
+      />
+    );
+  }
+
   return (
     <View className="flex-1 bg-sand-50 dark:bg-sand-900">
+      {toast && (
+        <View className="absolute top-2 left-4 right-4 z-50 items-center rounded-lg bg-red-600 px-4 py-2.5">
+          <Text className="text-sm font-semibold text-white">{toast}</Text>
+        </View>
+      )}
       {/* Filter tabs — fixed height row, does not expand */}
       <View className="flex-none">
         <ScrollView
@@ -129,7 +197,7 @@ export default function DepositApprovalsScreen() {
           const count =
             tab.key === 'all'
               ? members.length
-              : members.filter((m) => m.approvalStatus === tab.key).length;
+              : members.filter((m) => getEffectiveStatus(m) === tab.key).length;
           return (
             <Pressable
               key={tab.key}
@@ -154,7 +222,11 @@ export default function DepositApprovalsScreen() {
       </View>
 
       {/* Member list */}
-      <ScrollView className="flex-1" contentContainerClassName="px-6 pb-8">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-6 pb-8"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#c49a3c" />}
+      >
         {filteredMembers.length === 0 && (
           <Text className="mt-8 text-center text-sm text-sand-500 dark:text-sand-400">
             No hay miembros en esta categoría.
@@ -164,6 +236,10 @@ export default function DepositApprovalsScreen() {
         {filteredMembers.map((member) => {
           const isExpanded = expandedUserId === member.userId;
           const submission = getLatestSubmission(member.userId);
+          // Derive display status from latest submission (more accurate than member.approvalStatus)
+          const displayStatus: ApprovalStatus = submission
+            ? (submission.status === 'approved' ? 'approved' : submission.status === 'rejected' ? 'rejected' : 'pending')
+            : member.approvalStatus;
 
           return (
             <View
@@ -173,7 +249,7 @@ export default function DepositApprovalsScreen() {
               <View className="px-4">
                 <MemberRow
                   name={getUserName(member.userId)}
-                  right={<StatusBadge variant={member.approvalStatus} />}
+                  right={<StatusBadge variant={displayStatus} />}
                   onPress={() => setExpandedUserId(isExpanded ? null : member.userId)}
                 />
               </View>
@@ -198,23 +274,19 @@ export default function DepositApprovalsScreen() {
                         </Text>
                       )}
 
-                      {member.approvalStatus === 'pending' && (
+                      {displayStatus === 'pending' && (
                         <View>
                           <View className="mb-3 flex-row gap-3">
                             <Pressable
                               className="flex-1 items-center rounded-lg bg-felt-600 py-2.5 active:bg-felt-700"
-                              onPress={() => handleReview(submission.id, 'approve')}
+                              onPress={() => handleApprovePress(submission.id)}
                               disabled={acting}
                             >
-                              {acting ? (
-                               <ButtonActivityIndicator />
-                              ) : (
-                                <Text className="text-sm font-semibold text-white">Aprobar</Text>
-                              )}
+                              <Text className="text-sm font-semibold text-white">Aprobar</Text>
                             </Pressable>
                             <Pressable
                               className="flex-1 items-center rounded-lg bg-red-500 py-2.5 active:bg-red-600"
-                              onPress={() => handleReview(submission.id, 'reject')}
+                              onPress={() => handleRejectPress(submission.id)}
                               disabled={acting}
                             >
                               <Text className="text-sm font-semibold text-white">Rechazar</Text>
@@ -247,6 +319,21 @@ export default function DepositApprovalsScreen() {
           );
         })}
       </ScrollView>
+
+      <ConfirmationModal
+        visible={pendingAction !== null}
+        title={pendingAction?.action === 'approve' ? 'Aprobar Depósito' : 'Rechazar Depósito'}
+        message={
+          pendingAction?.action === 'approve'
+            ? '¿Confirmar la aprobación de este depósito?'
+            : '¿Confirmar el rechazo de este depósito?'
+        }
+        confirmLabel={pendingAction?.action === 'approve' ? 'Aprobar' : 'Rechazar'}
+        variant={pendingAction?.action === 'reject' ? 'destructive' : 'default'}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setPendingAction(null)}
+        loading={acting}
+      />
     </View>
   );
 }

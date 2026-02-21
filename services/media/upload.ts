@@ -1,20 +1,46 @@
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { apiFetch } from '@/services/api/http-auth-client';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+
+/**
+ * PUT a local file to a URL using XHR. React Native's fetch often does not send
+ * Blob/body on PUT; XHR with { uri } lets the native layer read the file and send the bytes.
+ */
+function putFileToUrl(
+  fileUri: string,
+  url: string,
+  contentType: string,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('Content-Type', contentType);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Upload failed: ${xhr.status}`));
+    };
+    xhr.onerror = (e) => reject(new Error(e.toString()));
+    // React Native: send file by URI so native layer reads and sends the bytes
+    (xhr as unknown as { send(body: { uri: string; type: string }): void }).send({
+      uri: fileUri,
+      type: contentType,
+    });
+  });
+}
 
 type UploadMediaResult = {
   mediaKey: string;
 };
 
 type PresignedUrlResponse = {
-  id: string;
-  url: string;
+  r2Key: string;
+  uploadUrl: string;
 };
 
 /**
  * Uploads a local image to the backend via presigned R2 URL.
  *
  * 1. Converts any format (HEIC/HEIF/PNG) to compressed JPEG
- * 2. Gets a presigned upload URL from POST /media
+ * 2. Gets a presigned upload URL from POST /media/upload-url
  * 3. PUTs the binary to R2
  * 4. Returns the mediaKey (R2 ID)
  */
@@ -30,24 +56,27 @@ export async function uploadMedia(
     format: SaveFormat.JPEG,
   });
 
-  // 2. Get presigned URL
+  // 2. Get file size (manipulateAsync does not return file size) — read once for size
+  const sizeResponse = await fetch(manipulated.uri);
+  const blob = await sizeResponse.blob();
+  const sizeBytes = blob.size;
+
+  // 3. Get presigned URL
   const filename = `upload-${Date.now()}.jpg`;
-  const { id, url } = await apiFetch<PresignedUrlResponse>('/media', {
+  const { r2Key, uploadUrl } = await apiFetch<PresignedUrlResponse>('/media/upload-url', {
     method: 'POST',
-    body: JSON.stringify({ contentType: 'image/jpeg', filename }),
+    body: JSON.stringify({
+      contentType: 'image/jpeg',
+      fileName: filename,
+      sizeBytes: sizeBytes,
+    }),
   });
 
-  // 3. Upload binary to R2
-  const response = await fetch(manipulated.uri);
-  const blob = await response.blob();
-  await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'image/jpeg' },
-    body: blob,
-  });
+  // 4. Upload binary to R2 — use XHR so the file body is actually sent (RN fetch often drops Blob body on PUT)
+  await putFileToUrl(manipulated.uri, uploadUrl, 'image/jpeg');
 
-  // 4. Return the media key
-  return { mediaKey: id };
+  // 5. Return the media key (R2 key used to resolve the public URL later)
+  return { mediaKey: r2Key };
 }
 
 /**

@@ -10,20 +10,27 @@ import { uploadMedia } from '@/services/media/upload';
 import type { SeasonDepositSubmission } from '@/types';
 import { pickMedia } from '@/utils/media-picker';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { useNavigation, useRouter } from 'expo-router';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 export default function DepositUploadScreen() {
   const auth = useAuth();
   const appState = useAppState();
   const router = useRouter();
+  const navigation = useNavigation();
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [existingSubmission, setExistingSubmission] = useState<SeasonDepositSubmission | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Prevent modal dismissal while submitting
+  useLayoutEffect(() => {
+    navigation.setOptions({ gestureEnabled: !submitting });
+  }, [navigation, submitting]);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const season = appState.status === 'season_setup' ? appState.season : null;
@@ -42,15 +49,18 @@ export default function DepositUploadScreen() {
   }, [season, currentUser?.id]);
 
   const handlePickImage = useCallback(async () => {
-    const uri = await pickMedia({ quality: 0.8 });
-    if (uri) setPhotoUri(uri);
+    const uri = await pickMedia({ quality: 0.5 });
+    if (uri) {
+      setImageLoaded(false);
+      setPhotoUri(uri);
+    }
   }, []);
 
   const handleSubmit = useCallback(async () => {
     if (!photoUri || !season || !currentUser || submitting) return;
     setSubmitting(true);
     try {
-      const { mediaKey } = await uploadMedia(photoUri);
+      const { mediaKey } = await uploadMedia(photoUri, { compress: 0.4 });
       await api.submitDeposit({
         seasonId: season.id,
         userId: currentUser.id,
@@ -139,8 +149,8 @@ export default function DepositUploadScreen() {
   const showRejectionNote = currentMember?.approvalStatus === 'rejected' && currentMember.rejectionNote;
 
   return (
-    <View className="flex-1 bg-sand-50 dark:bg-sand-900">
-      <ScrollView className="flex-1" contentContainerClassName="px-6 py-6">
+    <View className="flex-1 bg-sand-50 dark:bg-sand-900" pointerEvents={submitting ? 'none' : 'auto'}>
+      <ScrollView className="flex-1" contentContainerClassName="px-6 py-6" scrollEnabled={!submitting}>
         {showRejectionNote && (
           <View className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
             <Text className="mb-1 text-sm font-semibold text-red-700 dark:text-red-300">
@@ -161,13 +171,25 @@ export default function DepositUploadScreen() {
 
         {/* Photo picker */}
         {photoUri ? (
-          <Pressable className="mb-4" onPress={() => setPhotoUri(null)}>
+          <Pressable className="mb-4" onPress={() => !submitting && setPhotoUri(null)} disabled={submitting}>
             <View className="overflow-hidden rounded-xl border border-sand-200 dark:border-sand-700">
-              <Image source={{ uri: photoUri }} style={{ width: '100%', height: 200 }} contentFit="cover" />
+              {!imageLoaded && (
+                <View className="absolute inset-0 z-10 items-center justify-center" style={{ height: 200 }}>
+                  <ActivityIndicator size="large" color="#c49a3c" />
+                </View>
+              )}
+              <Image
+                source={{ uri: photoUri }}
+                style={{ width: '100%', height: 200, opacity: imageLoaded ? 1 : 0 }}
+                contentFit="cover"
+                onLoad={() => setImageLoaded(true)}
+              />
             </View>
-            <Text className="mt-2 text-center text-xs text-sand-500 dark:text-sand-400">
-              Toca para eliminar
-            </Text>
+            {!submitting && (
+              <Text className="mt-2 text-center text-xs text-sand-500 dark:text-sand-400">
+                Toca para eliminar
+              </Text>
+            )}
           </Pressable>
         ) : (
           <Pressable

@@ -1,3 +1,4 @@
+import { emitGlobalError } from './global-error';
 import type { GetMeResponse, SendMagicLinkResponse, UpdateBankingInfoRequest, UpdateBankingInfoResponse, VerifyMagicLinkResponse } from './types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
@@ -41,6 +42,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     if (__DEV__) {
       console.error(`[API] ✗ ${method} ${url} — network error`, err);
     }
+    emitGlobalError('❗️ ocurrió un error');
     throw new Error('No se pudo conectar al servidor. Verifica tu conexión.');
   }
 
@@ -51,6 +53,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
       `Error del servidor (${res.status})`;
     if (__DEV__) {
       console.error(`[API] ✗ ${method} ${url} — ${res.status}`, body);
+    }
+    if (res.status >= 500) {
+      emitGlobalError('❗️ ocurrió un error');
     }
     throw new ApiError(message, res.status);
   }
