@@ -28,7 +28,7 @@ function makeId(prefix: string): string {
  * Hybrid API client: real auth + mock everything else.
  * Auth methods hit the real backend; non-auth methods use seed data.
  */
-const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo' | 'getActiveSeason' | 'getUsers' | 'createSeason' | 'updateSeasonName' | 'updateTreasurer' | 'startSeason' | 'endSeason' | 'getHostOrder' | 'saveHostOrder' | 'submitDeposit' | 'getDepositSubmissions' | 'reviewDeposit' | 'scheduleSession' | 'getSessionDetail'> = {
+const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo' | 'updateAvatar' | 'getActiveSeason' | 'getUsers' | 'createSeason' | 'updateSeasonName' | 'updateTreasurer' | 'startSeason' | 'endSeason' | 'getHostOrder' | 'saveHostOrder' | 'submitDeposit' | 'getDepositSubmissions' | 'reviewDeposit' | 'scheduleSession' | 'getSessionDetail'> = {
   async getActiveSession() {
     await delay(200);
     return { session: mockStore.session };

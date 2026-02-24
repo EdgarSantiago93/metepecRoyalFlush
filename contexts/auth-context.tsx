@@ -17,6 +17,7 @@ type AuthContextValue = AuthState & {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<User>;
+  updateAvatar: (mediaId: string) => Promise<User>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -78,9 +79,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user;
   }, []);
 
+  const updateAvatar = useCallback(async (mediaId: string): Promise<User> => {
+    const { user } = await api.updateAvatar({ mediaId });
+    setState((prev) => {
+      if (prev.status !== 'authenticated') return prev;
+      return { ...prev, user };
+    });
+    return user;
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, sendMagicLink, verifyMagicLink, logout, refreshUser, updateBankingInfo }),
-    [state, sendMagicLink, verifyMagicLink, logout, refreshUser, updateBankingInfo],
+    () => ({ ...state, sendMagicLink, verifyMagicLink, logout, refreshUser, updateBankingInfo, updateAvatar }),
+    [state, sendMagicLink, verifyMagicLink, logout, refreshUser, updateBankingInfo, updateAvatar],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

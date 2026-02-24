@@ -1,5 +1,6 @@
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
@@ -16,6 +17,7 @@ type HostItem = {
   id: string;
   userId: string;
   name: string;
+  avatarMediaId: string | null;
   position: number;
 };
 
@@ -54,6 +56,7 @@ export default function HostOrderScreen() {
             id: h.userId,
             userId: h.userId,
             name: getUserName(h.userId),
+            avatarMediaId: users.find((u) => u.id === h.userId)?.avatarMediaId ?? null,
             position: 0,
           })),
         ),
@@ -110,10 +113,8 @@ export default function HostOrderScreen() {
                 {item.position}
               </Text>
             </View>
-            <View className="mr-3 h-9 w-9 items-center justify-center rounded-full bg-sand-200 dark:bg-sand-600">
-              <Text className="text-sm font-bold text-sand-600 dark:text-sand-300">
-                {item.name.charAt(0)}
-              </Text>
+            <View className="mr-3">
+              <UserAvatar displayName={item.name} avatarMediaId={item.avatarMediaId} size={36} />
             </View>
             <Text className="flex-1 text-base font-medium text-sand-950 dark:text-sand-50">
               {item.name}
@@ -152,10 +153,8 @@ export default function HostOrderScreen() {
                 {i + 1}
               </Text>
             </View>
-            <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-sand-200 dark:bg-sand-600">
-              <Text className="text-lg font-bold text-sand-600 dark:text-sand-300">
-                {item.name.charAt(0)}
-              </Text>
+            <View className="mr-3">
+              <UserAvatar displayName={item.name} avatarMediaId={item.avatarMediaId} size={40} />
             </View>
             <Text className="flex-1 text-base font-medium text-sand-950 dark:text-sand-50">
               {item.name}

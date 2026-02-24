@@ -1,3 +1,4 @@
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import type { Season, SeasonHostOrder, SeasonMember, Session, User } from '@/types';
@@ -144,7 +145,6 @@ export function SeasonActive({ season, members, hostOrder: hostOrderProp, sessio
           {hostOrder.map((ho, index) => {
             const user = userMap.get(ho.userId);
             if (!user) return null;
-            const initials = getInitials(user.displayName);
             return (
               <View
                 key={ho.id}
@@ -153,11 +153,13 @@ export function SeasonActive({ season, members, hostOrder: hostOrderProp, sessio
                 <Text className="w-7 text-right text-xs font-sans-medium text-sand-400 dark:text-sand-500">
                   #{index + 1}
                 </Text>
-                <View className="h-[35px] w-[35px] items-center justify-center rounded-full bg-felt-100 dark:bg-felt-900">
-                  <Text className="text-xs font-sans-semibold text-felt-600 dark:text-felt-300">
-                    {initials}
-                  </Text>
-                </View>
+                <UserAvatar
+                  displayName={user.displayName}
+                  avatarMediaId={user.avatarMediaId}
+                  size={35}
+                  fallbackClassName="bg-felt-100 dark:bg-felt-900"
+                  fallbackTextClassName="text-xs font-sans-semibold text-felt-600 dark:text-felt-300"
+                />
                 <Text className="text-sm font-sans-medium text-sand-950 dark:text-sand-50">
                   {user.displayName}
                 </Text>
@@ -258,15 +260,6 @@ function SessionStatusRow({ session, users }: { session: Session; users: User[] 
 // ---------------------------------------------------------------------------
 // Shared
 // ---------------------------------------------------------------------------
-
-function getInitials(displayName: string): string {
-  const parts = displayName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  const single = displayName.trim().slice(0, 2);
-  return (single.length >= 2 ? single : single + single).toUpperCase();
-}
 
 function SectionTitle({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (

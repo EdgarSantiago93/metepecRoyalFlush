@@ -337,6 +337,10 @@ export type UpdateBankingInfoResponse = {
   user: User;
 };
 
+export type UpdateAvatarResponse = {
+  user: User;
+};
+
 // ---------------------------------------------------------------------------
 // Ledger (Phase 7)
 // ---------------------------------------------------------------------------
@@ -398,6 +402,7 @@ export type ApiClient = {
   disputePayout: (req: DisputePayoutRequest) => Promise<DisputePayoutResponse>;
   resolvePayout: (payoutId: string) => Promise<ResolvePayoutResponse>;
   updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<UpdateBankingInfoResponse>;
+  updateAvatar: (req: { mediaId: string }) => Promise<UpdateAvatarResponse>;
   // Ledger
   getSeasonSessions: (seasonId: string) => Promise<GetSeasonSessionsResponse>;
   getSessionDetail: (sessionId: string) => Promise<GetSessionDetailResponse>;

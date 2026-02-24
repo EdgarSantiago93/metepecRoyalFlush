@@ -259,6 +259,7 @@ export default function DepositApprovalsScreen() {
               <View className="px-4">
                 <MemberRow
                   name={getUserName(member.userId)}
+                  avatarMediaId={users.find((u) => u.id === member.userId)?.avatarMediaId}
                   right={<StatusBadge variant={displayStatus} />}
                   onPress={() => setExpandedUserId(isExpanded ? null : member.userId)}
                 />
