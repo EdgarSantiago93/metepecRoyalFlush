@@ -255,7 +255,10 @@ export const httpSeason = {
   // ---------------------------------------------------------------------------
 
   async getSessionParticipants(sessionId: string): Promise<GetSessionParticipantsResponse> {
-    return apiFetch<GetSessionParticipantsResponse>(`/sessions/${sessionId}/participants`);
+    // No dedicated GET /participants endpoint — read from session detail
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = await apiFetch<any>(`/sessions/${sessionId}`);
+    return { participants: raw.participants ?? [] };
   },
 
   async checkInToSession(sessionId: string): Promise<CheckInResponse> {
@@ -295,7 +298,10 @@ export const httpSeason = {
   // ---------------------------------------------------------------------------
 
   async getSessionInjections(sessionId: string): Promise<GetSessionInjectionsResponse> {
-    return apiFetch<GetSessionInjectionsResponse>(`/sessions/${sessionId}/injections`);
+    // No dedicated GET /injections endpoint — read from session detail
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = await apiFetch<any>(`/sessions/${sessionId}`);
+    return { injections: raw.injections ?? [] };
   },
 
   async requestRebuy(req: RequestRebuyRequest): Promise<RequestRebuyResponse> {
@@ -323,10 +329,10 @@ export const httpSeason = {
   // ---------------------------------------------------------------------------
 
   async getEndingSubmissions(sessionId: string): Promise<GetEndingSubmissionsResponse> {
-    // Backend returns { submissions } with photoMediaId; map to frontend shape
+    // No dedicated GET /submissions endpoint — read from session detail
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const raw = await apiFetch<any>(`/sessions/${sessionId}/submissions`);
-    const submissions = (raw.submissions ?? raw ?? []).map(mapEndingSubmission);
+    const raw = await apiFetch<any>(`/sessions/${sessionId}`);
+    const submissions = (raw.submissions ?? raw.endingSubmissions ?? []).map(mapEndingSubmission);
     return { submissions };
   },
 
