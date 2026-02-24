@@ -1,5 +1,5 @@
-import type { User } from '@/types';
-import { apiFetch, ApiError } from './http-auth-client';
+import type { EndingSubmission, User } from '@/types';
+import { ApiError, apiFetch } from './http-auth-client';
 import type {
   CreateSeasonRequest,
   CreateSeasonResponse,
@@ -8,11 +8,14 @@ import type {
   GetActiveSeasonResponse,
   GetDepositSubmissionsResponse,
   GetHostOrderResponse,
+  GetSessionDetailResponse,
   GetUsersResponse,
   ReviewDepositRequest,
   ReviewDepositResponse,
   SaveHostOrderRequest,
   SaveHostOrderResponse,
+  ScheduleSessionRequest,
+  ScheduleSessionResponse,
   StartSeasonResponse,
   SubmitDepositRequest,
   SubmitDepositResponse,
@@ -22,14 +25,38 @@ import type {
   UpdateTreasurerResponse,
 } from './types';
 
+function mapEndingSubmission(raw: Record<string, unknown>): EndingSubmission {
+  return { ...raw, mediaKey: (raw.photoMediaId as string) ?? raw.mediaKey } as EndingSubmission;
+}
+
 export const httpSeason = {
   async getActiveSeason(): Promise<GetActiveSeasonResponse> {
     try {
-      return await apiFetch<GetActiveSeasonResponse>('/seasons/active');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const raw = await apiFetch<any>('/seasons/active');
+      const currentSession = raw.currentSession
+        ? {
+            session: raw.currentSession.session,
+            participants: raw.currentSession.participants ?? [],
+            injections: raw.currentSession.injections ?? [],
+            endingSubmissions: (
+              raw.currentSession.submissions ??
+              raw.currentSession.endingSubmissions ??
+              []
+            ).map(mapEndingSubmission),
+            finalizeNote: raw.currentSession.finalizeNote ?? null,
+          }
+        : null;
+      return {
+        season: raw.season,
+        members: raw.members ?? [],
+        hostOrder: raw.hostOrder ?? [],
+        currentSession,
+      };
     } catch (err) {
       // 404 means no active season — valid state, not an error
       if (err instanceof ApiError && err.status === 404) {
-        return { season: null, members: [] };
+        return { season: null, members: [], hostOrder: [], currentSession: null };
       }
       throw err;
     }
@@ -128,6 +155,19 @@ export const httpSeason = {
     return { submissions };
   },
 
+  async scheduleSession(req: ScheduleSessionRequest): Promise<ScheduleSessionResponse> {
+    console.log('🚀🚀🚀🚀scheduleSession', req);
+    return apiFetch<ScheduleSessionResponse>('/sessions', {
+      method: 'POST',
+      body: JSON.stringify({
+        seasonId: req.seasonId,
+        hostUserId: req.hostUserId,
+        ...(req.scheduledFor ? { scheduledFor: req.scheduledFor } : {}),
+        ...(req.location ? { location: req.location } : {}),
+      }),
+    });
+  },
+
   async reviewDeposit(req: ReviewDepositRequest): Promise<ReviewDepositResponse> {
     return apiFetch<ReviewDepositResponse>(`/deposits/${req.submissionId}/review`, {
       method: 'POST',
@@ -136,5 +176,17 @@ export const httpSeason = {
         reviewNote: req.reviewNote,
       }),
     });
+  },
+
+  async getSessionDetail(sessionId: string): Promise<GetSessionDetailResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = await apiFetch<any>(`/sessions/${sessionId}`);
+    return {
+      session: raw.session,
+      participants: raw.participants ?? [],
+      injections: raw.injections ?? [],
+      endingSubmissions: (raw.submissions ?? raw.endingSubmissions ?? []).map(mapEndingSubmission),
+      finalizeNote: raw.finalizeNote ?? null,
+    };
   },
 };

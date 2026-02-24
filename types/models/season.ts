@@ -1,3 +1,5 @@
+import type { EmbeddedUser } from './user';
+
 // ---------------------------------------------------------------------------
 // Season
 // ---------------------------------------------------------------------------
@@ -33,6 +35,7 @@ export type SeasonMember = {
   approvedByUserId: string | null; // FK → users
   rejectionNote: string | null;
   createdAt: string; // ISO datetime
+  user?: EmbeddedUser;
 };
 
 // ---------------------------------------------------------------------------
@@ -66,4 +69,6 @@ export type SeasonHostOrder = {
   userId: string; // FK → users
   sortIndex: number;
   updatedAt: string; // ISO datetime
+  userDisplayName?: string;
+  userAvatarMediaId?: string | null;
 };

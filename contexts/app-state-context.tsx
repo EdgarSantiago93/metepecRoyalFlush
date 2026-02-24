@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Toast from 'react-native-simple-toast';
-import type { EndingSubmission, Season, SeasonMember, SeasonPayout, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
+import type { EndingSubmission, Season, SeasonHostOrder, SeasonMember, SeasonPayout, Session, SessionFinalizeNote, SessionInjection, SessionParticipant, User } from '@/types';
 import type { InjectionType } from '@/types/models/session';
 import type { CreateSeasonRequest, DisputeStartRequest, ScheduleSessionRequest, SendPayoutRequest, UpdateBankingInfoRequest, UpdateScheduledSessionRequest } from '@/services/api/types';
 import { api } from '@/services/api/client';
@@ -20,7 +20,7 @@ export type AppState =
   | { status: 'error'; message: string; _devPresetKey?: PresetKey | null }
   | { status: 'no_season'; users: User[]; _devPresetKey?: PresetKey | null }
   | { status: 'season_setup'; season: Season; members: SeasonMember[]; users: User[]; _devPresetKey?: PresetKey | null }
-  | { status: 'season_active'; season: Season; members: SeasonMember[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; endingSubmissions: EndingSubmission[]; finalizeNote: SessionFinalizeNote | null; users: User[]; _devPresetKey?: PresetKey | null }
+  | { status: 'season_active'; season: Season; members: SeasonMember[]; hostOrder: SeasonHostOrder[]; session: Session | null; participants: SessionParticipant[]; injections: SessionInjection[]; endingSubmissions: EndingSubmission[]; finalizeNote: SessionFinalizeNote | null; users: User[]; _devPresetKey?: PresetKey | null }
   | { status: 'season_ended'; season: Season; members: SeasonMember[]; users: User[]; payouts: SeasonPayout[]; _devPresetKey?: PresetKey | null };
 
 export type AppStateContextValue = AppState & {
@@ -61,6 +61,32 @@ export type AppStateContextValue = AppState & {
 export const AppStateContext = createContext<AppStateContextValue | null>(null);
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function deriveUsers(members: SeasonMember[]): User[] {
+  const seen = new Set<string>();
+  const users: User[] = [];
+  for (const m of members) {
+    if (!m.user || seen.has(m.user.id)) continue;
+    seen.add(m.user.id);
+    users.push({
+      id: m.user.id,
+      email: m.user.email,
+      displayName: m.user.displayName,
+      isAdmin: m.user.isAdmin,
+      avatarUrl: null,
+      bankingNombre: null,
+      bankingCuenta: null,
+      bankingBanco: null,
+      bankingClabe: null,
+      createdAt: '',
+    });
+  }
+  return users;
+}
+
+// ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
 
@@ -75,46 +101,30 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       setState({ status: 'loading', _devPresetKey });
     }
     try {
-      const [seasonRes, sessionRes, usersRes] = await Promise.all([
-        api.getActiveSeason(),
-        api.getActiveSession(),
-        api.getUsers(),
-      ]);
-
-      const { season, members } = seasonRes;
-      const { session } = sessionRes;
-      const { users } = usersRes;
+      const { season, members, hostOrder, currentSession } = await api.getActiveSeason();
 
       if (!season) {
-        setState({ status: 'no_season', users, _devPresetKey });
+        const usersRes = await api.getUsers();
+        setState({ status: 'no_season', users: usersRes.users, _devPresetKey });
       } else if (season.status === 'setup') {
-        setState({ status: 'season_setup', season, members, users, _devPresetKey });
+        setState({ status: 'season_setup', season, members, users: deriveUsers(members), _devPresetKey });
       } else if (season.status === 'active') {
-        // Fetch participants when session is in dealing, in_progress, closing, or finalized state
-        let participants: SessionParticipant[] = [];
-        let injections: SessionInjection[] = [];
-        let endingSubmissions: EndingSubmission[] = [];
-        let finalizeNote: SessionFinalizeNote | null = null;
-        if (session && (session.state === 'dealing' || session.state === 'in_progress' || session.state === 'closing' || session.state === 'finalized')) {
-          const partRes = await api.getSessionParticipants(session.id);
-          participants = partRes.participants;
-        }
-        if (session && (session.state === 'in_progress' || session.state === 'closing' || session.state === 'finalized')) {
-          const injRes = await api.getSessionInjections(session.id);
-          injections = injRes.injections;
-        }
-        if (session && (session.state === 'closing' || session.state === 'finalized')) {
-          const subRes = await api.getEndingSubmissions(session.id);
-          endingSubmissions = subRes.submissions;
-        }
-        if (session && session.state === 'finalized') {
-          const noteRes = await api.getSessionFinalizeNote(session.id);
-          finalizeNote = noteRes.finalizeNote;
-        }
-        setState({ status: 'season_active', season, members, session, participants, injections, endingSubmissions, finalizeNote, users, _devPresetKey });
+        setState({
+          status: 'season_active',
+          season,
+          members,
+          hostOrder,
+          session: currentSession?.session ?? null,
+          participants: currentSession?.participants ?? [],
+          injections: currentSession?.injections ?? [],
+          endingSubmissions: currentSession?.endingSubmissions ?? [],
+          finalizeNote: currentSession?.finalizeNote ?? null,
+          users: deriveUsers(members),
+          _devPresetKey,
+        });
       } else {
         const payoutsRes = await api.getPayouts(season.id);
-        setState({ status: 'season_ended', season, members, users, payouts: payoutsRes.payouts, _devPresetKey });
+        setState({ status: 'season_ended', season, members, users: deriveUsers(members), payouts: payoutsRes.payouts, _devPresetKey });
       }
       lastFetchedAtRef.current = Date.now();
     } catch (err) {
@@ -133,15 +143,14 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const createSeason = useCallback(
     async (req: CreateSeasonRequest) => {
       try {
-        const { season, members } = await api.createSeason(req);
-        const usersRes = await api.getUsers();
-        setState({ status: 'season_setup', season, members, users: usersRes.users });
+        await api.createSeason(req);
+        await load();
       } catch (err) {
         showErrorToast(err, 'No se pudo crear la temporada');
         throw err;
       }
     },
-    [],
+    [load],
   );
 
   const startSeason = useCallback(async () => {

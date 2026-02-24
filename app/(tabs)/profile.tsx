@@ -1,5 +1,5 @@
-import { AppTextInput } from '@/components/ui/app-text-input';
 import { DevStateToggle } from '@/components/profile/dev-state-toggle';
+import { AppTextInput } from '@/components/ui/app-text-input';
 import { useAuth } from '@/hooks/use-auth';
 import { IconCheck, IconCreditCard, IconPencil, IconX } from '@tabler/icons-react-native';
 import * as Clipboard from 'expo-clipboard';
@@ -24,8 +24,9 @@ export default function ProfileScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const inset = useSafeAreaInsets();
-  const paddingTop = inset.top + 10;
   const iconColor = colorScheme === 'dark' ? '#b5ac9e' : '#918779';
+  // Spinner color: visible on both light and dark backgrounds
+  const refreshTint = colorScheme === 'dark' ? '#72c496' : '#1a7d52';
 
   const [refreshing, setRefreshing] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -100,12 +101,21 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-sand-50 dark:bg-sand-900"
-      contentContainerClassName="pb-12"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#2a9d68" colors={['#2a9d68']} />}
-      style={{ paddingTop }}
-    >
+    <View className="flex-1 bg-sand-50 dark:bg-sand-900" style={{ paddingTop: inset.top }}>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="pb-12"
+        contentContainerStyle={{ paddingTop: 10 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={refreshTint}
+            colors={[refreshTint]}
+            progressViewOffset={inset.top}
+          />
+        }
+      >
       {/* Profile header */}
       <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
         <View className="items-center">
@@ -240,6 +250,7 @@ export default function ProfileScreen() {
       </View>
 
       {__DEV__ && <DevStateToggle />}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

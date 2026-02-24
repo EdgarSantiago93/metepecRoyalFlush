@@ -61,6 +61,7 @@ export function SessionScheduleForm({
   const userMap = new Map(users.map((u) => [u.id, u]));
 
   const handleSubmit = async () => {
+    console.log('handleSubmit', selectedHost, selectedDate, location);
     if (!selectedHost || submitting) return;
     setSubmitting(true);
     try {

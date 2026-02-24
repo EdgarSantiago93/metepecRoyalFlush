@@ -1,3 +1,5 @@
+import type { EmbeddedUser } from './user';
+
 // ---------------------------------------------------------------------------
 // Session
 // ---------------------------------------------------------------------------
@@ -57,6 +59,7 @@ export type SessionParticipant = {
   removedByUserId: string | null; // FK → users
 
   createdAt: string; // ISO datetime
+  user?: EmbeddedUser | null; // null for ephemeral guests (leftJoin)
 };
 
 // ---------------------------------------------------------------------------
