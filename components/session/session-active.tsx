@@ -6,7 +6,7 @@ import type { EndingSubmission, Season, SeasonMember, Session, SessionFinalizeNo
 import { IconCalendar } from '@tabler/icons-react-native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PokerHandsButton } from './poker-hands-button';
 import { SessionClosing } from './session-closing';
@@ -94,6 +94,16 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
   const appState = useAppState();
   const [starting, setStarting] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await appState.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [appState]);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
@@ -126,6 +136,9 @@ function SessionScheduled({ session, season, users }: Omit<Props, 'participants'
       className="flex-1 bg-sand-50 dark:bg-sand-900"
       contentContainerClassName="pb-12"
       style={{ paddingTop }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#c49a3c" />
+      }
     >
       {/* Header */}
       <View className="px-6 pb-6">

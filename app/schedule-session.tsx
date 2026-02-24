@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Alert, View } from 'react-native';
-import { Loader } from '@/components/ui/loader';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useAuth } from '@/hooks/use-auth';
-import { useAppState } from '@/hooks/use-app-state';
-import { api } from '@/services/api/client';
 import { SessionScheduleForm } from '@/components/session/session-schedule-form';
+import { Loader } from '@/components/ui/loader';
+import { useAppState } from '@/hooks/use-app-state';
+import { useAuth } from '@/hooks/use-auth';
+import { api } from '@/services/api/client';
 import type { SeasonHostOrder } from '@/types';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { Alert, View } from 'react-native';
 
 export default function ScheduleSessionScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const params = useLocalSearchParams<{ edit?: string }>();
   const auth = useAuth();
   const appState = useAppState();
@@ -17,6 +18,12 @@ export default function ScheduleSessionScreen() {
 
   const [hostOrder, setHostOrder] = useState<SeasonHostOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Prevent back navigation while submitting
+  useLayoutEffect(() => {
+    navigation.setOptions({ gestureEnabled: !submitting });
+  }, [navigation, submitting]);
 
   const season = appState.status === 'season_active' ? appState.season : null;
   const session = appState.status === 'season_active' ? appState.session : null;
@@ -66,6 +73,7 @@ export default function ScheduleSessionScreen() {
       : undefined;
 
   const handleSubmit = async (data: { hostUserId: string; scheduledFor?: string; location?: string }) => {
+    setSubmitting(true);
     try {
       if (isEdit && session) {
         await appState.updateScheduledSession({
@@ -85,6 +93,8 @@ export default function ScheduleSessionScreen() {
       router.back();
     } catch (e) {
       Alert.alert('Error', e instanceof Error ? e.message : 'No se pudo guardar el juego');
+    } finally {
+      setSubmitting(false);
     }
   };
 

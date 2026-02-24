@@ -1,8 +1,10 @@
+import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import type { Season, SeasonMember, User } from '@/types';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PokerHandsButton } from './poker-hands-button';
 
@@ -15,14 +17,33 @@ type Props = {
 export function NoSession({ season, users }: Props) {
   const router = useRouter();
   const auth = useAuth();
+  const appState = useAppState();
   const insets = useSafeAreaInsets();
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
   const isAdmin = currentUser?.isAdmin === true;
   const canSchedule = isTreasurer || isAdmin;
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await appState.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [appState]);
+
   return (
-    <View className="flex-1 items-center justify-center bg-sand-50 px-6 dark:bg-sand-900">
+    <ScrollView
+      className="flex-1 bg-sand-50 dark:bg-sand-900"
+      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerClassName="items-center justify-center px-6"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#c49a3c" />
+      }
+    >
       {/* Poker hands reference button */}
       <View className="absolute right-4" style={{ top: insets.top + 10 }}>
         <PokerHandsButton />
@@ -52,6 +73,6 @@ export function NoSession({ season, users }: Props) {
           Esperando a que el tesorero programe la próxima noche de juego.
         </Text>
       )}
-    </View>
+    </ScrollView>
   );
 }

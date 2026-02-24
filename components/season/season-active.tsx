@@ -1,10 +1,11 @@
+import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
 import type { Season, SeasonHostOrder, SeasonMember, Session, User } from '@/types';
 import { IconArrowsShuffle, IconCards, IconTrophy } from '@tabler/icons-react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
@@ -18,6 +19,7 @@ type Props = {
 export function SeasonActive({ season, members, session, users }: Props) {
   const router = useRouter();
   const auth = useAuth();
+  const appState = useAppState();
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
   const isAdmin = currentUser?.isAdmin === true;
@@ -28,6 +30,16 @@ export function SeasonActive({ season, members, session, users }: Props) {
   const currentMember = members.find((m) => m.userId === currentUser?.id);
 
   const [hostOrder, setHostOrder] = useState<SeasonHostOrder[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await appState.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [appState]);
 
   useEffect(() => {
     api.getHostOrder(season.id).then((res) => {
@@ -46,6 +58,9 @@ export function SeasonActive({ season, members, session, users }: Props) {
       className="flex-1 bg-sand-50 dark:bg-sand-900"
       contentContainerClassName="pb-12"
       style={{ paddingTop }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#c49a3c" />
+      }
     >
       {/* Header */}
       <View className="px-6 pb-6">
