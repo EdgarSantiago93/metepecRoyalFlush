@@ -28,7 +28,7 @@ function makeId(prefix: string): string {
  * Hybrid API client: real auth + mock everything else.
  * Auth methods hit the real backend; non-auth methods use seed data.
  */
-const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo' | 'getActiveSeason' | 'getUsers' | 'createSeason' | 'updateSeasonName' | 'updateTreasurer' | 'startSeason' | 'endSeason' | 'getHostOrder' | 'saveHostOrder' | 'submitDeposit' | 'getDepositSubmissions' | 'reviewDeposit'> = {
+const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | 'updateBankingInfo' | 'getActiveSeason' | 'getUsers' | 'createSeason' | 'updateSeasonName' | 'updateTreasurer' | 'startSeason' | 'endSeason' | 'getHostOrder' | 'saveHostOrder' | 'submitDeposit' | 'getDepositSubmissions' | 'reviewDeposit' | 'scheduleSession' | 'getSessionDetail'> = {
   async getActiveSession() {
     await delay(200);
     return { session: mockStore.session };
@@ -127,44 +127,7 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
     return { payout };
   },
 
-  // ---------------------------------------------------------------------------
-  // Session scheduling
-  // ---------------------------------------------------------------------------
-
-  async scheduleSession(req) {
-    await delay(500);
-    const now = new Date().toISOString();
-
-    if (!mockStore.season || mockStore.season.id !== req.seasonId) {
-      throw new Error('Season not found');
-    }
-    if (mockStore.season.status !== 'active') {
-      throw new Error('Season must be active to schedule a session');
-    }
-    if (mockStore.session && mockStore.session.state !== 'finalized') {
-      throw new Error('A non-finalized session already exists');
-    }
-
-    const session = {
-      id: makeId('01SS'),
-      seasonId: req.seasonId,
-      state: 'scheduled' as const,
-      hostUserId: req.hostUserId,
-      scheduledFor: req.scheduledFor ?? null,
-      location: req.location ?? null,
-      scheduledAt: now,
-      scheduledByUserId: getCurrentUserId(),
-      startedAt: null,
-      startedByUserId: null,
-      endedAt: null,
-      endedByUserId: null,
-      finalizedAt: null,
-      finalizedByUserId: null,
-    };
-
-    mockStore.session = session;
-    return { session };
-  },
+  // scheduleSession — wired to HTTP client (httpSeason)
 
   async updateScheduledSession(req) {
     await delay(400);
@@ -696,28 +659,6 @@ const mockApi: Omit<ApiClient, 'sendMagicLink' | 'verifyMagicLink' | 'getMe' | '
     return { sessions };
   },
 
-  async getSessionDetail(sessionId: string) {
-    await delay(300);
-    // Find in finalized history or current session
-    const session =
-      mockStore.finalizedSessions.find((s) => s.id === sessionId) ??
-      (mockStore.session?.id === sessionId ? mockStore.session : null);
-    if (!session) throw new Error('Session not found');
-
-    const participants = mockStore.sessionParticipants.filter(
-      (p) => p.sessionId === sessionId && p.removedAt === null,
-    );
-    const injections = mockStore.sessionInjections.filter(
-      (inj) => inj.sessionId === sessionId,
-    );
-    const endingSubmissions = mockStore.endingSubmissions.filter(
-      (s) => s.sessionId === sessionId,
-    );
-    const finalizeNote =
-      mockStore.sessionFinalizeNotes.find((n) => n.sessionId === sessionId) ?? null;
-
-    return { session, participants, injections, endingSubmissions, finalizeNote };
-  },
 };
 
 export const api: ApiClient = {

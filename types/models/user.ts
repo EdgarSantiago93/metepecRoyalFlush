@@ -11,3 +11,12 @@ export type User = {
   bankingClabe: string | null;
   createdAt: string; // ISO datetime
 };
+
+/** Subset of User embedded in enriched API responses (members, participants, host order). */
+export type EmbeddedUser = {
+  id: string;
+  displayName: string;
+  email: string;
+  isAdmin: boolean;
+  avatarMediaId?: string | null;
+};

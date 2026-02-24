@@ -38,6 +38,7 @@ export default function SeasonScreen() {
         <SeasonActive
           season={appState.season}
           members={appState.members}
+          hostOrder={appState.hostOrder}
           session={appState.session}
           users={appState.users}
         />

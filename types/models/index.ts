@@ -1,4 +1,4 @@
-export type { User } from './user';
+export type { User, EmbeddedUser } from './user';
 
 export type {
   SeasonStatus,

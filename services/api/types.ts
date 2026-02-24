@@ -19,9 +19,19 @@ export type GetMeResponse = {
 // Season / Session responses
 // ---------------------------------------------------------------------------
 
+export type EnrichedSessionResponse = {
+  session: Session;
+  participants: SessionParticipant[];
+  injections: SessionInjection[];
+  endingSubmissions: EndingSubmission[];
+  finalizeNote: SessionFinalizeNote | null;
+};
+
 export type GetActiveSeasonResponse = {
   season: Season | null;
   members: SeasonMember[];
+  hostOrder: SeasonHostOrder[];
+  currentSession: EnrichedSessionResponse | null;
 };
 
 export type GetActiveSessionResponse = {

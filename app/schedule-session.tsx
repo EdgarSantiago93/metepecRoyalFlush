@@ -2,8 +2,6 @@ import { SessionScheduleForm } from '@/components/session/session-schedule-form'
 import { Loader } from '@/components/ui/loader';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
-import { api } from '@/services/api/client';
-import type { SeasonHostOrder } from '@/types';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { Alert, View } from 'react-native';
@@ -16,9 +14,8 @@ export default function ScheduleSessionScreen() {
   const appState = useAppState();
   const isEdit = params.edit === '1';
 
-  const [hostOrder, setHostOrder] = useState<SeasonHostOrder[]>([]);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const hostOrder = appState.status === 'season_active' ? appState.hostOrder : [];
 
   // Prevent back navigation while submitting
   useLayoutEffect(() => {
@@ -46,16 +43,7 @@ export default function ScheduleSessionScreen() {
     }
   }, [currentUser, isTreasurer, isAdmin, router]);
 
-  // Load host order
-  useEffect(() => {
-    if (!season) return;
-    api.getHostOrder(season.id).then((res) => {
-      setHostOrder(res.hostOrder);
-      setLoading(false);
-    });
-  }, [season]);
-
-  if (loading) {
+  if (appState.status === 'loading') {
     return (
       <View className="flex-1 items-center justify-center bg-sand-50 dark:bg-sand-900">
         <Loader size={80} />

@@ -1,10 +1,9 @@
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
-import { api } from '@/services/api/client';
 import type { Season, SeasonHostOrder, SeasonMember, Session, User } from '@/types';
 import { IconArrowsShuffle, IconCards, IconTrophy } from '@tabler/icons-react-native';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,11 +11,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type Props = {
   season: Season;
   members: SeasonMember[];
+  hostOrder: SeasonHostOrder[];
   session: Session | null;
   users: User[];
 };
 
-export function SeasonActive({ season, members, session, users }: Props) {
+export function SeasonActive({ season, members, hostOrder: hostOrderProp, session, users }: Props) {
   const router = useRouter();
   const auth = useAuth();
   const appState = useAppState();
@@ -29,8 +29,8 @@ export function SeasonActive({ season, members, session, users }: Props) {
   const approvedCount = members.filter((m) => m.approvalStatus === 'approved').length;
   const currentMember = members.find((m) => m.userId === currentUser?.id);
 
-  const [hostOrder, setHostOrder] = useState<SeasonHostOrder[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const hostOrder = [...hostOrderProp].sort((a, b) => a.sortIndex - b.sortIndex);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -40,12 +40,6 @@ export function SeasonActive({ season, members, session, users }: Props) {
       setRefreshing(false);
     }
   }, [appState]);
-
-  useEffect(() => {
-    api.getHostOrder(season.id).then((res) => {
-      setHostOrder(res.hostOrder.sort((a, b) => a.sortIndex - b.sortIndex));
-    });
-  }, [season.id]);
 
   const userMap = new Map(users.map((u) => [u.id, u]));
   const colorScheme = useColorScheme();
