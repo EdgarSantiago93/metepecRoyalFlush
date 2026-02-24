@@ -49,7 +49,7 @@ export type CreateSeasonResponse = {
 export type SubmitDepositRequest = {
   seasonId: string;
   userId: string;
-  mediaKey: string;
+  mediaId: string;
   note?: string;
 };
 

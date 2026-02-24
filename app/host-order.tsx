@@ -30,8 +30,14 @@ export default function HostOrderScreen() {
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isAdmin = currentUser?.isAdmin === true;
-  const season = appState.status === 'season_setup' ? appState.season : null;
-  const users = appState.status === 'season_setup' ? appState.users : [];
+  const season =
+    appState.status === 'season_setup' || appState.status === 'season_active' || appState.status === 'season_ended'
+      ? appState.season
+      : null;
+  const users =
+    appState.status === 'season_setup' || appState.status === 'season_active' || appState.status === 'season_ended'
+      ? appState.users
+      : [];
 
   const getUserName = (userId: string) =>
     users.find((u) => u.id === userId)?.displayName ?? 'Unknown';

@@ -54,6 +54,7 @@ export type AppStateContextValue = AppState & {
   updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<void>;
   refreshPayouts: () => Promise<void>;
   refresh: () => Promise<void>;
+  refreshIfStale: (thresholdMs: number) => void;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
 
@@ -66,10 +67,13 @@ export const AppStateContext = createContext<AppStateContextValue | null>(null);
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>({ status: 'loading' });
   const devPresetKeyRef = useRef<PresetKey | null>(null);
+  const lastFetchedAtRef = useRef<number>(0);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (opts?: { silent?: boolean }) => {
     const _devPresetKey = devPresetKeyRef.current;
-    setState({ status: 'loading', _devPresetKey });
+    if (!opts?.silent) {
+      setState({ status: 'loading', _devPresetKey });
+    }
     try {
       const [seasonRes, sessionRes, usersRes] = await Promise.all([
         api.getActiveSeason(),
@@ -112,6 +116,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         const payoutsRes = await api.getPayouts(season.id);
         setState({ status: 'season_ended', season, members, users, payouts: payoutsRes.payouts, _devPresetKey });
       }
+      lastFetchedAtRef.current = Date.now();
     } catch (err) {
       setState({
         status: 'error',
@@ -502,6 +507,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [load],
   );
 
+  const refreshIfStale = useCallback(
+    (thresholdMs: number) => {
+      if (Date.now() - lastFetchedAtRef.current > thresholdMs) {
+        load({ silent: true });
+      }
+    },
+    [load],
+  );
+
   const value = useMemo<AppStateContextValue>(
     () => ({
       ...state,
@@ -535,9 +549,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       updateBankingInfo,
       refreshPayouts,
       refresh: load,
+      refreshIfStale,
       _devSetPreset,
     }),
-    [state, createSeason, startSeason, updateSeasonName, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, addGuest, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, sendPayout, confirmPayout, disputePayout, resolvePayout, updateBankingInfo, refreshPayouts, load, _devSetPreset],
+    [state, createSeason, startSeason, updateSeasonName, updateTreasurer, scheduleSession, updateScheduledSession, startSession, checkIn, confirmStart, disputeStart, removeParticipant, addGuest, moveToInProgress, refreshParticipants, requestRebuy, reviewInjection, endSession, refreshInjections, submitEndingStack, reviewEndingSubmission, refreshEndingSubmissions, finalizeSession, endSeason, sendPayout, confirmPayout, disputePayout, resolvePayout, updateBankingInfo, refreshPayouts, load, refreshIfStale, _devSetPreset],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

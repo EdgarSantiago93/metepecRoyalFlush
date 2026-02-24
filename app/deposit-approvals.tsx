@@ -9,8 +9,9 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
 import type { ApprovalStatus, SeasonDepositSubmission } from '@/types';
-import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { HeaderBackButton } from '@react-navigation/elements';
+import { useNavigation, useRouter } from 'expo-router';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 type FilterTab = 'all' | ApprovalStatus;
 
@@ -26,6 +27,15 @@ export default function DepositApprovalsScreen() {
   const auth = useAuth();
   const appState = useAppState();
   const router = useRouter();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <HeaderBackButton label="Atrás" tintColor="#c49a3c" onPress={() => router.back()} />
+      ),
+    });
+  }, [navigation, router]);
 
   const [filter, setFilter] = useState<FilterTab>('all');
   const [submissions, setSubmissions] = useState<SeasonDepositSubmission[]>([]);
