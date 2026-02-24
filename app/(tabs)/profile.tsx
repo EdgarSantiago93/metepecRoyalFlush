@@ -4,7 +4,7 @@ import { UserAvatar } from '@/components/ui/user-avatar';
 import { useAuth } from '@/hooks/use-auth';
 import { uploadMedia } from '@/services/media/upload';
 import { pickMedia } from '@/utils/media-picker';
-import { IconCheck, IconCreditCard, IconPencil, IconX } from '@tabler/icons-react-native';
+import { IconCamera, IconCheck, IconCopy, IconCreditCard, IconLogout, IconPencil, IconPokerChip, IconX } from '@tabler/icons-react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -128,12 +128,13 @@ export default function ProfileScreen() {
     );
   };
 
+  const hasBankingData = BANK_FIELDS.some(({ key }) => user[key]?.trim());
+
   return (
     <View className="flex-1 bg-sand-50 dark:bg-sand-900" style={{ paddingTop: inset.top }}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-12"
-        contentContainerStyle={{ paddingTop: 10 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -144,21 +145,25 @@ export default function ProfileScreen() {
           />
         }
       >
-      {/* Profile header */}
-      <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+      {/* ── Profile header — felt-tinted hero strip ── */}
+      <View className="bg-felt-50 px-6 pb-8 pt-10 dark:bg-felt-900/20">
         <View className="items-center">
-          <Pressable className="relative mb-4 active:opacity-70" onPress={handleAvatarPress}>
+          <Pressable className="relative mb-5 active:opacity-80" onPress={handleAvatarPress}>
             <UserAvatar
               displayName={user.displayName}
               avatarMediaId={user.avatarMediaId}
               localUri={avatarLocalUri}
-              size={80}
-              fallbackClassName="bg-felt-100 dark:bg-felt-900"
-              fallbackTextClassName="text-3xl font-sans-bold text-felt-600 dark:text-felt-300"
+              size={88}
+              fallbackClassName="bg-felt-200 dark:bg-felt-800"
+              fallbackTextClassName="text-3xl font-sans-bold text-felt-700 dark:text-felt-300"
             />
-            {uploadingAvatar && (
+            {uploadingAvatar ? (
               <View className="absolute inset-0 items-center justify-center rounded-full bg-black/40">
                 <ActivityIndicator size="small" color="#fff" />
+              </View>
+            ) : (
+              <View className="absolute -bottom-0.5 -right-0.5 h-7 w-7 items-center justify-center rounded-full border-2 border-felt-50 bg-felt-600 dark:border-felt-900">
+                <IconCamera size={14} color="#fff" />
               </View>
             )}
           </Pressable>
@@ -169,7 +174,7 @@ export default function ProfileScreen() {
             {user.email}
           </Text>
           {user.isAdmin && (
-            <View className="mt-2 rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
+            <View className="mt-3 rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
               <Text className="text-xs font-sans-semibold text-gold-700 dark:text-gold-300">
                 Admin
               </Text>
@@ -178,8 +183,8 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Datos de cuenta */}
-      <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+      {/* ── Banking data ── */}
+      <View className="px-6 py-6">
         <View className="mb-4 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <IconCreditCard size={18} color={iconColor} />
@@ -225,63 +230,80 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        <View className="rounded-xl border border-sand-300 bg-sand-200 p-4 dark:border-sand-600 dark:bg-sand-700">
-          {BANK_FIELDS.map(({ key, label }) => {
-            if (editing) {
+        {editing ? (
+          <View className="rounded-xl bg-sand-100 p-4 dark:bg-sand-800">
+            {BANK_FIELDS.map(({ key, label }) => (
+              <View key={key} className="mb-3 last:mb-0">
+                <Text className="mb-1 font-mono text-sm text-sand-600 dark:text-sand-400">{label}</Text>
+                <AppTextInput
+                  size="sm"
+                  value={draft[key]}
+                  onChangeText={(text) => setDraft((prev) => ({ ...prev, [key]: text }))}
+                  placeholder={label}
+                  editable={!saving}
+                />
+              </View>
+            ))}
+          </View>
+        ) : hasBankingData ? (
+          <View className="rounded-xl bg-sand-100 p-4 dark:bg-sand-800">
+            {BANK_FIELDS.map(({ key, label }) => {
+              const value = user[key];
+              if (!value?.trim()) return null;
               return (
-                <View key={key} className="mb-3 last:mb-0">
-                  <Text className="mb-1 font-mono text-sm text-sand-600 dark:text-sand-400">{label}</Text>
-                  <AppTextInput
-                    size="sm"
-                    value={draft[key]}
-                    onChangeText={(text) => setDraft((prev) => ({ ...prev, [key]: text }))}
-                    placeholder={label}
-                    editable={!saving}
-                  />
-                </View>
+                <Pressable
+                  key={key}
+                  className="mb-3 flex-row items-center justify-between active:opacity-70 last:mb-0"
+                  onPress={() => copyToClipboard(value, label)}
+                >
+                  <View className="flex-1">
+                    <Text className="font-mono text-xs text-sand-500 dark:text-sand-400">{label}</Text>
+                    <Text className="font-mono-bold text-sm text-sand-900 dark:text-sand-100" numberOfLines={1}>
+                      {value}
+                    </Text>
+                  </View>
+                  <IconCopy size={14} color={iconColor} />
+                </Pressable>
               );
-            }
-
-            const value = user[key];
-            const display = value?.trim() || '\u2014';
-            return (
-              <Pressable
-                key={key}
-                className="mb-3 active:opacity-70 last:mb-0"
-                onPress={() => value ? copyToClipboard(value, label) : undefined}
-                disabled={!value}
-              >
-                <Text className="font-mono text-sm text-sand-600 dark:text-sand-400">{label}</Text>
-                <Text className="font-mono-bold text-sm text-sand-900 dark:text-sand-100" numberOfLines={1}>
-                  {display}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+            })}
+          </View>
+        ) : (
+          <Pressable
+            className="items-center rounded-xl border border-dashed border-sand-300 py-6 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
+            onPress={startEditing}
+          >
+            <Text className="mb-1 text-sm font-sans-semibold text-sand-500 dark:text-sand-400">
+              Sin datos bancarios
+            </Text>
+            <Text className="text-xs text-sand-400 dark:text-sand-500">
+              Toca para agregar tus datos de pago
+            </Text>
+          </Pressable>
+        )}
       </View>
 
-      {/* Contador de fichas (admin only) */}
-      {user.isAdmin && (
-        <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+      {/* ── Actions — tighter group at the bottom ── */}
+      <View className="border-t border-sand-200 px-6 pt-4 dark:border-sand-700">
+        {/* Chip counter (admin only) */}
+        {user.isAdmin && (
           <Pressable
-            className="flex-row items-center justify-center gap-2 rounded-full bg-felt-600 py-3.5 active:bg-felt-700"
+            className="mb-3 flex-row items-center justify-center gap-2 rounded-full bg-felt-600 py-3 active:bg-felt-700"
             onPress={() => router.push('/chip-counter')}
           >
+            <IconPokerChip size={18} color="#fff" />
             <Text className="text-sm font-sans-semibold text-white">
               Contador de Fichas
             </Text>
           </Pressable>
-        </View>
-      )}
+        )}
 
-      {/* Cerrar sesion */}
-      <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
+        {/* Logout — outlined, secondary */}
         <Pressable
-          className="items-center rounded-full bg-red-600 py-3.5 active:bg-red-700"
+          className="flex-row items-center justify-center gap-2 rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600 dark:active:bg-sand-800"
           onPress={logout}
         >
-          <Text className="text-sm font-sans-semibold text-white">
+          <IconLogout size={16} color={colorScheme === 'dark' ? '#b5ac9e' : '#736a5e'} />
+          <Text className="text-sm font-sans-semibold text-sand-600 dark:text-sand-400">
             Cerrar sesion
           </Text>
         </Pressable>
