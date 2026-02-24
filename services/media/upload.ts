@@ -78,10 +78,12 @@ async function generateBlurhash(imageUri: string): Promise<string | null> {
 }
 
 type UploadMediaResult = {
+  mediaId: string;
   mediaKey: string;
 };
 
 type PresignedUrlResponse = {
+  mediaId: string;
   r2Key: string;
   uploadUrl: string;
 };
@@ -116,7 +118,7 @@ export async function uploadMedia(
 
   // 3. Get presigned URL
   const filename = `upload-${Date.now()}.jpg`;
-  const { r2Key, uploadUrl } = await apiFetch<PresignedUrlResponse>('/media/upload-url', {
+  const { mediaId, r2Key, uploadUrl } = await apiFetch<PresignedUrlResponse>('/media/upload-url', {
     method: 'POST',
     body: JSON.stringify({
       contentType: 'image/jpeg',
@@ -130,7 +132,7 @@ export async function uploadMedia(
   await putFileToUrl(manipulated.uri, uploadUrl, 'image/jpeg');
 
   // 5. Return the media key (R2 key used to resolve the public URL later)
-  return { mediaKey: r2Key };
+  return { mediaId, mediaKey: r2Key };
 }
 
 /**

@@ -1,8 +1,6 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { Loader } from '@/components/ui/loader';
-import { MediaImage } from '@/components/ui/media-image';
-import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
@@ -60,11 +58,11 @@ export default function DepositUploadScreen() {
     if (!photoUri || !season || !currentUser || submitting) return;
     setSubmitting(true);
     try {
-      const { mediaKey } = await uploadMedia(photoUri, { compress: 0.4 });
+      const { mediaId } = await uploadMedia(photoUri, { compress: 0.4 });
       await api.submitDeposit({
         seasonId: season.id,
         userId: currentUser.id,
-        mediaKey,
+        mediaId,
         note: note.trim() || undefined,
       });
       await appState.refresh();
@@ -107,46 +105,9 @@ export default function DepositUploadScreen() {
     );
   }
 
-  // Pending submission
-  if (currentMember?.approvalStatus === 'pending' && existingSubmission) {
-    return (
-      <View className="flex-1 bg-sand-50 dark:bg-sand-900">
-        <ScrollView className="flex-1" contentContainerClassName="items-center px-6 py-8">
-          <StatusBadge variant="pending" />
-          <Text className="mt-4 mb-2 text-xl font-heading text-sand-950 dark:text-sand-50">
-            En Revisión
-          </Text>
-          <Text className="mb-6 text-center text-sm text-sand-500 dark:text-sand-400">
-            Tu comprobante de depósito está siendo revisado por el tesorero.
-          </Text>
-          {existingSubmission.mediaKey && (
-            <View className="mb-4 w-full">
-              <MediaImage
-                mediaKey={existingSubmission.mediaKey}
-                variant="pressable"
-                height={200}
-                className="overflow-hidden rounded-xl border border-sand-200 dark:border-sand-700"
-              />
-            </View>
-          )}
-          {existingSubmission.note && (
-            <Text className="mb-4 text-sm text-sand-500 dark:text-sand-400">
-              Nota: {existingSubmission.note}
-            </Text>
-          )}
-          <Pressable
-            className="rounded-full bg-gold-500 px-6 py-3 active:bg-gold-600"
-            onPress={() => router.back()}
-          >
-            <Text className="text-base font-semibold text-white">Regresar al Inicio</Text>
-          </Pressable>
-        </ScrollView>
-      </View>
-    );
-  }
-
   // Rejected — show note + allow re-upload
   const showRejectionNote = currentMember?.approvalStatus === 'rejected' && currentMember.rejectionNote;
+  const showPendingWarning = currentMember?.approvalStatus === 'pending' && existingSubmission;
 
   return (
     <View className="flex-1 bg-sand-50 dark:bg-sand-900" pointerEvents={submitting ? 'none' : 'auto'}>
@@ -158,6 +119,18 @@ export default function DepositUploadScreen() {
             </Text>
             <Text className="text-sm text-red-600 dark:text-red-400">
               {currentMember.rejectionNote}
+            </Text>
+          </View>
+        )}
+
+        {showPendingWarning && (
+          <View className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+            <Text className="mb-1 text-sm font-semibold text-amber-700 dark:text-amber-300">
+              Comprobante en Revisión
+            </Text>
+            <Text className="text-sm text-amber-600 dark:text-amber-400">
+              Ya tienes un comprobante pendiente de revisión. Si envías uno nuevo, el anterior será
+              reemplazado.
             </Text>
           </View>
         )}

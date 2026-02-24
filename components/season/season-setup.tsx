@@ -7,9 +7,9 @@ import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/services/api/client';
 import type { Season, SeasonHostOrder, SeasonMember, User } from '@/types';
 import { IconClipboardCheck, IconUsers } from '@tabler/icons-react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
@@ -26,6 +26,7 @@ export function SeasonSetup({ season, members, users }: Props) {
   const [hostOrder, setHostOrder] = useState<SeasonHostOrder[]>([]);
   const [starting, setStarting] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
@@ -36,10 +37,7 @@ export function SeasonSetup({ season, members, users }: Props) {
   const canStart = approvedCount >= 2;
 
   const currentMember = members.find((m) => m.userId === currentUser?.id);
-  const needsDeposit =
-    currentMember &&
-    (currentMember.approvalStatus === 'not_submitted' ||
-      currentMember.approvalStatus === 'rejected');
+  const needsDeposit = currentMember && currentMember.approvalStatus !== 'approved';
 
   const hasActions = needsDeposit || isTreasurer || isAdmin;
 
@@ -52,6 +50,19 @@ export function SeasonSetup({ season, members, users }: Props) {
   useEffect(() => {
     api.getHostOrder(season.id).then((res) => setHostOrder(res.hostOrder));
   }, [season.id]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    appState.refreshIfStale(0);
+    // Give the silent refresh a moment to land, then stop the spinner
+    setTimeout(() => setRefreshing(false), 1000);
+  }, [appState]);
+
+  useFocusEffect(
+    useCallback(() => {
+      appState.refreshIfStale(30_000);
+    }, [appState]),
+  );
 
   const handleStartSeason = useCallback(async () => {
     if (starting) return;
@@ -73,6 +84,9 @@ export function SeasonSetup({ season, members, users }: Props) {
       className="flex-1 bg-sand-50 dark:bg-sand-900"
       contentContainerClassName="pb-12"
       style={{ paddingTop }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#c49a3c" />
+      }
     >
       {/* Header */}
       <View className="px-6 pb-6">
@@ -82,7 +96,7 @@ export function SeasonSetup({ season, members, users }: Props) {
         <View className="flex-row items-center gap-2">
           <View className="rounded-full bg-gold-100 px-3 py-1 dark:bg-gold-900">
             <Text className="text-xs font-semibold text-gold-700 dark:text-gold-300">
-              Configuracións
+              Configuración
             </Text>
           </View>
           <Text className="text-sm text-sand-500 dark:text-sand-400">

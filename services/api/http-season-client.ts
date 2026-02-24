@@ -89,7 +89,7 @@ export const httpSeason = {
     return apiFetch<SubmitDepositResponse>(`/seasons/${req.seasonId}/deposits`, {
       method: 'POST',
       body: JSON.stringify({
-        mediaKey: req.mediaKey,
+        mediaId: req.mediaId,
         ...(req.note ? { note: req.note } : {}),
       }),
     });
