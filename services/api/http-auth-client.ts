@@ -1,5 +1,5 @@
 import { emitGlobalError } from './global-error';
-import type { GetMeResponse, SendMagicLinkResponse, UpdateBankingInfoRequest, UpdateBankingInfoResponse, VerifyMagicLinkResponse } from './types';
+import type { GetMeResponse, SendMagicLinkResponse, UpdateAvatarResponse, UpdateBankingInfoRequest, UpdateBankingInfoResponse, VerifyMagicLinkResponse } from './types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 const __DEV__ = process.env.NODE_ENV !== 'production';
@@ -99,6 +99,15 @@ export const httpAuth = {
     const user = await apiFetch<UpdateBankingInfoResponse['user']>(`/users/${_authUserId}`, {
       method: 'PATCH',
       body: JSON.stringify(req),
+    });
+    return { user };
+  },
+
+  async updateAvatar(req: { mediaId: string }): Promise<UpdateAvatarResponse> {
+    if (!_authUserId) throw new Error('No authenticated session');
+    const user = await apiFetch<UpdateAvatarResponse['user']>(`/users/${_authUserId}/avatar`, {
+      method: 'POST',
+      body: JSON.stringify({ mediaId: req.mediaId }),
     });
     return { user };
   },

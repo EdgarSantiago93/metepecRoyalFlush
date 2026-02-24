@@ -12,6 +12,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: 'BBVA',
     bankingClabe: '012345678901234567',
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=1',
   },
   {
@@ -24,6 +25,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: 'Banorte',
     bankingClabe: '987654321098765432',
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=2',
   },
   {
@@ -36,6 +38,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: 'Santander',
     bankingClabe: '112233445566778899',
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=3',
   },
   {
@@ -48,6 +51,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: null,
     bankingClabe: null,
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=4',
   },
   {
@@ -60,6 +64,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: 'HSBC',
     bankingClabe: null,
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=5',
   },
   {
@@ -72,6 +77,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: null,
     bankingClabe: null,
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=6',
   },
   {
@@ -84,6 +90,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: 'Citibanamex',
     bankingClabe: '667788990011223344',
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=69',
   },
   {
@@ -96,6 +103,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: null,
     bankingClabe: null,
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=7',
   },
   {
@@ -108,6 +116,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: null,
     bankingClabe: null,
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=8',
   },
   {
@@ -120,6 +129,7 @@ export const SEED_USERS: User[] = [
     bankingBanco: null,
     bankingClabe: null,
     createdAt: '2025-01-01T00:00:00.000Z',
+    avatarMediaId: null,
     avatarUrl: 'https://placedog.net/100/100?random=9',
   },
 ];

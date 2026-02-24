@@ -1,6 +1,9 @@
 import { DevStateToggle } from '@/components/profile/dev-state-toggle';
 import { AppTextInput } from '@/components/ui/app-text-input';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { useAuth } from '@/hooks/use-auth';
+import { uploadMedia } from '@/services/media/upload';
+import { pickMedia } from '@/utils/media-picker';
 import { IconCheck, IconCreditCard, IconPencil, IconX } from '@tabler/icons-react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
@@ -29,6 +32,8 @@ export default function ProfileScreen() {
   const refreshTint = colorScheme === 'dark' ? '#72c496' : '#1a7d52';
 
   const [refreshing, setRefreshing] = useState(false);
+  const [avatarLocalUri, setAvatarLocalUri] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<Record<BankingKey, string>>({
@@ -46,6 +51,29 @@ export default function ProfileScreen() {
       setRefreshing(false);
     }
   }, [auth]);
+
+  const handleAvatarPress = useCallback(async () => {
+    if (uploadingAvatar) return;
+    const localUri = await pickMedia({ quality: 0.8 });
+    if (!localUri) return;
+
+    setAvatarLocalUri(localUri);
+    setUploadingAvatar(true);
+    try {
+      const { mediaId } = await uploadMedia(localUri);
+      await auth.updateAvatar(mediaId);
+      setAvatarLocalUri(null);
+    } catch (e) {
+      setAvatarLocalUri(null);
+      Toast.showWithGravity(
+        e instanceof Error ? e.message : 'Error al subir foto',
+        Toast.SHORT,
+        Toast.TOP,
+      );
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }, [auth, uploadingAvatar]);
 
   if (auth.status !== 'authenticated') {
     return null;
@@ -119,11 +147,21 @@ export default function ProfileScreen() {
       {/* Profile header */}
       <View className="border-b border-sand-200 px-6 py-6 dark:border-sand-700">
         <View className="items-center">
-          <View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-felt-100 dark:bg-felt-900">
-            <Text className="text-3xl font-sans-bold text-felt-600 dark:text-felt-300">
-              {user.displayName.charAt(0)}
-            </Text>
-          </View>
+          <Pressable className="relative mb-4 active:opacity-70" onPress={handleAvatarPress}>
+            <UserAvatar
+              displayName={user.displayName}
+              avatarMediaId={user.avatarMediaId}
+              localUri={avatarLocalUri}
+              size={80}
+              fallbackClassName="bg-felt-100 dark:bg-felt-900"
+              fallbackTextClassName="text-3xl font-sans-bold text-felt-600 dark:text-felt-300"
+            />
+            {uploadingAvatar && (
+              <View className="absolute inset-0 items-center justify-center rounded-full bg-black/40">
+                <ActivityIndicator size="small" color="#fff" />
+              </View>
+            )}
+          </Pressable>
           <Text className="text-2xl font-heading text-sand-950 dark:text-sand-50">
             {user.displayName}
           </Text>

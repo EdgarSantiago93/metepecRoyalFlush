@@ -1,5 +1,6 @@
 import { AppTextInput } from '@/components/ui/app-text-input';
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import type { User } from '@/types';
 import { useState } from 'react';
 import {
@@ -74,20 +75,14 @@ export function CreateSeasonForm({ users, onSubmit, onCancel }: Props) {
                 onPress={() => setSelectedTreasurer(user.id)}
                 disabled={submitting}
               >
-                <View
-                  className={`mr-3 h-10 w-10 items-center justify-center rounded-full ${
-                    isSelected
-                      ? 'bg-felt-600'
-                      : 'bg-sand-200 dark:bg-sand-600'
-                  }`}
-                >
-                  <Text
-                    className={`text-lg font-bold ${
-                      isSelected ? 'text-white' : 'text-sand-600 dark:text-sand-300'
-                    }`}
-                  >
-                    {user.displayName.charAt(0)}
-                  </Text>
+                <View className="mr-3">
+                  <UserAvatar
+                    displayName={user.displayName}
+                    avatarMediaId={user.avatarMediaId}
+                    size={40}
+                    fallbackClassName={isSelected ? 'bg-felt-600' : 'bg-sand-200 dark:bg-sand-600'}
+                    fallbackTextClassName={`text-lg font-bold ${isSelected ? 'text-white' : 'text-sand-600 dark:text-sand-300'}`}
+                  />
                 </View>
                 <View className="flex-1">
                   <Text

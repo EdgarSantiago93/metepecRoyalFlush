@@ -5,6 +5,7 @@ export type User = {
   displayName: string;
   isAdmin: boolean;
   avatarUrl: string | null;
+  avatarMediaId: string | null;
   bankingNombre: string | null;
   bankingCuenta: string | null;
   bankingBanco: string | null;

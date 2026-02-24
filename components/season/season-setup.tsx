@@ -226,6 +226,7 @@ export function SeasonSetup({ season, members, users }: Props) {
               >
                 <MemberRow
                   name={getUserName(member.userId)}
+                  avatarMediaId={users.find((u) => u.id === member.userId)?.avatarMediaId}
                   right={
                     <View className="flex-row items-center gap-2">
                       {hostPos >= 0 && (

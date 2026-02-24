@@ -76,6 +76,7 @@ function deriveUsers(members: SeasonMember[]): User[] {
       displayName: m.user.displayName,
       isAdmin: m.user.isAdmin,
       avatarUrl: null,
+      avatarMediaId: m.user.avatarMediaId ?? null,
       bankingNombre: null,
       bankingCuenta: null,
       bankingBanco: null,
