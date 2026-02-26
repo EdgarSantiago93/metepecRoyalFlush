@@ -4,7 +4,9 @@ import {
   DEFAULT_CONFIDENCE,
   DEFAULT_OVERLAP,
   type ChipCountResult,
+  type EditTarget,
   type ManualChip,
+  type PredictionOverride,
   type RoboflowPrediction,
 } from '@/types/chip-counter';
 import { Image } from 'expo-image';
@@ -130,8 +132,8 @@ export function ResultsView({
   imageWidth,
   imageHeight,
   predictions,
-  results: initialResults,
-  grandTotal: initialGrandTotal,
+  results: _initialResults,
+  grandTotal: _initialGrandTotal,
   loading,
   error,
   onRetry,
@@ -144,6 +146,8 @@ export function ResultsView({
   const [confidence, setConfidence] = useState(DEFAULT_CONFIDENCE);
   const [overlap, setOverlap] = useState(DEFAULT_OVERLAP);
   const [showBoxes, setShowBoxes] = useState(false);
+  const [predictionOverrides, setPredictionOverrides] = useState<Map<string, PredictionOverride>>(new Map());
+  const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
 
   const onImageLayout = (e: LayoutChangeEvent) => {
     setContainerSize({
@@ -168,63 +172,80 @@ export function ResultsView({
     };
   }, [containerSize, imageWidth, imageHeight]);
 
-  // Merge initial results with manual chips
+  // Compute results from raw predictions + overrides + manual chips
   const { mergedResults, mergedGrandTotal, totalChips } = useMemo(() => {
     const countMap = new Map<string, ChipCountResult>();
-    for (const r of initialResults) {
-      countMap.set(r.chipClass, { ...r });
-    }
-    for (const mc of manualChips) {
-      const existing = countMap.get(mc.chipClass);
+
+    const addChip = (chipClass: string) => {
+      const config = CHIP_MAP[chipClass];
+      if (!config) return;
+      const existing = countMap.get(chipClass);
       if (existing) {
         existing.count += 1;
         existing.total = existing.count * existing.value;
       } else {
-        const config = CHIP_MAP[mc.chipClass];
-        if (config) {
-          countMap.set(mc.chipClass, {
-            chipClass: mc.chipClass,
-            label: config.label,
-            count: 1,
-            value: config.value,
-            total: config.value,
-            color: config.color,
-            bgColor: config.bgColor,
-          });
-        }
+        countMap.set(chipClass, {
+          chipClass,
+          label: config.label,
+          count: 1,
+          value: config.value,
+          total: config.value,
+          color: config.color,
+          bgColor: config.bgColor,
+        });
       }
+    };
+
+    // Count API predictions with overrides applied
+    for (const p of predictions) {
+      const override = predictionOverrides.get(p.detection_id);
+      if (override?.action === 'remove') continue;
+      const chipClass = override?.action === 'change' ? override.newChipClass : p.class;
+      addChip(chipClass);
     }
+
+    // Count manual chips
+    for (const mc of manualChips) {
+      addChip(mc.chipClass);
+    }
+
     const merged = Array.from(countMap.values()).sort((a, b) => b.value - a.value);
     const total = merged.reduce((sum, r) => sum + r.total, 0);
     const chips = merged.reduce((sum, r) => sum + r.count, 0);
     return { mergedResults: merged, mergedGrandTotal: total, totalChips: chips };
-  }, [initialResults, manualChips]);
+  }, [predictions, predictionOverrides, manualChips]);
 
-  // Bounding box rects + center dots for API predictions
+  // Bounding box rects + center dots for API predictions (with overrides applied)
   const detectionElements = useMemo(() => {
     if (!displayRect) return [];
-    return predictions.map((p) => {
-      const config = CHIP_MAP[p.class];
-      const color = config?.color ?? '#FFFFFF';
-      const cx = p.x * displayRect.scale + displayRect.offsetX;
-      const cy = p.y * displayRect.scale + displayRect.offsetY;
-      const w = p.width * displayRect.scale;
-      const h = p.height * displayRect.scale;
-      return {
-        id: p.detection_id,
-        // Box
-        boxX: cx - w / 2,
-        boxY: cy - h / 2,
-        boxW: w,
-        boxH: h,
-        // Dot center
-        cx,
-        cy,
-        color,
-        isDark: IS_DARK_CHIP(color),
-      };
-    });
-  }, [predictions, displayRect]);
+    return predictions
+      .filter((p) => {
+        const override = predictionOverrides.get(p.detection_id);
+        return !override || override.action !== 'remove';
+      })
+      .map((p) => {
+        const override = predictionOverrides.get(p.detection_id);
+        const chipClass = override?.action === 'change' ? override.newChipClass : p.class;
+        const config = CHIP_MAP[chipClass];
+        const color = config?.color ?? '#FFFFFF';
+        const cx = p.x * displayRect.scale + displayRect.offsetX;
+        const cy = p.y * displayRect.scale + displayRect.offsetY;
+        const w = p.width * displayRect.scale;
+        const h = p.height * displayRect.scale;
+        return {
+          id: p.detection_id,
+          chipClass,
+          boxX: cx - w / 2,
+          boxY: cy - h / 2,
+          boxW: w,
+          boxH: h,
+          cx,
+          cy,
+          color,
+          isDark: IS_DARK_CHIP(color),
+        };
+      });
+  }, [predictions, displayRect, predictionOverrides]);
 
   // Manual chip dots
   const manualDots = useMemo(() => {
@@ -233,6 +254,7 @@ export function ResultsView({
       const color = config?.color ?? '#FFFFFF';
       return {
         id: mc.id,
+        chipClass: mc.chipClass,
         cx: mc.x,
         cy: mc.y,
         color,
@@ -241,10 +263,45 @@ export function ResultsView({
     });
   }, [manualChips]);
 
+  // Hit-test: find the nearest dot within finger tolerance
+  const findHitDot = useCallback(
+    (tapX: number, tapY: number): EditTarget | null => {
+      const hitRadius = DOT_RADIUS * 2; // 20px finger tolerance
+      let bestDist = hitRadius;
+      let bestTarget: EditTarget | null = null;
+
+      // Check manual dots first (rendered on top)
+      for (const dot of manualDots) {
+        const dist = Math.hypot(tapX - dot.cx, tapY - dot.cy);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestTarget = { source: 'manual', chipId: dot.id, chipClass: dot.chipClass };
+        }
+      }
+
+      // Then detection dots
+      for (const el of detectionElements) {
+        const dist = Math.hypot(tapX - el.cx, tapY - el.cy);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestTarget = { source: 'detection', detectionId: el.id, chipClass: el.chipClass };
+        }
+      }
+
+      return bestTarget;
+    },
+    [manualDots, detectionElements],
+  );
+
   const tapGesture = Gesture.Tap()
     .runOnJS(true)
     .onEnd((e) => {
-      setPendingTap({ x: e.x, y: e.y });
+      const hit = findHitDot(e.x, e.y);
+      if (hit) {
+        setEditTarget(hit);
+      } else {
+        setPendingTap({ x: e.x, y: e.y });
+      }
     });
 
   const handleSelectChipType = useCallback((chipClass: string) => {
@@ -266,8 +323,42 @@ export function ResultsView({
 
   const handleReanalyze = useCallback(() => {
     setManualChips([]);
+    setPredictionOverrides(new Map());
     onReanalyze(confidence, overlap);
   }, [confidence, overlap, onReanalyze]);
+
+  // Edit handlers
+  const handleEditChipType = useCallback((newChipClass: string) => {
+    if (!editTarget) return;
+    if (editTarget.source === 'manual') {
+      setManualChips((prev) =>
+        prev.map((mc) => (mc.id === editTarget.chipId ? { ...mc, chipClass: newChipClass } : mc)),
+      );
+    } else {
+      setPredictionOverrides((prev) => {
+        const next = new Map(prev);
+        next.set(editTarget.detectionId, { action: 'change', newChipClass });
+        return next;
+      });
+    }
+    setEditTarget(null);
+  }, [editTarget]);
+
+  const handleRemoveChip = useCallback(() => {
+    if (!editTarget) return;
+    if (editTarget.source === 'manual') {
+      setManualChips((prev) => prev.filter((mc) => mc.id !== editTarget.chipId));
+    } else {
+      setPredictionOverrides((prev) => {
+        const next = new Map(prev);
+        next.set(editTarget.detectionId, { action: 'remove' });
+        return next;
+      });
+    }
+    setEditTarget(null);
+  }, [editTarget]);
+
+  const handleCancelEdit = useCallback(() => setEditTarget(null), []);
 
   // ── Render helpers for Skia dots ──
 
@@ -404,7 +495,7 @@ export function ResultsView({
         {/* Controls row: tap hint + show boxes toggle */}
         <View className="mx-4 mt-2 flex-row items-center justify-between">
           <Text className="text-xs text-sand-400 dark:text-sand-500">
-            Toca la imagen para agregar fichas
+            Toca para agregar o editar fichas
           </Text>
           <Pressable
             className="flex-row items-center gap-1.5"
@@ -484,7 +575,7 @@ export function ResultsView({
         </View>
       </ScrollView>
 
-      {/* Chip type picker modal */}
+      {/* Chip type picker modal (add new chip) */}
       <Modal visible={pendingTap !== null} transparent animationType="fade" onRequestClose={handleCancelPicker}>
         <Pressable className="flex-1 justify-end bg-black/50" onPress={handleCancelPicker}>
           <Pressable className="rounded-t-2xl bg-sand-50 px-6 pb-10 pt-6 dark:bg-sand-800" onPress={() => {}}>
@@ -506,6 +597,55 @@ export function ResultsView({
               ))}
             </View>
             <Pressable className="mt-4 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600" onPress={handleCancelPicker}>
+              <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Cancelar</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Edit chip modal */}
+      <Modal visible={editTarget !== null} transparent animationType="fade" onRequestClose={handleCancelEdit}>
+        <Pressable className="flex-1 justify-end bg-black/50" onPress={handleCancelEdit}>
+          <Pressable className="rounded-t-2xl bg-sand-50 px-6 pb-10 pt-6 dark:bg-sand-800" onPress={() => {}}>
+            <Text className="mb-4 text-center text-base font-sans-bold text-sand-950 dark:text-sand-50">
+              Editar ficha
+            </Text>
+            <View className="flex-row flex-wrap justify-center gap-3">
+              {CHIP_OPTIONS.map((opt) => {
+                const isSelected = editTarget?.chipClass === opt.chipClass;
+                return (
+                  <Pressable
+                    key={opt.chipClass}
+                    className={`items-center rounded-xl border px-4 py-3 ${
+                      isSelected
+                        ? 'border-felt-600 bg-felt-50 dark:border-felt-400 dark:bg-felt-900/30'
+                        : 'border-sand-200 active:bg-sand-100 dark:border-sand-700 dark:active:bg-sand-700'
+                    }`}
+                    style={{ minWidth: 90 }}
+                    onPress={() => handleEditChipType(opt.chipClass)}
+                  >
+                    <View
+                      className={`mb-2 h-8 w-8 rounded-full border ${
+                        isSelected ? 'border-felt-600 dark:border-felt-400' : 'border-sand-300 dark:border-sand-600'
+                      }`}
+                      style={{ backgroundColor: opt.color }}
+                    />
+                    <Text className="text-xs font-sans-semibold text-sand-950 dark:text-sand-50">{opt.label}</Text>
+                    <Text className="text-xs text-sand-500 dark:text-sand-400">{formatMXN(opt.value)}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Pressable
+              className="mt-4 items-center rounded-full border border-red-300 py-3 active:bg-red-50 dark:border-red-700 dark:active:bg-red-900/30"
+              onPress={handleRemoveChip}
+            >
+              <Text className="text-sm font-sans-semibold text-red-600 dark:text-red-400">Eliminar ficha</Text>
+            </Pressable>
+            <Pressable
+              className="mt-2 items-center rounded-full border border-sand-300 py-3 active:bg-sand-100 dark:border-sand-600"
+              onPress={handleCancelEdit}
+            >
               <Text className="text-sm font-sans-semibold text-sand-700 dark:text-sand-300">Cancelar</Text>
             </Pressable>
           </Pressable>

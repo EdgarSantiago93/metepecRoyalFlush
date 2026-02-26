@@ -1,24 +1,51 @@
 import type { EndingSubmission, User } from '@/types';
 import { ApiError, apiFetch } from './http-auth-client';
 import type {
+  AddGuestRequest,
+  AddGuestResponse,
+  CheckInResponse,
+  ConfirmStartResponse,
   CreateSeasonRequest,
   CreateSeasonResponse,
+  DisputeStartRequest,
+  DisputeStartResponse,
   EndSeasonRequest,
   EndSeasonResponse,
+  EndSessionResponse,
+  FinalizeSessionRequest,
+  FinalizeSessionResponse,
   GetActiveSeasonResponse,
   GetDepositSubmissionsResponse,
+  GetEndingSubmissionsResponse,
   GetHostOrderResponse,
+  GetSeasonSessionsResponse,
   GetSessionDetailResponse,
+  GetSessionFinalizeNoteResponse,
+  GetSessionInjectionsResponse,
+  GetSessionParticipantsResponse,
   GetUsersResponse,
+  MoveToInProgressResponse,
+  RemoveParticipantResponse,
+  RequestRebuyRequest,
+  RequestRebuyResponse,
   ReviewDepositRequest,
   ReviewDepositResponse,
+  ReviewEndingSubmissionRequest,
+  ReviewEndingSubmissionResponse,
+  ReviewInjectionRequest,
+  ReviewInjectionResponse,
   SaveHostOrderRequest,
   SaveHostOrderResponse,
   ScheduleSessionRequest,
   ScheduleSessionResponse,
   StartSeasonResponse,
+  StartSessionResponse,
   SubmitDepositRequest,
   SubmitDepositResponse,
+  SubmitEndingStackRequest,
+  SubmitEndingStackResponse,
+  UpdateScheduledSessionRequest,
+  UpdateScheduledSessionResponse,
   UpdateSeasonNameRequest,
   UpdateSeasonNameResponse,
   UpdateTreasurerRequest,
@@ -188,5 +215,172 @@ export const httpSeason = {
       endingSubmissions: (raw.submissions ?? raw.endingSubmissions ?? []).map(mapEndingSubmission),
       finalizeNote: raw.finalizeNote ?? null,
     };
+  },
+
+  // ---------------------------------------------------------------------------
+  // Session lifecycle
+  // ---------------------------------------------------------------------------
+
+  async updateScheduledSession(req: UpdateScheduledSessionRequest): Promise<UpdateScheduledSessionResponse> {
+    return apiFetch<UpdateScheduledSessionResponse>(`/sessions/${req.sessionId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        ...(req.hostUserId !== undefined ? { hostUserId: req.hostUserId } : {}),
+        ...(req.scheduledFor !== undefined ? { scheduledFor: req.scheduledFor } : {}),
+        ...(req.location !== undefined ? { location: req.location } : {}),
+      }),
+    });
+  },
+
+  async startSession(sessionId: string): Promise<StartSessionResponse> {
+    return apiFetch<StartSessionResponse>(`/sessions/${sessionId}/start-dealing`, {
+      method: 'POST',
+    });
+  },
+
+  async moveSessionToInProgress(sessionId: string): Promise<MoveToInProgressResponse> {
+    return apiFetch<MoveToInProgressResponse>(`/sessions/${sessionId}/move-to-in-progress`, {
+      method: 'POST',
+    });
+  },
+
+  async endSession(sessionId: string): Promise<EndSessionResponse> {
+    return apiFetch<EndSessionResponse>(`/sessions/${sessionId}/end`, {
+      method: 'POST',
+    });
+  },
+
+  // ---------------------------------------------------------------------------
+  // Session participants (dealing phase)
+  // ---------------------------------------------------------------------------
+
+  async getSessionParticipants(sessionId: string): Promise<GetSessionParticipantsResponse> {
+    // No dedicated GET /participants endpoint — read from session detail
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = await apiFetch<any>(`/sessions/${sessionId}`);
+    return { participants: raw.participants ?? [] };
+  },
+
+  async checkInToSession(sessionId: string): Promise<CheckInResponse> {
+    return apiFetch<CheckInResponse>(`/sessions/${sessionId}/check-in`, {
+      method: 'POST',
+    });
+  },
+
+  async confirmStartingStack(sessionId: string, participantId: string): Promise<ConfirmStartResponse> {
+    return apiFetch<ConfirmStartResponse>(`/sessions/${sessionId}/participants/${participantId}/confirm`, {
+      method: 'POST',
+    });
+  },
+
+  async disputeStartingStack(req: DisputeStartRequest): Promise<DisputeStartResponse> {
+    return apiFetch<DisputeStartResponse>(`/sessions/${req.sessionId}/participants/${req.participantId}/dispute`, {
+      method: 'POST',
+      body: JSON.stringify({ note: req.note }),
+    });
+  },
+
+  async removeParticipant(sessionId: string, participantId: string): Promise<RemoveParticipantResponse> {
+    return apiFetch<RemoveParticipantResponse>(`/sessions/${sessionId}/participants/${participantId}/remove`, {
+      method: 'POST',
+    });
+  },
+
+  async addGuest(req: AddGuestRequest): Promise<AddGuestResponse> {
+    return apiFetch<AddGuestResponse>(`/sessions/${req.sessionId}/guests`, {
+      method: 'POST',
+      body: JSON.stringify({ guestName: req.guestName }),
+    });
+  },
+
+  // ---------------------------------------------------------------------------
+  // Session injections (rebuys — in_progress phase)
+  // ---------------------------------------------------------------------------
+
+  async getSessionInjections(sessionId: string): Promise<GetSessionInjectionsResponse> {
+    // No dedicated GET /injections endpoint — read from session detail
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = await apiFetch<any>(`/sessions/${sessionId}`);
+    return { injections: raw.injections ?? [] };
+  },
+
+  async requestRebuy(req: RequestRebuyRequest): Promise<RequestRebuyResponse> {
+    return apiFetch<RequestRebuyResponse>(`/sessions/${req.sessionId}/injections`, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: req.type,
+        ...(req.proofMediaKey ? { proofPhotoUrl: req.proofMediaKey } : {}),
+      }),
+    });
+  },
+
+  async reviewInjection(req: ReviewInjectionRequest): Promise<ReviewInjectionResponse> {
+    return apiFetch<ReviewInjectionResponse>(`/injections/${req.injectionId}/review`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: req.action,
+        ...(req.reviewNote ? { reviewNote: req.reviewNote } : {}),
+      }),
+    });
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ending submissions (closing phase)
+  // ---------------------------------------------------------------------------
+
+  async getEndingSubmissions(sessionId: string): Promise<GetEndingSubmissionsResponse> {
+    // No dedicated GET /submissions endpoint — read from session detail
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = await apiFetch<any>(`/sessions/${sessionId}`);
+    const submissions = (raw.submissions ?? raw.endingSubmissions ?? []).map(mapEndingSubmission);
+    return { submissions };
+  },
+
+  async submitEndingStack(req: SubmitEndingStackRequest): Promise<SubmitEndingStackResponse> {
+    return apiFetch<SubmitEndingStackResponse>(`/sessions/${req.sessionId}/submissions`, {
+      method: 'POST',
+      body: JSON.stringify({
+        participantId: req.participantId,
+        endingStackCents: req.endingStackCents,
+        photoUrl: req.mediaKey,
+        ...(req.note ? { note: req.note } : {}),
+        ...(req.submittedByUserId ? { submittedByUserId: req.submittedByUserId } : {}),
+      }),
+    });
+  },
+
+  async reviewEndingSubmission(req: ReviewEndingSubmissionRequest): Promise<ReviewEndingSubmissionResponse> {
+    return apiFetch<ReviewEndingSubmissionResponse>(`/submissions/${req.submissionId}/review`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: req.action,
+        ...(req.reviewNote ? { reviewNote: req.reviewNote } : {}),
+      }),
+    });
+  },
+
+  // ---------------------------------------------------------------------------
+  // Session finalization
+  // ---------------------------------------------------------------------------
+
+  async finalizeSession(req: FinalizeSessionRequest): Promise<FinalizeSessionResponse> {
+    return apiFetch<FinalizeSessionResponse>(`/sessions/${req.sessionId}/finalize`, {
+      method: 'POST',
+      body: JSON.stringify({
+        ...(req.overrideNote ? { overrideNote: req.overrideNote } : {}),
+      }),
+    });
+  },
+
+  async getSessionFinalizeNote(sessionId: string): Promise<GetSessionFinalizeNoteResponse> {
+    return apiFetch<GetSessionFinalizeNoteResponse>(`/sessions/${sessionId}/finalize-note`);
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ledger
+  // ---------------------------------------------------------------------------
+
+  async getSeasonSessions(seasonId: string): Promise<GetSeasonSessionsResponse> {
+    return apiFetch<GetSeasonSessionsResponse>(`/seasons/${seasonId}/sessions`);
   },
 };

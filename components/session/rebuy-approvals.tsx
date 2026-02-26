@@ -24,10 +24,9 @@ export function RebuyApprovals({ injections, participants, users }: Props) {
     );
   }
 
-  console.log('pending', JSON.stringify(pending, null, 2));
   return (
     <View className="gap-3">
-      {pending.slice(0, 1).map((inj) => (
+      {pending.map((inj) => (
         <PendingInjectionCard
           key={inj.id}
           injection={inj}

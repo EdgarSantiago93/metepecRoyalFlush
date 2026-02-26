@@ -54,7 +54,7 @@ export type AppStateContextValue = AppState & {
   updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<void>;
   refreshPayouts: () => Promise<void>;
   refresh: () => Promise<void>;
-  refreshIfStale: (thresholdMs: number) => void;
+  refreshIfStale: (thresholdMs: number) => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
 
@@ -224,37 +224,42 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   // Participant actions — refresh participants only (no full reload)
   // ---------------------------------------------------------------------------
 
-  const refreshParticipants = useCallback(async () => {
-    // TODO: WebSocket — replace polling with real-time updates
+  /** Fetch latest session detail and merge into state (session + participants + injections + submissions). */
+  const refreshSessionDetail = useCallback(async () => {
     if (state.status !== 'season_active' || !state.session) return;
-    const { participants } = await api.getSessionParticipants(state.session.id);
+    const detail = await api.getSessionDetail(state.session.id);
     setState((prev) => {
       if (prev.status !== 'season_active') return prev;
-      return { ...prev, participants };
+      return {
+        ...prev,
+        session: detail.session,
+        participants: detail.participants,
+        injections: detail.injections,
+        endingSubmissions: detail.endingSubmissions,
+        finalizeNote: detail.finalizeNote,
+      };
     });
   }, [state]);
+
+  const refreshParticipants = useCallback(async () => {
+    // TODO: WebSocket — replace polling with real-time updates
+    // Uses full session detail so session state changes (e.g. dealing→in_progress) are picked up
+    await refreshSessionDetail();
+  }, [refreshSessionDetail]);
 
   const checkIn = useCallback(async () => {
     if (state.status !== 'season_active' || !state.session) return;
     await api.checkInToSession(state.session.id);
-    const { participants } = await api.getSessionParticipants(state.session.id);
-    setState((prev) => {
-      if (prev.status !== 'season_active') return prev;
-      return { ...prev, participants };
-    });
-  }, [state]);
+    await refreshSessionDetail();
+  }, [state, refreshSessionDetail]);
 
   const confirmStart = useCallback(
     async (participantId: string) => {
       if (state.status !== 'season_active' || !state.session) return;
       await api.confirmStartingStack(state.session.id, participantId);
-      const { participants } = await api.getSessionParticipants(state.session.id);
-      setState((prev) => {
-        if (prev.status !== 'season_active') return prev;
-        return { ...prev, participants };
-      });
+      await refreshSessionDetail();
     },
-    [state],
+    [state, refreshSessionDetail],
   );
 
   const disputeStart = useCallback(
@@ -265,29 +270,18 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         participantId,
         note,
       } satisfies DisputeStartRequest);
-      const { participants } = await api.getSessionParticipants(state.session.id);
-      setState((prev) => {
-        if (prev.status !== 'season_active') return prev;
-        return { ...prev, participants };
-      });
+      await refreshSessionDetail();
     },
-    [state],
+    [state, refreshSessionDetail],
   );
 
   const removeParticipant = useCallback(
     async (participantId: string) => {
       if (state.status !== 'season_active' || !state.session) return;
       await api.removeParticipant(state.session.id, participantId);
-      const [partRes, injRes] = await Promise.all([
-        api.getSessionParticipants(state.session.id),
-        api.getSessionInjections(state.session.id),
-      ]);
-      setState((prev) => {
-        if (prev.status !== 'season_active') return prev;
-        return { ...prev, participants: partRes.participants, injections: injRes.injections };
-      });
+      await refreshSessionDetail();
     },
-    [state],
+    [state, refreshSessionDetail],
   );
 
   const addGuest = useCallback(
@@ -321,38 +315,25 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const refreshInjections = useCallback(async () => {
     // TODO: WebSocket — replace polling with real-time updates
-    if (state.status !== 'season_active' || !state.session) return;
-    const { injections } = await api.getSessionInjections(state.session.id);
-    setState((prev) => {
-      if (prev.status !== 'season_active') return prev;
-      return { ...prev, injections };
-    });
-  }, [state]);
+    await refreshSessionDetail();
+  }, [refreshSessionDetail]);
 
   const requestRebuy = useCallback(
     async (type: InjectionType, proofMediaKey?: string) => {
       if (state.status !== 'season_active' || !state.session) return;
       await api.requestRebuy({ sessionId: state.session.id, type, proofMediaKey });
-      const { injections } = await api.getSessionInjections(state.session.id);
-      setState((prev) => {
-        if (prev.status !== 'season_active') return prev;
-        return { ...prev, injections };
-      });
+      await refreshSessionDetail();
     },
-    [state],
+    [state, refreshSessionDetail],
   );
 
   const reviewInjection = useCallback(
     async (injectionId: string, action: 'approve' | 'reject', note?: string) => {
       if (state.status !== 'season_active' || !state.session) return;
       await api.reviewInjection({ injectionId, action, reviewNote: note });
-      const { injections } = await api.getSessionInjections(state.session.id);
-      setState((prev) => {
-        if (prev.status !== 'season_active') return prev;
-        return { ...prev, injections };
-      });
+      await refreshSessionDetail();
     },
-    [state],
+    [state, refreshSessionDetail],
   );
 
   const endSession = useCallback(async () => {
@@ -367,13 +348,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const refreshEndingSubmissions = useCallback(async () => {
     // TODO: WebSocket — replace polling with real-time updates
-    if (state.status !== 'season_active' || !state.session) return;
-    const { submissions } = await api.getEndingSubmissions(state.session.id);
-    setState((prev) => {
-      if (prev.status !== 'season_active') return prev;
-      return { ...prev, endingSubmissions: submissions };
-    });
-  }, [state]);
+    await refreshSessionDetail();
+  }, [refreshSessionDetail]);
 
   const submitEndingStack = useCallback(
     async (participantId: string, endingStackCents: number, mediaKey: string, note?: string) => {
@@ -385,26 +361,18 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         mediaKey,
         note,
       });
-      const { submissions } = await api.getEndingSubmissions(state.session.id);
-      setState((prev) => {
-        if (prev.status !== 'season_active') return prev;
-        return { ...prev, endingSubmissions: submissions };
-      });
+      await refreshSessionDetail();
     },
-    [state],
+    [state, refreshSessionDetail],
   );
 
   const reviewEndingSubmission = useCallback(
     async (submissionId: string, action: 'validate' | 'reject', note?: string) => {
       if (state.status !== 'season_active' || !state.session) return;
       await api.reviewEndingSubmission({ submissionId, action, reviewNote: note });
-      const { submissions } = await api.getEndingSubmissions(state.session.id);
-      setState((prev) => {
-        if (prev.status !== 'season_active') return prev;
-        return { ...prev, endingSubmissions: submissions };
-      });
+      await refreshSessionDetail();
     },
-    [state],
+    [state, refreshSessionDetail],
   );
 
   // ---------------------------------------------------------------------------
@@ -518,9 +486,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   );
 
   const refreshIfStale = useCallback(
-    (thresholdMs: number) => {
+    async (thresholdMs: number) => {
       if (Date.now() - lastFetchedAtRef.current > thresholdMs) {
-        load({ silent: true });
+        await load({ silent: true });
       }
     },
     [load],
