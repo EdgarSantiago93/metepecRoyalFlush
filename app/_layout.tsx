@@ -28,10 +28,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Loader } from "@/components/ui/loader";
+import { NotificationBanner } from '@/components/ui/notification-banner';
 import { AppStateProvider } from '@/contexts/app-state-context';
 import { AuthProvider } from '@/contexts/auth-context';
 import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { usePushNotifications } from '@/hooks/use-push-notifications';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -55,6 +57,7 @@ export const unstable_settings = {
 
 function RootNavigation() {
   const colorScheme = useColorScheme();
+  const { bannerData } = usePushNotifications();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -91,6 +94,7 @@ function RootNavigation() {
         </BottomSheetModalProvider>
         </AppStateProvider>
       </AuthGate>
+      {bannerData && <NotificationBanner {...bannerData} />}
       <StatusBar style="auto" />
     </ThemeProvider>
   );
