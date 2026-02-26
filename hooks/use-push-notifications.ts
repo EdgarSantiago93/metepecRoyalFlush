@@ -25,11 +25,10 @@ export function usePushNotifications() {
   const [bannerData, setBannerData] = useState<BannerData>(null);
   const notificationListener = useRef<EventSubscription | null>(null);
   const responseListener = useRef<EventSubscription | null>(null);
-  const tokenListener = useRef<EventSubscription | null>(null);
 
   const dismissBanner = useCallback(() => setBannerData(null), []);
 
-  // Register push token when authenticated
+  // Register push token once when authenticated
   useEffect(() => {
     if (auth.status !== 'authenticated') return;
     if (Platform.OS === 'web') return;
@@ -82,17 +81,9 @@ export function usePushNotifications() {
       },
     );
 
-    // Token refresh: re-register Expo push token (not the raw device token)
-    tokenListener.current = Notifications.addPushTokenListener(() => {
-      registerForPushNotifications().then((expoPushToken) => {
-        if (expoPushToken) sendPushTokenToServer(expoPushToken);
-      });
-    });
-
     return () => {
       notificationListener.current?.remove();
       responseListener.current?.remove();
-      tokenListener.current?.remove();
     };
   }, [auth.status, dismissBanner, router]);
 
