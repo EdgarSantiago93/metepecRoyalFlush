@@ -82,9 +82,11 @@ export function usePushNotifications() {
       },
     );
 
-    // Token refresh: re-send to server
-    tokenListener.current = Notifications.addPushTokenListener((tokenData) => {
-      sendPushTokenToServer(tokenData.data);
+    // Token refresh: re-register Expo push token (not the raw device token)
+    tokenListener.current = Notifications.addPushTokenListener(() => {
+      registerForPushNotifications().then((expoPushToken) => {
+        if (expoPushToken) sendPushTokenToServer(expoPushToken);
+      });
     });
 
     return () => {
