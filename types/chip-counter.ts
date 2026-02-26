@@ -50,6 +50,16 @@ export type DisplayRect = {
   displayHeight: number;
 };
 
+/** Override applied to an API-detected chip (by detection_id) */
+export type PredictionOverride =
+  | { action: 'remove' }
+  | { action: 'change'; newChipClass: string };
+
+/** Identifies which dot the user tapped for editing */
+export type EditTarget =
+  | { source: 'detection'; detectionId: string; chipClass: string }
+  | { source: 'manual'; chipId: string; chipClass: string };
+
 /** Chip class name → config mapping (Roboflow class names) */
 export const CHIP_MAP: Record<string, ChipConfig> = {
   'White PokerChip': { label: 'Blanca', value: 5, color: '#FFFFFF', bgColor: '#f5f5f5' },

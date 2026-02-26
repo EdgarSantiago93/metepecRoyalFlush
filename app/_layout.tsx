@@ -25,6 +25,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Loader } from "@/components/ui/loader";
 import { AppStateProvider } from '@/contexts/app-state-context';
@@ -59,6 +60,7 @@ function RootNavigation() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthGate>
         <AppStateProvider>
+        <BottomSheetModalProvider>
         <ErrorBoundary>
         <Stack
           screenOptions={{
@@ -86,6 +88,7 @@ function RootNavigation() {
           <Stack.Screen name="poker-hands" options={{ title: 'Manos de Poker', presentation: 'modal', headerShown: false }} />
         </Stack>
         </ErrorBoundary>
+        </BottomSheetModalProvider>
         </AppStateProvider>
       </AuthGate>
       <StatusBar style="auto" />

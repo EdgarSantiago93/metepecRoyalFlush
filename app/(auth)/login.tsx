@@ -3,8 +3,8 @@ import { ChipRain } from '@/components/ui/chip-rain';
 import { Loader } from '@/components/ui/loader';
 import { useAuth } from '@/hooks/use-auth';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -35,6 +35,14 @@ export default function LoginScreen() {
 
   const { bottom } = useSafeAreaInsets();
   const progress = useSharedValue(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(false);
+      setError(null);
+      progress.value = withTiming(0, TIMING);
+    }, [progress]),
+  );
 
   const logoStyle = useAnimatedStyle(() => {
     const size = interpolate(progress.value, [0, 1], [LOGO_SMALL, LOGO_LARGE]);

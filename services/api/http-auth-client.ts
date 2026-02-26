@@ -52,7 +52,8 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
       (body as { message?: string })?.message ??
       `Error del servidor (${res.status})`;
     if (__DEV__) {
-      console.error(`[API] ✗ ${method} ${url} — ${res.status}`, body);
+      const log = res.status >= 500 ? console.error : console.warn;
+      log(`[API] ✗ ${method} ${url} — ${res.status}`, body);
     }
     if (res.status >= 500) {
       emitGlobalError('❗️ ocurrió un error');

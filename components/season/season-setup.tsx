@@ -1,6 +1,7 @@
 import { ButtonActivityIndicator } from '@/components/ui/button-activity-indicator';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { MemberRow } from '@/components/ui/member-row';
+import { RefreshableScrollView } from '@/components/ui/refreshable-scroll-view';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAuth } from '@/hooks/use-auth';
@@ -9,7 +10,7 @@ import type { Season, SeasonHostOrder, SeasonMember, User } from '@/types';
 import { IconClipboardCheck, IconUsers } from '@tabler/icons-react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Pressable, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
@@ -26,7 +27,6 @@ export function SeasonSetup({ season, members, users }: Props) {
   const [hostOrder, setHostOrder] = useState<SeasonHostOrder[]>([]);
   const [starting, setStarting] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
 
   const currentUser = auth.status === 'authenticated' ? auth.user : null;
   const isTreasurer = currentUser?.id === season.treasurerUserId;
@@ -52,10 +52,7 @@ export function SeasonSetup({ season, members, users }: Props) {
   }, [season.id]);
 
   const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    appState.refreshIfStale(0);
-    // Give the silent refresh a moment to land, then stop the spinner
-    setTimeout(() => setRefreshing(false), 1000);
+    await appState.refreshIfStale(0);
   }, [appState]);
 
   useFocusEffect(
@@ -80,13 +77,11 @@ export function SeasonSetup({ season, members, users }: Props) {
     users.find((u) => u.id === userId)?.displayName ?? 'Unknown';
 
   return (
-    <ScrollView
+    <RefreshableScrollView
       className="flex-1 bg-sand-50 dark:bg-sand-900"
       contentContainerClassName="pb-12"
       style={{ paddingTop }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#c49a3c" />
-      }
+      onRefresh={handleRefresh}
     >
       {/* Header */}
       <View className="px-6 pb-6">
@@ -206,7 +201,7 @@ export function SeasonSetup({ season, members, users }: Props) {
           {isAdmin && (
             <Pressable onPress={() => router.push('/host-order')}>
               <Text className="text-sm font-semibold text-gold-600 dark:text-gold-400">
-                Editar
+                Editar orden
               </Text>
             </Pressable>
           )}
@@ -263,7 +258,7 @@ export function SeasonSetup({ season, members, users }: Props) {
         onCancel={() => setShowStartModal(false)}
         loading={starting}
       />
-    </ScrollView>
+    </RefreshableScrollView>
   );
 }
 

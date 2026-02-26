@@ -21,10 +21,12 @@ export function UserAvatar({
   fallbackTextClassName = 'text-sand-600 dark:text-sand-300',
 }: Props) {
   const [resolvedUri, setResolvedUri] = useState<string | null>(null);
+  const [blurhash, setBlurhash] = useState<string | null>(null);
 
   useEffect(() => {
     if (localUri || !avatarMediaId) {
       setResolvedUri(null);
+      setBlurhash(null);
       return;
     }
 
@@ -40,8 +42,11 @@ export function UserAvatar({
 
     let cancelled = false;
     getMediaUrl(avatarMediaId)
-      .then(({ url }) => {
-        if (!cancelled) setResolvedUri(url);
+      .then(({ url, blurhash: hash }) => {
+        if (!cancelled) {
+          setResolvedUri(url);
+          setBlurhash(hash);
+        }
       })
       .catch(() => {
         // Silently fail — fallback to initials
@@ -58,8 +63,10 @@ export function UserAvatar({
       <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
         <Image
           source={{ uri: imageUri }}
+          placeholder={blurhash ? { blurhash } : undefined}
           style={{ width: size, height: size }}
           contentFit="cover"
+          transition={200}
         />
       </View>
     );

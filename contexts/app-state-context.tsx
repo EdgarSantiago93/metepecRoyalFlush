@@ -54,7 +54,7 @@ export type AppStateContextValue = AppState & {
   updateBankingInfo: (req: UpdateBankingInfoRequest) => Promise<void>;
   refreshPayouts: () => Promise<void>;
   refresh: () => Promise<void>;
-  refreshIfStale: (thresholdMs: number) => void;
+  refreshIfStale: (thresholdMs: number) => Promise<void>;
   _devSetPreset: (key: PresetKey) => Promise<void>;
 };
 
@@ -486,9 +486,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   );
 
   const refreshIfStale = useCallback(
-    (thresholdMs: number) => {
+    async (thresholdMs: number) => {
       if (Date.now() - lastFetchedAtRef.current > thresholdMs) {
-        load({ silent: true });
+        await load({ silent: true });
       }
     },
     [load],
