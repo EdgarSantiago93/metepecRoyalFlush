@@ -46,8 +46,15 @@ export async function registerForPushNotifications(): Promise<string | null> {
     return null;
   }
 
-  const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
-  return token;
+  try {
+    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
+    return token;
+  } catch (err) {
+    // Expo Go and simulator lack the aps-environment entitlement.
+    // Push tokens only work in development/production builds.
+    console.warn('[Push] Could not get push token (expected in Expo Go / simulator)', err);
+    return null;
+  }
 }
 
 /** Send the push token to the backend for storage. */
