@@ -11,7 +11,10 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "test:run": "echo \"No tests configured yet\" && exit 0"
+    "test:run": "echo \"No tests configured yet\" && exit 0",
+    "build:ios:local": "eas build --platform ios --profile release --local",
+    "build:android:local": "eas build --platform android --profile release --local",
+    "submit": "eas submit"
   },
   "dependencies": {
     "@expo-google-fonts/courier-prime": "^0.4.1",
@@ -25,6 +28,7 @@
     "@react-navigation/native": "^7.1.8",
     "@shopify/react-native-skia": "2.2.12",
     "@tabler/icons-react-native": "^3.36.1",
+    "babel-plugin-module-resolver": "^5.0.2",
     "blurhash": "^2.0.5",
     "expo": "~54.0.33",
     "expo-clipboard": "~8.0.2",
@@ -44,6 +48,7 @@
     "expo-status-bar": "~3.0.9",
     "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
+    "expo-updates": "~29.0.16",
     "expo-web-browser": "~15.0.10",
     "lottie-react-native": "^7.3.6",
     "nativewind": "^4.2.1",

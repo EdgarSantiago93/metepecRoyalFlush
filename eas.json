@@ -4,6 +4,16 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "release": {
+      "env": {
+        "NODE_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://metepecroyalflush.com",
+        "EXPO_PUBLIC_ROBOFLOW_API_KEY": "2KEAu4XQgsFHv8s0fq4J"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
