@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.junedevelopment.metepecroyalflush"
+      "bundleIdentifier": "com.junedevelopment.metepecroyalflush",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,6 +23,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
+        "android.permission.RECORD_AUDIO",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.junedevelopment.metepecroyalflush"
@@ -71,6 +75,12 @@
         "projectId": "252e069a-017f-4b67-85ca-9a9263185ecf"
       }
     },
-    "owner": "junedevelopment"
+    "owner": "junedevelopment",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/252e069a-017f-4b67-85ca-9a9263185ecf"
+    }
   }
 }

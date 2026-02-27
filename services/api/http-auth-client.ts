@@ -1,7 +1,7 @@
 import { emitGlobalError } from './global-error';
 import type { GetMeResponse, SendMagicLinkResponse, UpdateAvatarResponse, UpdateBankingInfoRequest, UpdateBankingInfoResponse, VerifyMagicLinkResponse } from './types';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
+const API_URL = 'https://metepecroyalflush.com';
 const __DEV__ = process.env.NODE_ENV !== 'production';
 
 let _authToken: string | null = null;

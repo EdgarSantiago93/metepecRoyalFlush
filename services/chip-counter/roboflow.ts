@@ -7,7 +7,7 @@ import {
   type RoboflowResponse,
 } from '@/types/chip-counter';
 
-const ROBOFLOW_API_KEY = process.env.EXPO_PUBLIC_ROBOFLOW_API_KEY ?? '';
+const ROBOFLOW_API_KEY = '2KEAu4XQgsFHv8s0fq4J';
 const ROBOFLOW_URL = 'https://serverless.roboflow.com/poker-chip-count/2';
 
 type DetectOptions = {
