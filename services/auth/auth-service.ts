@@ -1,5 +1,6 @@
 import type { User } from '@/types';
 import { api } from '@/services/api/client';
+import { httpAuth } from '@/services/api/http-auth-client';
 import { tokenStorage } from './token-storage';
 
 export type AuthSession = {
@@ -35,6 +36,11 @@ export const authService = {
 
   /** Clear the stored token and end the session. */
   async logout(): Promise<void> {
+    try {
+      await httpAuth.logoutBackend();
+    } catch {
+      // best-effort — still clear local state
+    }
     await tokenStorage.remove();
   },
 };

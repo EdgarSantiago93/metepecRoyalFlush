@@ -112,4 +112,17 @@ export const httpAuth = {
     });
     return { user };
   },
+
+  async updatePushToken(pushToken: string | null): Promise<void> {
+    await apiFetch<void>('/users/me/push-token', {
+      method: 'PUT',
+      body: JSON.stringify({ pushToken }),
+    });
+  },
+
+  async logoutBackend(): Promise<void> {
+    await apiFetch<void>('/auth/logout', {
+      method: 'POST',
+    });
+  },
 };
